@@ -1,12 +1,12 @@
-// --- 전역 설정 및 상태 관리 ---
+// --- ?�역 ?�정 �??�태 관�?---
 const DEFAULT_MASTER_URL = "https://script.google.com/macros/s/AKfycbw_wP7aQlfrUVyEZlORObmrQghbRBMz3qpmz7aMj18jTc4WkuZhRVlp2kFfYxPWH3jFmQ/exec";
-// 중요: 본인의 Apps Script 배포 URL로 교체 필요 (설정 메뉴에서 입력 권장)
+// 중요: 본인??Apps Script 배포 URL�?교체 ?�요 (?�정 메뉴?�서 ?�력 권장)
 const DEFAULT_TEST_ROOT_URL = "https://drive.google.com/drive/folders/18dd5Gssjlw9jGZJHmES91HWNxKVqD32A";
 
-// 로컬 스토리지 키
+// 로컬 ?�토리�? ??
 const STORAGE_KEY = "YONSEI_PREMIUM_CONFIG_V2";
 
-// 전역 상태 변수
+// ?�역 ?�태 변??
 let authMode = 'initial'; // initial, student, admin, master
 let curCatId = "";
 let examSession = {
@@ -22,41 +22,41 @@ let examTimer = null;
 let fData1 = null;
 let fData2 = null;
 
-// 문제 유형/영역 상수
+// 문제 ?�형/?�역 ?�수
 const SECTIONS = ["Grammar", "Writing", "Reading", "Listening", "Vocabulary"];
 const SUB_TYPE_MAP = {
-    "Grammar": ["가정법", "관계대명사", "관계부사", "관계사", "관계사/의문사", "관계사/접속사", "대명사", "명사", "병렬 구조", "분사", "분사구문", "비교급", "수동태", "수일치", "시제", "일치/화법", "접속사", "조동사", "준동사", "지칭 복합", "특수구문", "형식", "형용사", "형용사/부사", "화법", "to부정사", "to부정사/동명사", "기타"],
-    "Writing": ["레벨1", "레벨2", "레벨3", "레벨4", "레벨5", "레벨6", "레벨7", "레벨8", "레벨9", "문장 완성", "글 요약", "작문", "기타"],
-    "Reading": ["글 요약", "내용 일치", "대의 파악", "목적", "문장 연결성", "문장 완성", "문장 의미", "밑줄 추론", "심리/심경", "빈칸추론", "삽입", "세부사항", "순서", "어휘 추론", "어휘 활용", "연결사", "요약/요지", "장문 빈칸", "장문 제목", "제목", "주제", "지칭", "추론", "흐름", "기타"],
-    "Listening": ["계산", "그림 묘사", "목적 파악", "묘사", "받아쓰기", "상황파악", "세부사항", "심리/심경", "응답", "정보 요약", "주제", "단어 입력", "기타"],
-    "Vocabulary": ["레벨1", "레벨2", "레벨3", "레벨4", "레벨5", "레벨6", "레벨7", "레벨8", "레벨9", "숙어", "기타"]
+    "Grammar": ["가?�법", "관계�?명사", "관계�???, "관계사", "관계사/?�문??, "관계사/?�속??, "?�명사", "명사", "병렬 구조", "분사", "분사구문", "비교�?, "?�동??, "?�일�?, "?�제", "?�치/?�법", "?�속??, "조동??, "준?�사", "지�?복합", "?�수구문", "?�식", "?�용??, "?�용??부??, "?�법", "to부?�사", "to부?�사/?�명??, "기�?"],
+    "Writing": ["?�벨1", "?�벨2", "?�벨3", "?�벨4", "?�벨5", "?�벨6", "?�벨7", "?�벨8", "?�벨9", "문장 ?�성", "글 ?�약", "?�문", "기�?"],
+    "Reading": ["글 ?�약", "?�용 ?�치", "?�???�악", "목적", "문장 ?�결??, "문장 ?�성", "문장 ?��?", "밑줄 추론", "?�리/?�경", "빈칸추론", "?�입", "?��??�항", "?�서", "?�휘 추론", "?�휘 ?�용", "?�결??, "?�약/?��?", "?�문 빈칸", "?�문 ?�목", "?�목", "주제", "지�?, "추론", "?�름", "기�?"],
+    "Listening": ["계산", "그림 묘사", "목적 ?�악", "묘사", "받아?�기", "?�황?�악", "?��??�항", "?�리/?�경", "?�답", "?�보 ?�약", "주제", "?�어 ?�력", "기�?"],
+    "Vocabulary": ["?�벨1", "?�벨2", "?�벨3", "?�벨4", "?�벨5", "?�벨6", "?�벨7", "?�벨8", "?�벨9", "?�어", "기�?"]
 };
 
-// 기본 설정 객체 (로컬 스토리지 없을 시 사용)
+// 기본 ?�정 객체 (로컬 ?�토리�? ?�을 ???�용)
 let globalConfig = {
     adminCode: "1111", // 초기 관리자 비번
-    masterCode: "0000", // [New] 마스터 비번
+    masterCode: "0000", // [New] 마스??비번
     masterUrl: "https://script.google.com/macros/s/AKfycbw_wP7aQlfrUVyEZlORObmrQghbRBMz3qpmz7aMj18jTc4WkuZhRVlp2kFfYxPWH3jFmQ/exec",
-    mainServerLink: "https://drive.google.com/drive/folders/18dd5Gssjlw9jGZJHmES91HWNxKVqD32A", // [New] 연세국제 설정링크 중앙관리 시트 연동 링크
+    mainServerLink: "https://drive.google.com/drive/folders/18dd5Gssjlw9jGZJHmES91HWNxKVqD32A", // [New] ?�세�?�� ?�정링크 중앙관�??�트 ?�동 링크
     geminiKey: "", // AI API Key
     categories: [], // { id, name, createdDate, targetFolderUrl }
-    questions: [], // 로컬 캐싱된 문항 리스트
-    classes: [], // 등록 학급 목록 예) ["중2A반", "중3B반"]
+    questions: [], // 로컬 캐싱??문항 리스??
+    classes: [], // ?�록 ?�급 목록 ?? ["�?A�?, "�?B�?]
     logo: "https://drive.google.com/thumbnail?id=1-w2OQx2-M504_S7eEis0hF6nljhP3HwM&sz=w1000", // [Refactor] Flattened from assets
     banner: "https://drive.google.com/thumbnail?id=1-v3M4W_A3f5B-p9L75Bw3H5Z5kI7lJbX&sz=w1000", // [Refactor] Flattened from assets
 };
 
-// --- 초기화 및 로컬 저장소 함수 ---
+// --- 초기??�?로컬 ?�?�소 ?�수 ---
 function load() {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
         try {
             const parsed = JSON.parse(data);
-            // 병합 로직 (새로운 필드가 생길 수 있으므로)
+            // 병합 로직 (?�로???�드가 ?�길 ???�으므�?
             globalConfig = { ...globalConfig, ...parsed };
             // 중첩 객체 병합 보정
             if (parsed.assets) {
-                // [Migration] 구버전 assets 객체가 있다면 평탄화하여 복구
+                // [Migration] 구버??assets 객체가 ?�다�??�탄?�하??복구
                 if (parsed.assets.logo) globalConfig.logo = parsed.assets.logo;
                 if (parsed.assets.banner) globalConfig.banner = parsed.assets.banner;
             }
@@ -70,26 +70,26 @@ function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(globalConfig));
 }
 
-// 초기 로드 실행
+// 초기 로드 ?�행
 load();
 
-// --- 로딩 인디케이터 제어 ---
+// --- 로딩 ?�디케?�터 ?�어 ---
 function toggleLoading(show) {
     const el = document.getElementById("loading-overlay");
     if (el) el.style.display = show ? "flex" : "none";
 }
 
-// --- 클라우드 동기화 (설정값만) ---
+// --- ?�라?�드 ?�기??(?�정값만) ---
 async function saveConfigToCloud(silent = false) {
-    if (!globalConfig.masterUrl) return; // URL 없으면 스킵
+    if (!globalConfig.masterUrl) return; // URL ?�으�??�킵
 
-    // 필수 데이터만 전송 (questions는 별도 관리되므로 제외하거나 포함 여부 결정)
-    // 여기서는 설정값(카테고리, 비번, 자산주소 등)만 백업
+    // ?�수 ?�이?�만 ?�송 (questions??별도 관리되므�??�외?�거???�함 ?��? 결정)
+    // ?�기?�는 ?�정�?카테고리, 비번, ?�산주소 ??�?백업
     const configToSave = {
         adminCode: globalConfig.adminCode,
-        masterCode: globalConfig.masterCode, // [추가] Master Code 저장
-        masterUrl: globalConfig.masterUrl, // [추가] Master Sync API URL 저장
-        mainServerLink: globalConfig.mainServerLink, // [New] 메인 서버 링크 동기화
+        masterCode: globalConfig.masterCode, // [추�?] Master Code ?�??
+        masterUrl: globalConfig.masterUrl, // [추�?] Master Sync API URL ?�??
+        mainServerLink: globalConfig.mainServerLink, // [New] 메인 ?�버 링크 ?�기??
         geminiKey: globalConfig.geminiKey,
         categories: JSON.stringify(globalConfig.categories),
         questions: '[]', // Don't upload questions directly to unified config
@@ -100,11 +100,11 @@ async function saveConfigToCloud(silent = false) {
 
     if (!silent) toggleLoading(true);
     try {
-        // [Single Root Policy] 모든 데이터는 mainServerLink(메인 폴더) 하위에 저장
-        // mainServerLink 자체가 폴더 링크여야 함.
+        // [Single Root Policy] 모든 ?�이?�는 mainServerLink(메인 ?�더) ?�위???�??
+        // mainServerLink ?�체가 ?�더 링크?�야 ??
         const rootId = extractFolderId(globalConfig.mainServerLink);
         if (!rootId && !silent) {
-            showToast("⚠️ 메인 서버 폴더 주소가 설정되지 않았습니다.");
+            showToast("?�️ 메인 ?�버 ?�더 주소가 ?�정?��? ?�았?�니??");
             return;
         }
 
@@ -112,8 +112,8 @@ async function saveConfigToCloud(silent = false) {
             method: "POST",
             body: JSON.stringify({
                 type: "SAVE_CONFIG",
-                parentFolderId: rootId, // [Modified] 명시적 폴더 지정
-                // Single Root Policy: assetFolderId는 이제 별도로 보내지 않거나 rootId와 동일하게 취급
+                parentFolderId: rootId, // [Modified] 명시???�더 지??
+                // Single Root Policy: assetFolderId???�제 별도�?보내지 ?�거??rootId?� ?�일?�게 취급
                 config: configToSave
             })
         });
@@ -127,14 +127,14 @@ async function saveConfigToCloud(silent = false) {
         }
 
         if (json.status === "Success") {
-            if (!silent) showToast("☁️ 설정이 클라우드에 백업되었습니다. (파일 생성/갱신 완료)");
+            if (!silent) showToast("?�️ ?�정???�라?�드??백업?�었?�니?? (?�일 ?�성/갱신 ?�료)");
         } else {
             console.error("Cloud Save Error:", json);
-            if (!silent) showToast(`❌ 백업 실패: ${json.message || "서버 응답 오류"}`);
+            if (!silent) showToast(`??백업 ?�패: ${json.message || "?�버 ?�답 ?�류"}`);
         }
     } catch (e) {
         console.warn("Cloud Save Failed", e);
-        if (!silent) showToast("⚠️ 클라우드 백업 실패 (네트워크 확인)");
+        if (!silent) showToast("?�️ ?�라?�드 백업 ?�패 (?�트?�크 ?�인)");
     } finally {
         if (!silent) toggleLoading(false);
     }
@@ -143,23 +143,23 @@ async function saveConfigToCloud(silent = false) {
 async function loadConfigFromCloud(silent = false) {
     if (!globalConfig.masterUrl) {
         console.error("Load Config Failed: No Master URL");
-        if (!silent) showToast("⚠️ Master URL이 없습니다.");
+        if (!silent) showToast("?�️ Master URL???�습?�다.");
         return false;
     }
 
     if (!silent) toggleLoading(true);
     try {
-        // [Single Root Policy] 메인 서버 폴더에서 설정 로드
+        // [Single Root Policy] 메인 ?�버 ?�더?�서 ?�정 로드
         const rootId = extractFolderId(globalConfig.mainServerLink);
         if (!rootId) {
-            if (!silent) showToast("⚠️ 메인 서버 폴더 설정을 먼저 해주세요.");
+            if (!silent) showToast("?�️ 메인 ?�버 ?�더 ?�정??먼�? ?�주?�요.");
             return false;
         }
 
 
 
-        console.log(`📡 Fetching Config... Root: ${rootId}, URL: ${globalConfig.masterUrl}`);
-        // showToast(`📡 Loading... (${rootId ? 'Folder Set' : 'No Folder'})`);
+        console.log(`?�� Fetching Config... Root: ${rootId}, URL: ${globalConfig.masterUrl}`);
+        // showToast(`?�� Loading... (${rootId ? 'Folder Set' : 'No Folder'})`);
 
         const res = await fetch(globalConfig.masterUrl, {
             method: "POST",
@@ -170,23 +170,23 @@ async function loadConfigFromCloud(silent = false) {
         });
 
         const text = await res.text();
-        console.log("📡 Raw Response:", text);
+        console.log("?�� Raw Response:", text);
 
         let json;
         try {
             json = JSON.parse(text);
         } catch (e) {
             console.error("JSON Parse Error", e);
-            if (!silent) showToast("⚠️ 서버 응답 형식이 올바르지 않습니다.");
+            if (!silent) showToast("?�️ ?�버 ?�답 ?�식???�바르�? ?�습?�다.");
             return false;
         }
 
         if (json.status === "Success" && json.config) {
-            console.log("✅ Config Loaded:", json.config);
+            console.log("??Config Loaded:", json.config);
             const c = json.config;
             if (c.adminCode) globalConfig.adminCode = c.adminCode;
             if (c.masterCode) globalConfig.masterCode = c.masterCode;
-            // masterUrl은 덮어쓰지 않음 (현재 연결된 URL이 기준이므로)
+            // masterUrl?� ??��?��? ?�음 (?�재 ?�결??URL??기�??��?�?
             if (c.mainServerLink) globalConfig.mainServerLink = c.mainServerLink; // [New] Load Main Server Link
             if (c.geminiKey) globalConfig.geminiKey = c.geminiKey;
 
@@ -199,49 +199,49 @@ async function loadConfigFromCloud(silent = false) {
                 try { globalConfig.classes = typeof c.classes === 'string' ? JSON.parse(c.classes) : c.classes; } catch(e) { console.warn('Classes Parse Error', e); }
             }
 
-            // [Fix] 문항 데이터 로드 추가 (데이터 누락 방지)
+            // [Fix] 문항 ?�이??로드 추�? (?�이???�락 방�?)
             if (c.questions) {
                 try {
                     const qData = typeof c.questions === 'string' ? JSON.parse(c.questions) : c.questions;
                     if (Array.isArray(qData)) {
                         globalConfig.questions = qData;
-                        console.log(`✅ Loaded ${qData.length} questions from Config`);
+                        console.log(`??Loaded ${qData.length} questions from Config`);
                     }
                 } catch (e) { console.warn("Questions Parse Error", e); }
             }
 
             save(); // 로컬 반영
-            if (!silent) showToast("☁️ 설정 동기화 완료! (화면 갱신됨)");
-            // [Fix] 중요: 설정 로드 후 즉시 화면 갱신 트리거
+            if (!silent) showToast("?�️ ?�정 ?�기???�료! (?�면 갱신??");
+            // [Fix] 중요: ?�정 로드 ??즉시 ?�면 갱신 ?�리�?
             applyBranding();
             return true;
         } else {
             console.warn("Server Error:", json);
-            if (!silent) showToast(`⚠️ 서버 오류: ${json.message || "설정 없음"}`);
+            if (!silent) showToast(`?�️ ?�버 ?�류: ${json.message || "?�정 ?�음"}`);
             return false;
         }
     } catch (e) {
         console.warn("Cloud Load Failed", e);
-        if (!silent) showToast("⚠️ 네트워크/서버 통신 실패");
+        if (!silent) showToast("?�️ ?�트?�크/?�버 ?�신 ?�패");
         return false;
     } finally {
         if (!silent) toggleLoading(false);
     }
 }
 
-// --- 유틸리티 함수 ---
+// --- ?�틸리티 ?�수 ---
 function setCanvasId(id, layoutMode = 'standard') {
     const c = document.getElementById('dynamic-content');
     if (c) c.setAttribute('data-canvas-id', id);
 
-    // [New] 레이아웃 모드 제어 (Scroll Fix)
+    // [New] ?�이?�웃 모드 ?�어 (Scroll Fix)
     const parentCanvas = document.getElementById('app-canvas');
     if (parentCanvas) {
         if (layoutMode === 'full') {
-            // 전체 화면 모드: 부모 패딩/스크롤 제거 -> 자식이 스크롤 전담
+            // ?�체 ?�면 모드: 부�??�딩/?�크�??�거 -> ?�식???�크�??�담
             parentCanvas.classList.add('!p-0', '!overflow-hidden');
         } else {
-            // 기본 모드: 부모 패딩/스크롤 복원
+            // 기본 모드: 부�??�딩/?�크�?복원
             parentCanvas.classList.remove('!p-0', '!overflow-hidden');
             parentCanvas.style.removeProperty('padding');
             parentCanvas.style.removeProperty('overflow');
@@ -295,10 +295,10 @@ function renderEmptyState(c, title) {
             <h2 class="fs-32 text-[#013976] underline decoration-slate-200 decoration-8 underline-offset-8 leading-none font-black uppercase !border-none !pb-0">${title}</h2>
             
             <div class="card !bg-white border-2 border-slate-200 shadow-sm flex flex-col items-center justify-center p-20 space-y-6">
-                <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-6xl shadow-inner mb-2">📭</div>
+                <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-6xl shadow-inner mb-2">?��</div>
                 <div class="text-center space-y-2">
                     <h3 class="fs-24 text-slate-600 font-bold uppercase">No Category Found</h3>
-                    <p class="fs-17-reg text-slate-400 leading-relaxed">등록된 카테고리(시험지)가 없습니다.<br>먼저 카테고리(시험지)를 생성해 주세요.</p>
+                    <p class="fs-17-reg text-slate-400 leading-relaxed">?�록??카테고리(?�험지)가 ?�습?�다.<br>먼�? 카테고리(?�험지)�??�성??주세??</p>
                 </div>
             </div>
         </div>
@@ -306,14 +306,14 @@ function renderEmptyState(c, title) {
 }
 
 
-// [중요] 절대 실패하지 않는 저장소: 재시도 로직 강화 (최대 10회)
+// [중요] ?��? ?�패?��? ?�는 ?�?�소: ?�시??로직 강화 (최�? 10??
 async function sendReliableRequest(payload, silent = false) {
-    console.log("🚀 sendReliableRequest started", payload);
+    console.log("?? sendReliableRequest started", payload);
 
     const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
     const MAX_RETRIES = 5;
 
-    // 내부 헬퍼: 타임아웃 페치
+    // ?��? ?�퍼: ?�?�아???�치
     const fetchWithTimeout = (url, opts, time = 30000) => {
         return Promise.race([
             fetch(url, opts),
@@ -325,12 +325,12 @@ async function sendReliableRequest(payload, silent = false) {
         try {
             const t = document.getElementById("toast");
             if (t && !silent) {
-                t.innerText = i > 1 ? `🛰️ 서버 응답 지연... 재시도 중 (${i}/${MAX_RETRIES})` : "🛰️ 클라우드 동기화 중...";
+                t.innerText = i > 1 ? `?���??�버 ?�답 지??.. ?�시??�?(${i}/${MAX_RETRIES})` : "?���??�라?�드 ?�기??�?..";
                 t.className = "show";
             }
 
-            console.log(`📡 Attempt ${i}/${MAX_RETRIES} sending...`);
-            console.log(`📡 Attempt ${i}/${MAX_RETRIES} sending...`);
+            console.log(`?�� Attempt ${i}/${MAX_RETRIES} sending...`);
+            console.log(`?�� Attempt ${i}/${MAX_RETRIES} sending...`);
             // [Modified] Use custom timeout from opts or default 60s (Increased for large GET)
             const timeoutMs = (payload.timeout) ? payload.timeout : 60000;
 
@@ -346,25 +346,25 @@ async function sendReliableRequest(payload, silent = false) {
             let json = { status: "Error" };
             try {
                 // [Fix] Sanitize JSON string (handle newlines, tabs, and unescaped characters in text fields from server)
-                // 서버에서 내려온 텍스트에 줄바꿈이나 탭이 이스케이프되지 않고 들어있을 경우 파싱 에러 발생 방지
+                // ?�버?�서 ?�려???�스?�에 줄바꿈이????�� ?�스케?�프?��? ?�고 ?�어?�을 경우 ?�싱 ?�러 발생 방�?
                 let sanitizedText = text;
                 try {
-                    // 기본적인 제어 문자 이스케이프 (JSON 내 올바른 파싱을 위함)
+                    // 기본?�인 ?�어 문자 ?�스케?�프 (JSON ???�바�??�싱???�함)
                     sanitizedText = sanitizedText.replace(/[\n\r]/g, '\\n').replace(/\t/g, '\\t');
-                    // 정규식으로 수정 후 다시 파싱 시도
+                    // ?�규?�으�??�정 ???�시 ?�싱 ?�도
                     json = JSON.parse(sanitizedText);
                 } catch (e2) {
-                    // 정규식으로도 해결 안 되면 원래 텍스트로 시도 (보수적 접근)
+                    // ?�규?�으로도 ?�결 ???�면 ?�래 ?�스?�로 ?�도 (보수???�근)
                     json = JSON.parse(text);
                 }
             } catch (e) {
-                // GAS 특성상 텍스트로 Success가 오는 경우 처리
+                // GAS ?�성???�스?�로 Success가 ?�는 경우 처리
                 if (text.includes("Success")) json = { status: "Success", text: text };
                 else json = { status: "Error", message: text };
             }
 
             if (json.status === "Success") {
-                // 성공 시 즉시 리턴
+                // ?�공 ??즉시 리턴
                 return json;
             } else {
                 throw new Error(json.message || "Unknown Server Error");
@@ -380,7 +380,7 @@ async function sendReliableRequest(payload, silent = false) {
 
                 // This allows data to reach the server even if we can't read the response (Fire & Forget)
                 try {
-                    console.log("🛰️ Switching to no-cors mode...");
+                    console.log("?���?Switching to no-cors mode...");
                     await fetch(masterUrl, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -388,7 +388,7 @@ async function sendReliableRequest(payload, silent = false) {
                     });
                     const t = document.getElementById("toast");
                     if (t) {
-                        t.innerText = "⚠️ 저장 요청 전송됨 (응답 확인 불가 - 시트 확인 요망)";
+                        t.innerText = "?�️ ?�???�청 ?�송??(?�답 ?�인 불�? - ?�트 ?�인 ?�망)";
                         t.className = "show";
                         setTimeout(() => t.className = t.className.replace("show", ""), 5000);
                     }
@@ -397,7 +397,7 @@ async function sendReliableRequest(payload, silent = false) {
                     throw e; // Throw original error if no-cors also fails
                 }
             }
-            // 점진적 대기 시간 증가 (1초, 2초, 4초, ...)
+            // ?�진???��??�간 증�? (1�? 2�? 4�? ...)
             await new Promise(r => setTimeout(r, 1000 * Math.pow(1.2, i)));
         }
     }
@@ -413,10 +413,10 @@ function extractFolderId(url) {
 function convertToDirectLink(url) {
     if (!url || typeof url !== 'string') return "";
     try {
-        // 이미 변환된 링크인 경우
+        // ?��? 변?�된 링크??경우
         if (url.includes('googleusercontent.com/')) return url;
 
-        // 구글 드라이브 ID 추출 정규식 (file/d/, id=, folders/ 등 대응)
+        // 구�? ?�라?�브 ID 추출 ?�규??(file/d/, id=, folders/ ???�??
         const patterns = [
             /file\/d\/([a-zA-Z0-9-_]+)/,
             /id=([a-zA-Z0-9-_]+)/,
@@ -431,7 +431,7 @@ function convertToDirectLink(url) {
         for (let pattern of patterns) {
             const match = url.match(pattern);
             if (match && match[1]) {
-                // 썸네일 URL 사용 (CORB 우회)
+                // ?�네??URL ?�용 (CORB ?�회)
                 return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
             }
         }
@@ -441,19 +441,19 @@ function convertToDirectLink(url) {
     return url;
 }
 
-// 구글 드라이브 및 일반 이미지 URL에 안전하게 타임스탬프를 적용하는 헬퍼
+// 구�? ?�라?�브 �??�반 ?��?지 URL???�전?�게 ?�?�스?�프�??�용?�는 ?�퍼
 function getSafeImageUrl(url) {
     if (!url || typeof url !== 'string') return "";
     const directUrl = convertToDirectLink(url);
-    // 구글 드라이브 링크나 Data URI(base64)에는 타임스탬프를 붙이지 않음 (오류 유발 방지)
+    // 구�? ?�라?�브 링크??Data URI(base64)?�는 ?�?�스?�프�?붙이지 ?�음 (?�류 ?�발 방�?)
     if (directUrl.includes('drive.google.com') || directUrl.startsWith('data:')) {
         return directUrl;
     }
-    // 일반 HTTP 링크에만 캐시 방지 타임스탬프 적용
+    // ?�반 HTTP 링크?�만 캐시 방�? ?�?�스?�프 ?�용
     return directUrl.split('&t=')[0] + '&t=' + Date.now();
 }
 
-// 브랜딩 적용
+// 브랜???�용
 function applyBranding() {
     const hL = document.getElementById('h-logo'), sR = document.getElementById('rank-text');
     if (globalConfig.logo && hL) {
@@ -471,7 +471,7 @@ function changeMode(mode) {
         const c = document.getElementById('dynamic-content');
 
         // Reset layout state
-        // [Fix] student 모드는 로딩 완료 후 사이드바 제거 (renderStudentLogin 내부에서 처리)
+        // [Fix] student 모드??로딩 ?�료 ???�이?�바 ?�거 (renderStudentLogin ?��??�서 처리)
         if (mode !== 'student') {
             body.classList.remove('has-sidebar');
         }
@@ -507,10 +507,10 @@ function renderAuthScreen() {
             <div class="canvas-premium-box !max-w-2xl w-full">
                 <div class="flex flex-row items-start gap-10">
 
-                    <!-- 좌측: 아이콘 + 제목 -->
+                    <!-- 좌측: ?�이�?+ ?�목 -->
                     <div class="flex flex-col items-center gap-4 flex-shrink-0 w-40 border-r border-slate-200 pr-10">
                         <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl shadow-inner relative z-10 unified-animate">
-                            🔐
+                            ?��
                             <div class="absolute inset-0 bg-blue-100/30 rounded-full blur-2xl opacity-50 scale-150 -z-10"></div>
                         </div>
                         <h2 class="fs-18 ${isAdmin ? 'text-[#013976]' : 'text-sky-500'} uppercase text-center font-black tracking-tight leading-tight">
@@ -518,10 +518,10 @@ function renderAuthScreen() {
                         </h2>
                     </div>
 
-                    <!-- 우측: 폼 -->
+                    <!-- ?�측: ??-->
                     <div class="flex-1 space-y-4">
                         <input type="password" id="ac" class="ys-field text-center font-black" placeholder="Enter Access Code" autocomplete="off" onkeyup="if(event.key==='Enter') verifyAuth('${authMode}')">
-                        <button onclick="verifyAuth('${authMode}')" class="btn-ys w-full !py-5 transition-all active:scale-95 fs-18 font-bold">🔑 ACCESS NOW</button>
+                        <button onclick="verifyAuth('${authMode}')" class="btn-ys w-full !py-5 transition-all active:scale-95 fs-18 font-bold">?�� ACCESS NOW</button>
                         <button onclick="goHome()" class="w-full text-slate-400 fs-14 underline hover:text-red-500 transition-all font-medium">CANCEL &amp; RETURN</button>
                     </div>
 
@@ -532,7 +532,7 @@ function renderAuthScreen() {
     setTimeout(() => document.getElementById('ac')?.focus(), 100);
 }
 
-// [초기 화면] 배너 및 시작 버튼 제거됨
+// [초기 ?�면] 배너 �??�작 버튼 ?�거??
 function renderInitialScreen() {
     // Restore Header/Footer/Sidebar visibility if needed
     const header = document.getElementById('app-header');
@@ -540,9 +540,9 @@ function renderInitialScreen() {
     const sidebar = document.getElementById('app-sidebar');
     const mainContainer = document.getElementById('main-container');
 
-    if (header) header.style.display = ''; // [Fix] flex가 아니라 빈 문자열로 CSS 우선권 복원
+    if (header) header.style.display = ''; // [Fix] flex가 ?�니??�?문자?�로 CSS ?�선�?복원
     if (footer) footer.style.display = '';
-    if (sidebar) sidebar.style.display = ''; // [Fix] 시험 모드 등에서 강제로 none 처리된 사이드바 복원!
+    if (sidebar) sidebar.style.display = ''; // [Fix] ?�험 모드 ?�에??강제�?none 처리???�이?�바 복원!
 
     if (mainContainer) {
         mainContainer.style.height = ''; // Reset to CSS calc
@@ -559,7 +559,7 @@ function renderInitialScreen() {
                 <div class="animate-fade-in-safe flex flex-col items-center pb-20 mt-5 space-y-10">
                     <div class="canvas-premium-box !max-w-4xl hover:scale-[1.01]">
                         <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner relative z-10 unified-animate">
-                            🎓
+                            ?��
                             <div class="absolute inset-0 bg-blue-100/30 rounded-full blur-2xl opacity-50 scale-150 -z-10"></div>
                         </div>
                         
@@ -570,14 +570,14 @@ function renderInitialScreen() {
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mx-auto">
                             <button onclick="changeMode('student')" class="group p-10 bg-white border-2 border-slate-100 rounded-[2rem] hover:border-[#013976] hover:bg-slate-50 transition-all duration-500 text-center shadow-lg hover:shadow-2xl">
-                                <span class="text-5xl block mb-4 group-hover:scale-110 transition-transform">📝</span>
+                                <span class="text-5xl block mb-4 group-hover:scale-110 transition-transform">?��</span>
                                 <h3 class="fs-18 text-[#013976] font-black uppercase mb-2">Student Login</h3>
-                                <p class="text-slate-400 fs-14 font-medium">시험 응시 및 성적 확인</p>
+                                <p class="text-slate-400 fs-14 font-medium">?�험 ?�시 �??�적 ?�인</p>
                             </button>
                             <button onclick="changeMode('auth_admin')" class="group p-10 bg-[#013976] border-2 border-transparent rounded-[2rem] hover:bg-[#002855] transition-all duration-500 text-center shadow-lg hover:shadow-2xl">
-                                <span class="text-5xl block mb-4 group-hover:scale-110 transition-transform">⚙️</span>
+                                <span class="text-5xl block mb-4 group-hover:scale-110 transition-transform">?�️</span>
                                 <h3 class="fs-18 text-white font-black uppercase mb-2">Admin Panel</h3>
-                                <p class="text-blue-200/60 fs-14 font-medium">관리자 전용 대시보드</p>
+                                <p class="text-blue-200/60 fs-14 font-medium">관리자 ?�용 ?�?�보??/p>
                             </button>
                         </div>
                     </div>
@@ -597,22 +597,22 @@ function goHome() {
     changeMode('initial');
 }
 
-// 시험 진행 중 확인 함수
+// ?�험 진행 �??�인 ?�수
 function checkExamInProgress() {
     if (examSession.isExamActive) {
-        alert("시험이 진행 중입니다. 시험 화면으로 이동하세요.");
-        // 강제로 시험 화면 렌더링 (Student Mode 내에서 처리)
+        alert("?�험??진행 중입?�다. ?�험 ?�면?�로 ?�동?�세??");
+        // 강제�??�험 ?�면 ?�더�?(Student Mode ?�에??처리)
         return true;
     }
     return false;
 }
 
-// 시험 취소 함수
+// ?�험 취소 ?�수
 function cancelExam() {
-    if (confirm("정말 시험을 취소하겠습니까?")) {
+    if (confirm("?�말 ?�험??취소?�겠?�니�?")) {
         if (examTimer) clearInterval(examTimer);
         examSession = { studentName: "", grade: "", date: "", categoryId: "", answers: {}, startTime: null, isExamActive: false };
-        alert("시험이 취소되었습니다.");
+        alert("?�험??취소?�었?�니??");
         goHome();
     }
 }
@@ -620,50 +620,50 @@ function cancelExam() {
 
 async function verifyAuth(mode) {
     const pw = document.getElementById('ac').value;
-    if (!pw) return showToast("비밀번호를 입력하세요.");
+    if (!pw) return showToast("비�?번호�??�력?�세??");
 
     toggleLoading(true);
 
-    // 1. 클라우드 최신 정보 동기화 (Strict Cloud-First)
+    // 1. ?�라?�드 최신 ?�보 ?�기??(Strict Cloud-First)
     try {
         if (globalConfig.masterUrl) {
             // [Modified] Sync attempt
             const success = await loadConfigFromCloud(true);
 
-            // [Deadlock Fix] 메인 서버 링크가 없어서 실패한 경우(초기 세팅 전)에는 
-            // 로그인을 허용해야 설정이 가능함. 따라서 실패해도 로컬 코드로 검증 시도.
+            // [Deadlock Fix] 메인 ?�버 링크가 ?�어???�패??경우(초기 ?�팅 ???�는 
+            // 로그?�을 ?�용?�야 ?�정??가?�함. ?�라???�패?�도 로컬 코드�?검�??�도.
             if (!success) {
                 if (!globalConfig.mainServerLink) {
-                    console.log("⚠️ Main Server Link missing. Allowing offline auth for initial setup.");
+                    console.log("?�️ Main Server Link missing. Allowing offline auth for initial setup.");
                 } else {
-                    // 링크가 있는데 실패했다면 진짜 네트워크 오류이거나 권한 문제
-                    console.warn("⚠️ Sync failed but link exists. Proceeding with caution.");
-                    // throw new Error("Cloud Sync Failed"); // [Strict Mode Off] -> 사용성을 위해 오프라인 허용
+                    // 링크가 ?�는???�패?�다�?진짜 ?�트?�크 ?�류?�거??권한 문제
+                    console.warn("?�️ Sync failed but link exists. Proceeding with caution.");
+                    // throw new Error("Cloud Sync Failed"); // [Strict Mode Off] -> ?�용?�을 ?�해 ?�프?�인 ?�용
                 }
             }
         } else {
-            // URL이 없는 최초 상태면 예외적으로 통과 (설정하러 들어가야 하므로)
+            // URL???�는 최초 ?�태�??�외?�으�??�과 (?�정?�러 ?�어가???��?�?
             console.log("Master URL not set, skipping sync");
         }
     } catch (e) {
-        // [Strict] 오프라인 진입 차단
+        // [Strict] ?�프?�인 진입 차단
         toggleLoading(false);
         console.warn("Auth Sync Failed");
-        showToast("⛔ 네트워크 연결이 필요합니다. (보안 접속 불가)");
+        showToast("???�트?�크 ?�결???�요?�니?? (보안 ?�속 불�?)");
         return; // 진입 차단
     }
 
     toggleLoading(false);
 
-    // 2. 검증 (동기화된 데이터로 대조) - [Fix] 타입 불일치(숫자/문자) 방지를 위해 문자열 변환 비교
+    // 2. 검�?(?�기?�된 ?�이?�로 ?��? - [Fix] ?�??불일�??�자/문자) 방�?�??�해 문자??변??비교
     if (mode === 'admin' && String(pw) === String(globalConfig.adminCode)) {
         changeMode('admin_dashboard');
     } else if (mode === 'master' && String(pw) === String(globalConfig.masterCode || "0000")) {
-        // [Refactor] master_dashboard 제거 - 인증 성공 시 직접 주요사항 설정으로 이동
+        // [Refactor] master_dashboard ?�거 - ?�증 ?�공 ??직접 주요?�항 ?�정?�로 ?�동
         const c = document.getElementById('dynamic-content');
         renderMainConfig(c);
     } else {
-        showToast("⛔ 비밀번호가 올바르지 않습니다.");
+        showToast("??비�?번호가 ?�바르�? ?�습?�다.");
         const el = document.getElementById('ac');
         if (el) { el.value = ''; el.focus(); }
     }
@@ -679,19 +679,19 @@ function startStudentMode() {
 
 
 function renderSidebarNav() {
-    let b = `<button onclick="changeTab('records')" id="btn-records" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">📊 학생 성적표 확인</button><button onclick="changeTab('score_input')" id="btn-score_input" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">✏️ 학생 성적 수동 입력</button><button onclick="changeTab('stats')" id="btn-stats" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">📈 문항 및 학생 통계</button><button onclick="changeTab('bank')" id="btn-bank" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">📋 문항 리스트 등록·수정</button>`;
-    b += `<button onclick="changeTab('cat_manage')" id="btn-cat_manage" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">📂 시험지 관리</button>`;
+    let b = `<button onclick="changeTab('records')" id="btn-records" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">?�� ?�생 ?�적???�인</button><button onclick="changeTab('score_input')" id="btn-score_input" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">?�️ ?�생 ?�적 ?�동 ?�력</button><button onclick="changeTab('stats')" id="btn-stats" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">?�� 문항 �??�생 ?�계</button><button onclick="changeTab('bank')" id="btn-bank" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">?�� 문항 리스???�록·?�정</button>`;
+    b += `<button onclick="changeTab('cat_manage')" id="btn-cat_manage" class="w-full p-4 rounded-xl font-black text-slate-400 hover:text-white flex items-center gap-4 fs-18 text-left transition-all">?�� ?�험지 관�?/button>`;
     document.getElementById('sidebar-nav').innerHTML = b;
     applyBranding();
 }
 
-// --- 이탈 방지 로직 ---
+// --- ?�탈 방�? 로직 ---
 function hasUnsavedChanges() {
     const c = document.getElementById('dynamic-content');
     if (!c) return false;
     const cid = c.getAttribute('data-canvas-id');
 
-    // 06: 성적 수동 입력 — 학생명 또는 문항 점수 입력 시 경고
+    // 06: ?�적 ?�동 ?�력 ???�생�??�는 문항 ?�수 ?�력 ??경고
     if (cid === '06') {
         const nameVal = document.getElementById('input-student-name')?.value?.trim();
         if (nameVal) return true;
@@ -699,11 +699,11 @@ function hasUnsavedChanges() {
         if (hasQScore) return true;
         return false;
     }
-    // 08: 카테고리가 선택된 상태(리스트 조회 중)에서 이탈 시 경고
+    // 08: 카테고리가 ?�택???�태(리스??조회 �??�서 ?�탈 ??경고
     if (cid === '08') {
         return !!curCatId;
     }
-    // 07-2(부분 수정), 08-1(등록), 08-2(수정): 진입한 상태라면 무조건 경고
+    // 07-2(부�??�정), 08-1(?�록), 08-2(?�정): 진입???�태?�면 무조�?경고
     if (cid === '08-2' || cid === '08-1' || cid === '08-2') {
         return true;
     }
@@ -712,7 +712,7 @@ function hasUnsavedChanges() {
 
 function checkUnsavedChanges(callback) {
     if (hasUnsavedChanges()) {
-        if (confirm("작업 중인 정보를 저장하지 않았을 경우 정보가 손실됩니다.")) {
+        if (confirm("?�업 중인 ?�보�??�?�하지 ?�았??경우 ?�보가 ?�실?�니??")) {
             callback();
         }
     } else {
@@ -722,7 +722,7 @@ function checkUnsavedChanges(callback) {
 
 function changeTab(tab) {
     checkUnsavedChanges(() => {
-        // [Fix] 탭 전환 시 레이아웃 완전 복원 (어느 탭에서 와도 정상화)
+        // [Fix] ???�환 ???�이?�웃 ?�전 복원 (?�느 ??��???�???�상??
         const _header = document.getElementById('app-header');
         const _footer = document.getElementById('app-footer');
         const _mc = document.getElementById('main-container');
@@ -752,7 +752,7 @@ function changeTab(tab) {
     });
 }
 
-// --- 로고 및 자산 관리 (통합됨) ---
+// --- 로고 �??�산 관�?(?�합?? ---
 
 
 async function upAs(e, k) {
@@ -767,14 +767,14 @@ async function upAs(e, k) {
     const masterUrl = globalConfig.masterUrl;
     if (!masterUrl) {
         console.error("Master URL not set");
-        return showToast("마스터 싱크 주소를 먼저 저장해 주세요.");
+        return showToast("마스???�크 주소�?먼�? ?�?�해 주세??");
     }
 
     const targetFolderId = extractFolderId(globalConfig.mainServerLink);
 
     if (!targetFolderId) {
         console.error("No Main Server Folder ID available");
-        return showToast("메인 서버 폴더가 설정되지 않았습니다.");
+        return showToast("메인 ?�버 ?�더가 ?�정?��? ?�았?�니??");
     }
 
     const reader = new FileReader();
@@ -782,14 +782,14 @@ async function upAs(e, k) {
         const localData = ev.target.result;
         console.log("File loaded, size:", localData.length);
 
-        // 1단계: 로컬 이미지 즉시 화면에 노출 (사용자 대기 방지)
+        // 1?�계: 로컬 ?��?지 즉시 ?�면???�출 (?�용???��?방�?)
         const previewEl = document.getElementById(`pv-${k}`);
         if (previewEl) {
             previewEl.innerHTML = `<img src="${localData}" class="max-h-full p-6 opacity-60 animate-pulse">`;
         }
 
-        toggleLoading(true); // 로딩 시작
-        showToast("🛰️ 클라우드 동기화 중...");
+        toggleLoading(true); // 로딩 ?�작
+        showToast("?���??�라?�드 ?�기??�?..");
 
         try {
             const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
@@ -802,7 +802,7 @@ async function upAs(e, k) {
             };
 
             console.log("Sending payload to server...");
-            // [핵심] 10회 재시도 보장 전송
+            // [?�심] 10???�시??보장 ?�송
             const result = await sendReliableRequest(payload);
 
             if (result.status === "Success") {
@@ -815,7 +815,7 @@ async function upAs(e, k) {
                     await saveConfigToCloud();
                     applyBranding();
                     if (previewEl) previewEl.innerHTML = `<img src="${globalConfig[k]}" class="max-h-full p-6">`;
-                    showToast(`✅ 클라우드 저장 성공!`);
+                    showToast(`???�라?�드 ?�???�공!`);
                     changeTab('main_config'); // [Standardization] Reset view after action (Updated to main_config)
                 } else { throw new Error("URL missing in response"); }
             } else {
@@ -823,10 +823,10 @@ async function upAs(e, k) {
             }
         } catch (err) {
             console.error("Upload error:", err);
-            showToast("❌ 전송 실패: " + err.message);
-            // 로컬 임시 보관 로직 제거 (사용자 의도 반영: 서버 실패 시 확실히 실패 처리)
+            showToast("???�송 ?�패: " + err.message);
+            // 로컬 ?�시 보�? 로직 ?�거 (?�용???�도 반영: ?�버 ?�패 ???�실???�패 처리)
             if (previewEl) {
-                // 실패 시 미리보기 제거 또는 에러 표시
+                // ?�패 ??미리보기 ?�거 ?�는 ?�러 ?�시
                 previewEl.innerHTML = '<span class="text-base text-red-500 font-bold">Upload Failed</span>';
             }
         } finally {
@@ -836,7 +836,7 @@ async function upAs(e, k) {
 
     reader.onerror = (err) => {
         console.error("FileReader error:", err);
-        showToast("❌ 파일 읽기 오류");
+        showToast("???�일 ?�기 ?�류");
     };
 
     reader.readAsDataURL(file);
@@ -844,7 +844,7 @@ async function upAs(e, k) {
 
 
 
-// 4. [기능] 유형별 UI 가이드 및 가시성 제어
+// 4. [기능] ?�형�?UI 가?�드 �?가?�성 ?�어
 function toggleTypeUI(type) {
     const choiceArea = document.getElementById('choice-area');
     const ansInput = document.getElementById('q-ans');
@@ -852,40 +852,40 @@ function toggleTypeUI(type) {
 
     if (type === 'choice') {
         choiceArea.classList.remove('hidden');
-        ansInput.placeholder = "정답 번호 (1-5)";
-        ansLabel.innerText = "5. Answer (객관식 정답)";
+        ansInput.placeholder = "?�답 번호 (1-5)";
+        ansLabel.innerText = "5. Answer (객�????�답)";
         renderOptions(document.getElementById('opt-cnt').value);
     } else if (type === 'short') {
         choiceArea.classList.add('hidden');
-        ansInput.placeholder = "단답형 키워드 입력";
-        ansLabel.innerText = "5. Answer (주관식 정답)";
+        ansInput.placeholder = "?�답???�워???�력";
+        ansLabel.innerText = "5. Answer (주�????�답)";
     } else if (type === 'essay') {
         choiceArea.classList.add('hidden');
-        ansInput.placeholder = "서술형 모범 답안 혹은 가이드 입력";
-        ansLabel.innerText = "5. Model Answer (작문형 모범답안)";
+        ansInput.placeholder = "?�술??모범 ?�안 ?��? 가?�드 ?�력";
+        ansLabel.innerText = "5. Model Answer (?�문??모범?�안)";
     }
 }
 
-// 5. [기능] 세부 유형 목록 업데이트
-// 5. [기능] 세부 유형 목록 업데이트
+// 5. [기능] ?��? ?�형 목록 ?�데?�트
+// 5. [기능] ?��? ?�형 목록 ?�데?�트
 function upDet(v) {
     const s = document.getElementById('q-subtype') || document.getElementById('q-det');
     if (!s) return;
 
     if (!v) {
-        s.innerHTML = '<option value="" disabled selected hidden>주 영역을 먼저 선택하세요</option>';
+        s.innerHTML = '<option value="" disabled selected hidden>�??�역??먼�? ?�택?�세??/option>';
         return;
     }
 
     const list = [...(SUB_TYPE_MAP[v] || [])];
     if (list.length === 0) {
-        s.innerHTML = '<option value="" disabled selected hidden>해당 주 영역에 세부 항목이 없습니다</option>';
+        s.innerHTML = '<option value="" disabled selected hidden>?�당 �??�역???��? ??��???�습?�다</option>';
     } else {
-        s.innerHTML = '<option value="" disabled selected hidden>세부 영역을 선택하세요</option>' + list.map(t => `<option value="${t}">${t}</option>`).join('');
+        s.innerHTML = '<option value="" disabled selected hidden>?��? ?�역???�택?�세??/option>' + list.map(t => `<option value="${t}">${t}</option>`).join('');
     }
 }
 
-// 6. [기능] 이미지 파일 Base64 추출 (H열, I열)
+// 6. [기능] ?��?지 ?�일 Base64 추출 (H?? I??
 function handleDualFile(e, idx) {
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader();
@@ -897,20 +897,20 @@ function handleDualFile(e, idx) {
     r.readAsDataURL(f);
 }
 
-// 7. [기능] 객관식 보기 입력 박스 동적 생성
+// 7. [기능] 객�???보기 ?�력 박스 ?�적 ?�성
 function renderOptions(cnt) {
     const g = document.getElementById('opt-grid'); g.innerHTML = '';
     for (let i = 0; i < cnt; i++) {
         g.innerHTML += `
                     <div class="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 focus-within:border-[#013976] transition-all hover:bg-white hover:shadow-md duration-300">
                         <span class="fs-18 text-[#013976] opacity-30">${i + 1}</span>
-                        <input type="text" id="opt-${i}" class="bg-transparent border-none outline-none text-base flex-grow placeholder:text-slate-300" placeholder="보기 ${i + 1} 내용을 입력하세요">
+                        <input type="text" id="opt-${i}" class="bg-transparent border-none outline-none text-base flex-grow placeholder:text-slate-300" placeholder="보기 ${i + 1} ?�용???�력?�세??>
                     </div>`;
     }
 }
 
-// 8. [기능] 최종 클라우드 전송 및 영구 저장
-// 8. [기능] 최종 클라우드 전송 및 영구 저장
+// 8. [기능] 최종 ?�라?�드 ?�송 �??�구 ?�??
+// 8. [기능] 최종 ?�라?�드 ?�송 �??�구 ?�??
 async function saveQ() {
     const btn = document.getElementById('save-btn');
 
@@ -919,25 +919,25 @@ async function saveQ() {
         const ans = document.getElementById('q-ans').value;
         const type = document.getElementById('q-type').value;
 
-        if (!txt || !ans) throw new Error("문항 내용과 정답(답안)은 필수 입력 사항입니다.");
+        if (!txt || !ans) throw new Error("문항 ?�용�??�답(?�안)?� ?�수 ?�력 ?�항?�니??");
 
         btn.disabled = true;
-        btn.innerText = "🛰️ CLOUD SYNCING...";
+        btn.innerText = "?���?CLOUD SYNCING...";
 
-        // [수정] DOM에서 직접 값을 읽어와 신뢰성 확보
+        // [?�정] DOM?�서 직접 값을 ?�어?� ?�뢰???�보
         const catSelect = document.getElementById('reg-cat-select');
         if (catSelect) curCatId = catSelect.value;
 
         const cat = globalConfig.categories.find(c => c.id === curCatId);
-        if (!cat) throw new Error("선택된 카테고리가 유효하지 않습니다. 카테고리를 다시 선택해주세요.");
+        if (!cat) throw new Error("?�택??카테고리가 ?�효?��? ?�습?�다. 카테고리�??�시 ?�택?�주?�요.");
 
-        // 폴더 ID 추출 및 검증
+        // ?�더 ID 추출 �?검�?
         let pId = "";
         try {
             pId = extractFolderId(cat.targetFolderUrl);
         } catch (e) { console.warn("Folder ID extraction failed", e); }
 
-        if (!pId) throw new Error(`'${cat.name}' 카테고리의 폴더 주소가 올바르지 않습니다. 설정에서 확인해주세요.`);
+        if (!pId) throw new Error(`'${cat.name}' 카테고리???�더 주소가 ?�바르�? ?�습?�다. ?�정?�서 ?�인?�주?�요.`);
 
         let options = [];
         if (type === 'choice') {
@@ -971,50 +971,50 @@ async function saveQ() {
         const serverPayload = { ...payload, multipleChoiceConfig: JSON.stringify(options), options: JSON.stringify(options) };
 
         const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
-        if (!masterUrl) throw new Error("Master URL (Apps Script URL)이 설정되지 않았습니다.");
+        if (!masterUrl) throw new Error("Master URL (Apps Script URL)???�정?��? ?�았?�니??");
 
-        // [핵심] 10회 재시도 보장 전송
+        // [?�심] 10???�시??보장 ?�송
         const result = await sendReliableRequest(serverPayload);
 
-        // 2. 성공 시 데이터 반영
+        // 2. ?�공 ???�이??반영
         payload.fileUrl1 = result.fileUrl1 || payload.fileUrl1;
         payload.fileUrl2 = result.fileUrl2 || payload.fileUrl2;
 
-        // 거대 데이터 정리
+        // 거�? ?�이???�리
         delete payload.fileData1; delete payload.fileData2;
         delete payload.fileName1; delete payload.fileName2;
         delete payload.mimeType1; delete payload.mimeType2;
 
         globalConfig.questions.push(payload);
         save();
-        saveConfigToCloud(); // [최적화] 백그라운드에서 동기화 진행 (UI 지연 방지)
+        saveConfigToCloud(); // [최적?? 백그?�운?�에???�기??진행 (UI 지??방�?)
 
-        showToast("✅ 문항이 클라우드 DB에 안전하게 저장되었습니다.");
+        showToast("??문항???�라?�드 DB???�전?�게 ?�?�되?�습?�다.");
 
-        // 초기화
+        // 초기??
         fData1 = null; fData2 = null;
         changeTab('bank');
 
     } catch (e) {
         console.error("SaveQ Error:", e);
-        showToast("❌ 저장 실패: " + e.message);
+        showToast("???�???�패: " + e.message);
         btn.disabled = false;
         btn.innerText = "Sync & Save to Academy DB (Retry)";
     }
 }
 
 
-// 8-2. [기능] 문항 수정 폼 렌더링 (08-1과 규격 동기화 - Category Select 제거) - OBSOLETE (구형 폼)
+// 8-2. [기능] 문항 ?�정 ???�더�?(08-1�?규격 ?�기??- Category Select ?�거) - OBSOLETE (구형 ??
 async function obsolete_renderEditForm(id) {
     const q = globalConfig.questions.find(item => String(item.id).trim() === String(id).trim());
-    if (!q) return showToast("문항 정보를 찾을 수 없습니다.");
+    if (!q) return showToast("문항 ?�보�?찾을 ???�습?�다.");
 
     const c = document.getElementById('dynamic-content');
     setCanvasId('08-2', 'full'); // Use full layout similar to 08-1
     document.getElementById('app-canvas').classList.add('!overflow-hidden');
 
     const attemptReturn = () => {
-        if (confirm("수정을 취소하고 돌아가시겠습니까?")) {
+        if (confirm("?�정??취소?�고 ?�아가?�겠?�니�?")) {
             document.getElementById('app-canvas').classList.remove('!overflow-hidden');
             renderBank();
         }
@@ -1026,14 +1026,14 @@ async function obsolete_renderEditForm(id) {
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
                  <div>
                     <h2 class="text-[18px] font-bold text-[#013976] flex items-center gap-2">
-                        <span class="text-xl">✏️</span> Edit Question (문항 수정)
+                        <span class="text-xl">?�️</span> Edit Question (문항 ?�정)
                     </h2>
                     <p class="text-slate-500 text-xs mt-1">ID: ${q.id}</p>
                 </div>
                 
                 <div class="flex items-center gap-3">
                      <button onclick="updateQuestion('${q.id}')" class="btn-ys !bg-[#013976] !text-white !py-2.5 !px-5 !text-[14px] !font-bold shadow-md hover:brightness-110 flex items-center gap-2">
-                        💾 Update
+                        ?�� Update
                     </button>
                     <div class="w-px h-6 bg-slate-300 mx-1"></div>
                     <button onclick="(${attemptReturn})()" class="btn-ys bg-white text-slate-500 border border-slate-200 hover:bg-slate-100 !py-2 !px-4 !text-[14px] !font-normal">
@@ -1049,11 +1049,11 @@ async function obsolete_renderEditForm(id) {
                     <!-- Common Settings (Read Only Category) -->
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex-shrink-0">
                         <h3 class="text-[16px] font-bold text-[#013976] mb-3 flex items-center gap-2">
-                            <span>⚙️ Common Settings</span>
+                            <span>?�️ Common Settings</span>
                         </h3>
                          <div class="flex items-center gap-4">
                             <div class="flex-1">
-                                <label class="block text-[14px] font-bold text-pink-600 mb-1">Category (시험지)</label>
+                                <label class="block text-[14px] font-bold text-pink-600 mb-1">Category (?�험지)</label>
                                 <div class="w-full p-2 border rounded-lg text-[14px] font-bold bg-slate-100 text-slate-500">
                                     ${globalConfig.categories.find(c => c.id === q.catId)?.name || 'Unknown Category'}
                                 </div>
@@ -1070,15 +1070,15 @@ async function obsolete_renderEditForm(id) {
                             <div class="w-px h-4 bg-slate-300 mx-1"></div>
                             
                             <!-- Symbols -->
-                            <button onclick="insertSymbol('→')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">→ </button>
-                            <button onclick="insertSymbol('↓')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">↓ </button>
-                            <button onclick="insertSymbol('★')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">★ </button>
-                            <button onclick="insertSymbol('※')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">※ </button>
-                            <button onclick="insertSymbol('①')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">① </button>
-                            <button onclick="insertSymbol('②')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">② </button>
-                            <button onclick="insertSymbol('③')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">③ </button>
-                            <button onclick="insertSymbol('④')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">④ </button>
-                            <button onclick="insertSymbol('⑤')" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">⑤ </button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
+                            <button onclick="insertSymbol('??)" class="p-1.5 rounded hover:bg-slate-200 text-[14px] text-slate-600">??</button>
                         </div>
                         
                         <div class="p-4 pb-0">
@@ -1097,7 +1097,7 @@ async function obsolete_renderEditForm(id) {
                 <div class="w-full lg:w-7/12 flex flex-col gap-4 min-h-0 overflow-y-auto custom-scrollbar pb-20">
                      <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex justify-between items-center sticky top-0 z-20 shadow-sm backdrop-blur-sm bg-opacity-90">
                         <h3 class="text-[16px] font-bold text-indigo-800 flex items-center gap-2">
-                            <span>📝 Question List</span>
+                            <span>?�� Question List</span>
                         </h3>
                     </div>
                     
@@ -1124,20 +1124,20 @@ async function obsolete_updateQ(id) {
     const q = globalConfig.questions.find(item => String(item.id).trim() === String(id).trim());
     if (!q) return;
 
-    if (!confirm('💾 수정된 문항 정보를 저장하시겠습니까?')) return;
+    if (!confirm('?�� ?�정??문항 ?�보�??�?�하?�겠?�니�?')) return;
 
     if (!globalConfig.masterUrl) {
-        showToast('⚠️ 마스터 URL이 설정되지 않았습니다. 설정 탭에서 먼저 등록해 주세요.');
+        showToast('?�️ 마스??URL???�정?��? ?�았?�니?? ?�정 ??��??먼�? ?�록??주세??');
         return;
     }
 
     const cat = globalConfig.categories.find(c => c.id === q.catId);
     if (!cat) {
-        showToast('⚠️ 문항의 카테고리 정보를 찾을 수 없습니다.');
+        showToast('?�️ 문항??카테고리 ?�보�?찾을 ???�습?�다.');
         return;
     }
 
-    // 08-1과 동일한 필드 ID 사용
+    // 08-1�??�일???�드 ID ?�용
     const sec = document.getElementById('q-section').value;
     const sub = document.getElementById('q-subtype').value.trim();
     const qType = document.getElementById('q-type').value;
@@ -1148,31 +1148,31 @@ async function obsolete_updateQ(id) {
     const scr = parseInt(document.getElementById('q-score').value) || 0;
     let ans = document.getElementById('q-answer').value.trim();
 
-    // [Validation] 영역, 유형, 배점, 발문 필수
-    if (!sec) { showToast('⚠️ 주 영역을 선택해 주세요 (Section required)'); return; }
-    if (!qType) { showToast('⚠️ 문항 유형을 선택해 주세요 (Type required)'); return; }
-    if (scr <= 0) { showToast('⚠️ 배점은 1점 이상이어야 합니다 (Score > 0)'); return; }
+    // [Validation] ?�역, ?�형, 배점, 발문 ?�수
+    if (!sec) { showToast('?�️ �??�역???�택??주세??(Section required)'); return; }
+    if (!qType) { showToast('?�️ 문항 ?�형???�택??주세??(Type required)'); return; }
+    if (scr <= 0) { showToast('?�️ 배점?� 1???�상?�어???�니??(Score > 0)'); return; }
     if (!title) {
-        showToast('⚠️ 문항 발문은 필수입니다 (Title required)');
+        showToast('?�️ 문항 발문?� ?�수?�니??(Title required)');
         document.getElementById('q-title').focus();
         return;
     }
 
-    // [Validation] 유형별 정답/보기 체크
-    if (qType !== '작문형' && !ans) {
-        showToast('⚠️ 정답을 입력해 주세요 (Answer required)');
+    // [Validation] ?�형�??�답/보기 체크
+    if (qType !== '?�문?? && !ans) {
+        showToast('?�️ ?�답???�력??주세??(Answer required)');
         document.getElementById('q-answer').focus();
         return;
     }
-    if (qType === '객관형') {
+    if (qType === '객�???) {
         const checkChoices = Array.from(document.querySelectorAll('.q-choice-input')).map(i => i.value.trim());
         if (checkChoices.every(v => v === "")) {
-            showToast('⚠️ 객관식 보기를 입력해 주세요 (Choices required)');
+            showToast('?�️ 객�???보기�??�력??주세??(Choices required)');
             return;
         }
     }
 
-    // 이미지 처리 (새로 선택된 파일이 있으면 업로드 준비)
+    // ?��?지 처리 (?�로 ?�택???�일???�으�??�로??준�?
     const img1 = document.getElementById('q-img1').files[0];
     const img2 = document.getElementById('q-img2').files[0];
 
@@ -1207,7 +1207,7 @@ async function obsolete_updateQ(id) {
 
     let mc = '', model = '', options = [];
     ans = document.getElementById('q-answer').value.trim();
-    if (qType === '객관형') {
+    if (qType === '객�???) {
         const count = parseInt(document.getElementById('q-choice-count').value);
         for (let i = 1; i <= count; i++) {
             const val = document.getElementById(`q - choice - ${i} `).value.trim();
@@ -1217,7 +1217,7 @@ async function obsolete_updateQ(id) {
             }
         }
         ans = document.getElementById('q-answer').value.trim();
-    } else if (qType === '주관형') {
+    } else if (qType === '주�???) {
         ans = document.getElementById('q-answer').value.trim();
     } else {
         model = document.getElementById('q-model').value.trim();
@@ -1258,7 +1258,7 @@ async function obsolete_updateQ(id) {
             payload.fileUrl2 = result.fileUrl2 || payload.fileUrl2;
         }
 
-        // 이미지 데이터 제거 (최적화)
+        // ?��?지 ?�이???�거 (최적??
         delete payload.fileData1; delete payload.fileData2;
         delete payload.fileName1; delete payload.fileName2;
         delete payload.mimeType1; delete payload.mimeType2;
@@ -1266,51 +1266,51 @@ async function obsolete_updateQ(id) {
         const idx = globalConfig.questions.findIndex(item => item.id == id);
         if (idx !== -1) globalConfig.questions[idx] = { ...globalConfig.questions[idx], ...payload };
         save();
-        saveConfigToCloud(); // [최적화] 백그라운드 동기화
+        saveConfigToCloud(); // [최적?? 백그?�운???�기??
 
-        showToast("✅ 수정 내용이 클라우드에 성공적으로 반영되었습니다.");
+        showToast("???�정 ?�용???�라?�드???�공?�으�?반영?�었?�니??");
         fData1 = null; fData2 = null;
         changeTab('bank');
     } catch (e) {
         console.error("Critical Update Error:", e);
-        showToast("❌ 수정 사항 전송 실패 (네트워크 확인)");
+        showToast("???�정 ?�항 ?�송 ?�패 (?�트?�크 ?�인)");
         btn.disabled = false;
         btn.innerText = "Update Question Info";
     }
 }
 
 // --- GEMINI AI INTEGRATION ---
-// [Removed] callGeminiAPI 구버전 (직접 API 호출) 삭제 — Proxy 버전(3997줄)이 최종 적용됨
+// [Removed] callGeminiAPI 구버??(직접 API ?�출) ??�� ??Proxy 버전(3997�???최종 ?�용??
 
-// [New] AI 자동 채점 핵심 로직
+// [New] AI ?�동 채점 ?�심 로직
 async function gradeWithAI(q, userAns) {
-    if (!userAns) return { score: 0, feedback: "답안이 입력되지 않았습니다." };
+    if (!userAns) return { score: 0, feedback: "?�안???�력?��? ?�았?�니??" };
     if (!globalConfig.geminiKey) return null; // Fallback
 
-    // [Fix] 묶음 지문 + 개별 지문을 AI에게 전달하여 문맥 파악 가능하게 함
+    // [Fix] 묶음 지�?+ 개별 지문을 AI?�게 ?�달?�여 문맥 ?�악 가?�하�???
     const bundleText = q.bundlePassageText || '';
     const passageText = q.passage1 || q.text || '';
-    const fullContext = bundleText ? '[묶음 지문]\n' + bundleText + '\n\n[개별 문항 지문]\n' + passageText : passageText;
+    const fullContext = bundleText ? '[묶음 지�?\n' + bundleText + '\n\n[개별 문항 지�?\n' + passageText : passageText;
 
     const prompt = `
 [AI Online Grading Request]
  문항: ${q.questionTitle || q.text}
- 유형: ${q.questionType}
- 영역: ${q.section}
- 정답/키워드: ${q.answer}
- 모범 답안: ${q.modelAnswer || '없음'}
- 학생 답안: ${userAns}
+ ?�형: ${q.questionType}
+ ?�역: ${q.section}
+ ?�답/?�워?? ${q.answer}
+ 모범 ?�안: ${q.modelAnswer || '?�음'}
+ ?�생 ?�안: ${userAns}
  배점: ${q.score}
-${fullContext ? ' 지문(문맥):\n' + fullContext : ''}
+${fullContext ? ' 지�?문맥):\n' + fullContext : ''}
 
 [Instructions]
-1. 위 지문(문맥)을 반드시 읽고, 학생의 답안이 빈칸/문맥에 알맞은지 판단하세요.
-2. 학생의 답안이 정답/모범 답안과 의미적으로 일치하는지 분석하세요.
-3. [주관형]: 스펠링이 약간 틀리거나 동의어를 사용했더라도 전체적인 의미가 맞다면 정답(만점)으로 인정합니다. 아포스트로피와 백틱은 동일한 문자로 간주하세요.
-4. [작문형]: 문맥, 문법, 핵심 단어 포함 여부를 종합 평가하여 0점에서 배점 사이의 점수를 부여하세요.
-5. 출력은 반드시 아래 JSON 형식으로만 하세요. (기타 텍스트 금지)
+1. ??지�?문맥)??반드???�고, ?�생???�안??빈칸/문맥???�맞?�지 ?�단?�세??
+2. ?�생???�안???�답/모범 ?�안�??��??�으�??�치?�는지 분석?�세??
+3. [주�???: ?�펠링이 ?�간 ?�리거???�의?��? ?�용?�더?�도 ?�체?�인 ?��?가 맞다�??�답(만점)?�로 ?�정?�니?? ?�포?�트로피?� 백틱?� ?�일??문자�?간주?�세??
+4. [?�문??: 문맥, 문법, ?�심 ?�어 ?�함 ?��?�?종합 ?��??�여 0?�에??배점 ?�이???�수�?부?�하?�요.
+5. 출력?� 반드???�래 JSON ?�식?�로�??�세?? (기�? ?�스??금�?)
 
-{"score": 점수숫자, "feedback": "간략한 채점 근거(한국어)"}
+{"score": ?�수?�자, "feedback": "간략??채점 근거(?�국??"}
     `;
 
     try {
@@ -1328,11 +1328,11 @@ async function handleAIAnalyze() {
     const p1 = document.getElementById('q-p1').value;
     const p2 = document.getElementById('q-p2').value;
     const text = p1 + "\n" + p2;
-    if (!text.trim()) return showToast("분석할 지문 내용이 없습니다.");
+    if (!text.trim()) return showToast("분석??지�??�용???�습?�다.");
 
     const prompt = `Analyze the following English text for an educational test item.
 Text: "${text}"
-Output ONLY a JSON object with these keys: "difficulty" (String one of: "최상", "상", "중", "하", "기초"), "keywords" (String comma separated), "category" (String best guess from "듣기(Listening)", "독해(Reading)", "어휘(Vocabulary)", "문법(Grammar)").`;
+Output ONLY a JSON object with these keys: "difficulty" (String one of: "최상", "??, "�?, "??, "기초"), "keywords" (String comma separated), "category" (String best guess from "?�기(Listening)", "?�해(Reading)", "?�휘(Vocabulary)", "문법(Grammar)").`;
 
     const res = await callGeminiAPI(prompt);
     if (!res) return;
@@ -1342,16 +1342,16 @@ Output ONLY a JSON object with these keys: "difficulty" (String one of: "최상"
         const json = JSON.parse(clean);
 
         if (json.difficulty) document.getElementById('q-diff').value = json.difficulty;
-        showToast(`✅ 분석 완료! 난이도: ${json.difficulty}, 키워드: ${json.keywords}`);
+        showToast(`??분석 ?�료! ?�이?? ${json.difficulty}, ?�워?? ${json.keywords}`);
     } catch (e) {
-        showToast("AI 응답 해석 실패. 다시 시도해주세요.");
+        showToast("AI ?�답 ?�석 ?�패. ?�시 ?�도?�주?�요.");
     }
 }
 
 async function handleAISuggest() {
     const type = document.getElementById('q-type').value;
     const p1 = document.getElementById('q-p1').value;
-    if (!p1) return showToast("지문(Passage 1)을 먼저 입력해야 제안할 수 있습니다.");
+    if (!p1) return showToast("지�?Passage 1)??먼�? ?�력?�야 ?�안?????�습?�다.");
 
     let prompt = "";
     if (type === 'choice') {
@@ -1382,14 +1382,14 @@ Output ONLY a JSON object with key: "answer" (String model answer).`;
             renderOptions(5);
             for (let i = 0; i < 5; i++) document.getElementById(`opt-${i}`).value = opts[i];
             document.getElementById('q-ans').value = ansIdx;
-            showToast("✅ AI가 보기를 생성했습니다!");
+            showToast("??AI가 보기�??�성?�습?�다!");
         } else {
             document.getElementById('q-ans').value = json.answer;
-            showToast("✅ AI가 예시 답안을 생성했습니다!");
+            showToast("??AI가 ?�시 ?�안???�성?�습?�다!");
         }
     } catch (e) {
         console.error(e);
-        showToast("AI 응답 처리 실패");
+        showToast("AI ?�답 처리 ?�패");
     }
 }
 
@@ -1398,17 +1398,17 @@ async function handleAIAnalyzeV2() {
     const p1 = document.getElementById('q-p1').value;
     const p2 = document.getElementById('q-p2').value;
     const text = p1 + "\n" + p2;
-    if (!text.trim()) return showToast("분석할 지문 내용이 없습니다.");
+    if (!text.trim()) return showToast("분석??지�??�용???�습?�다.");
 
     const sec = document.getElementById('q-sec').value;
-    const subTypes = SUB_TYPE_MAP[sec] ? SUB_TYPE_MAP[sec].join(", ") : "기타";
+    const subTypes = SUB_TYPE_MAP[sec] ? SUB_TYPE_MAP[sec].join(", ") : "기�?";
 
     const prompt = `Analyze the following English text for an educational test item.
 Text: "${text}"
 Context Section: "${sec}"
 Available SubTypes: [${subTypes}]
 Output ONLY a JSON object with these keys: 
-"difficulty" (String one of: "최상", "상", "중", "하", "기초"), 
+"difficulty" (String one of: "최상", "??, "�?, "??, "기초"), 
 "keywords" (String comma separated), 
 "subType" (String best match from Available SubTypes).`;
 
@@ -1425,17 +1425,17 @@ Output ONLY a JSON object with these keys:
             const st = document.getElementById('q-det');
             const exists = Array.from(st.options).some(o => o.value === json.subType);
             if (exists) st.value = json.subType;
-            else st.value = "(미분류)";
+            else st.value = "(미분�?";
         }
-        showToast(`✅ 분석 완료! 난이도: ${json.difficulty}`);
+        showToast(`??분석 ?�료! ?�이?? ${json.difficulty}`);
     } catch (e) {
-        showToast("AI 응답 해석 실패. 다시 시도해주세요.");
+        showToast("AI ?�답 ?�석 ?�패. ?�시 ?�도?�주?�요.");
     }
 }
 
 async function handleAIPassageRefine() {
     const p1 = document.getElementById('q-p1').value;
-    if (!p1) return showToast("수정할 지문(Passage 1)을 입력해주세요.");
+    if (!p1) return showToast("?�정??지�?Passage 1)???�력?�주?�요.");
 
     const prompt = `Refine the following English text to be more natural and grammatically correct for an educational test.
 Text: "${p1}"
@@ -1444,14 +1444,14 @@ Output ONLY the refined text. Do not add any introduction or quotes.`;
     const res = await callGeminiAPI(prompt);
     if (res) {
         document.getElementById('ai-passage-view').value = res.trim();
-        showToast("✅ AI 지문 수정 완료! 제안 내용을 확인하세요.");
+        showToast("??AI 지�??�정 ?�료! ?�안 ?�용???�인?�세??");
     }
 }
 
 async function handleAIAnswerSuggest() {
     const type = document.getElementById('q-type').value;
     const p1 = document.getElementById('q-p1').value;
-    if (!p1) return showToast("지문(Passage 1)을 먼저 입력해야 제안할 수 있습니다.");
+    if (!p1) return showToast("지�?Passage 1)??먼�? ?�력?�야 ?�안?????�습?�다.");
 
     let prompt = "";
     if (type === 'choice') {
@@ -1483,18 +1483,18 @@ Output ONLY a JSON object with key: "answer" (String model answer).`;
             for (let i = 0; i < 5; i++) document.getElementById(`opt-${i}`).value = opts[i];
             document.getElementById('q-ans').value = ansIdx;
 
-            displayText = `[정답: ${ansIdx}번 (${json.answer})]\n\n오답 보기:\n${opts.filter(o => o !== json.answer).join('\n')}`;
-            showToast("✅ AI가 보기를 생성했습니다!");
+            displayText = `[?�답: ${ansIdx}�?(${json.answer})]\n\n?�답 보기:\n${opts.filter(o => o !== json.answer).join('\n')}`;
+            showToast("??AI가 보기�??�성?�습?�다!");
         } else {
             document.getElementById('q-ans').value = json.answer;
             displayText = json.answer;
-            showToast("✅ AI가 예시 답안을 생성했습니다!");
+            showToast("??AI가 ?�시 ?�안???�성?�습?�다!");
         }
         document.getElementById('ai-answer-view').value = displayText;
 
     } catch (e) {
         console.error(e);
-        showToast("AI 응답 처리 실패");
+        showToast("AI ?�답 처리 ?�패");
     }
 }
 
@@ -1502,11 +1502,11 @@ async function delQ(id) {
     const q = globalConfig.questions.find(item => item.id == id);
     if (!q) return;
 
-    if (!confirm(`⚠️ [경고] 정말로 해당 문항을 삭제하시겠습니까?\n\n삭제 시 문항DB와 연동된 모든 정보(이미지 포함)가 복귀되지 않습니다. 똑같은 문항을 생성하려면 수동으로 다시 문항 생성을 해야 합니다.`)) return;
+    if (!confirm(`?�️ [경고] ?�말�??�당 문항????��?�시겠습?�까?\n\n??�� ??문항DB?� ?�동??모든 ?�보(?��?지 ?�함)가 복�??��? ?�습?�다. ?�같?� 문항???�성?�려�??�동?�로 ?�시 문항 ?�성???�야 ?�니??`)) return;
 
     toggleLoading(true);
     try {
-        // [New] 이미지 파일 ID 추출 로직
+        // [New] ?��?지 ?�일 ID 추출 로직
         const getFileId = (url) => {
             if (!url) return null;
             let m = url.match(/id=([a-zA-Z0-9-_]+)/);
@@ -1519,7 +1519,7 @@ async function delQ(id) {
         const fileId1 = getFileId(q.fileUrl1);
         const fileId2 = getFileId(q.fileUrl2);
 
-        // 1. 전용 문항DB 시트에서 행 삭제 (서버 확인 강제)
+        // 1. ?�용 문항DB ?�트?�서 ????�� (?�버 ?�인 강제)
         const cat = globalConfig.categories.find(c => c.id === q.catId);
         const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
         if (cat && masterUrl) {
@@ -1530,7 +1530,7 @@ async function delQ(id) {
                     parentFolderId: extractFolderId(cat.targetFolderUrl),
                     categoryName: cat.name,
                     id: q.id,
-                    // [New] 삭제할 이미지 파일 ID 전달
+                    // [New] ??��???��?지 ?�일 ID ?�달
                     fileId1: fileId1,
                     fileId2: fileId2
                 })
@@ -1539,16 +1539,16 @@ async function delQ(id) {
             console.log("Delete Response:", resultText);
         }
 
-        // 2. 로컬 메모리 및 설정 클라우드 갱신
+        // 2. 로컬 메모�?�??�정 ?�라?�드 갱신
         globalConfig.questions = globalConfig.questions.filter(item => item.id != id);
         save();
         await saveConfigToCloud();
 
-        showToast("✅ 문항 및 관련 이미지가 클라우드 DB에서 영구 삭제되었습니다.");
+        showToast("??문항 �?관???��?지가 ?�라?�드 DB?�서 ?�구 ??��?�었?�니??");
         changeTab('bank');
     } catch (err) {
         console.error(err);
-        showToast("⚠️ 삭제 처리 중 오류 발생");
+        showToast("?�️ ??�� 처리 �??�류 발생");
     } finally {
         toggleLoading(false);
     }
@@ -1585,7 +1585,7 @@ function handleRowDrop(e) {
         dragSrcEl.setAttribute('data-id', targetDataId);
         target.setAttribute('data-id', sourceDataId);
 
-        showToast("📍 순서가 변경되었습니다. '순서 저장' 버튼을 눌러 확정하세요.");
+        showToast("?�� ?�서가 변경되?�습?�다. '?�서 ?�?? 버튼???�러 ?�정?�세??");
     }
     return false;
 }
@@ -1596,11 +1596,11 @@ function handleRowDragEnd(e) {
     const rows = document.querySelectorAll('#bank-table-body tr');
     rows.forEach((row, idx) => {
         const noEl = row.querySelector('.font-mono');
-        if (noEl) noEl.innerHTML = `<div class="flex items-center justify-center gap-2"><span class="text-[10px] opacity-30">☰</span>${idx + 1}</div>`;
+        if (noEl) noEl.innerHTML = `<div class="flex items-center justify-center gap-2"><span class="text-[10px] opacity-30">??/span>${idx + 1}</div>`;
     });
 }
 
-// --- 마스터 설정창 (영구 보존 주소) ---
+// --- 마스???�정�?(?�구 보존 주소) ---
 function renderMainConfig(c) {
     setCanvasId('11');
     c.innerHTML = `
@@ -1612,29 +1612,29 @@ function renderMainConfig(c) {
                 <!-- Security & Identity (Admin + Master in ONE card) -->
                 <div>
                     <h3 class="fs-24 text-slate-800 font-black uppercase tracking-tight mb-4 flex items-center gap-3">
-                        <span class="bg-slate-200 p-2 rounded-lg text-2xl">🔐</span> Security &amp; Identity
+                        <span class="bg-slate-200 p-2 rounded-lg text-2xl">?��</span> Security &amp; Identity
                     </h3>
                     <div class="card !bg-white border-2 border-slate-200 hover:border-blue-400 transition-all duration-300 shadow-sm hover:shadow-xl space-y-0 relative overflow-hidden group">
                         <!-- Admin Code -->
                         <div class="space-y-2 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">🛡️</span></div>
+                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">?���?/span></div>
                             <h4 class="fs-16 text-[#013976] font-bold uppercase">Admin Access Code</h4>
-                            <p class="fs-14 text-slate-400">관리자 모드 접속 비밀번호</p>
+                            <p class="fs-14 text-slate-400">관리자 모드 ?�속 비�?번호</p>
                             <div class="flex gap-3 items-center">
                                 <input type="password" id="admin-code-input" class="ys-field flex-grow fs-20 font-black text-[#013976] tracking-widest text-center" value="${globalConfig.adminCode || '1111'}" placeholder="CODE">
-                                <button onclick="(async()=>{if(!confirm('💾 관리자 코드를 변경하시겠습니까?')) return; const v=document.getElementById('admin-code-input').value; if(v){globalConfig.adminCode=v; save(); await saveConfigToCloud(); showToast('✅ 관리자 코드가 변경되었습니다.');}else{showToast('⚠️ 유효한 코드를 입력하세요');}})()"
+                                <button onclick="(async()=>{if(!confirm('?�� 관리자 코드�?변경하?�겠?�니�?')) return; const v=document.getElementById('admin-code-input').value; if(v){globalConfig.adminCode=v; save(); await saveConfigToCloud(); showToast('??관리자 코드가 변경되?�습?�다.');}else{showToast('?�️ ?�효??코드�??�력?�세??);}})()"
                                         class="bg-[#013976] text-white px-6 py-3 rounded-xl fs-14 font-bold hover:bg-blue-800 transition-all active:scale-95 whitespace-nowrap shadow-md flex-none">SAVE</button>
                             </div>
                         </div>
                         <div class="border-t border-slate-100"></div>
                         <!-- Master Code -->
                         <div class="space-y-2 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">👑</span></div>
+                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">?��</span></div>
                             <h4 class="fs-16 text-indigo-700 font-bold uppercase">Master Access Code</h4>
-                            <p class="fs-14 text-slate-400">최고 관리자 접속 비밀번호</p>
+                            <p class="fs-14 text-slate-400">최고 관리자 ?�속 비�?번호</p>
                             <div class="flex gap-3 items-center">
                                 <input type="password" id="master-code-input" class="ys-field flex-grow fs-20 font-black text-indigo-700 tracking-widest text-center" value="${globalConfig.masterCode || '0000'}" placeholder="CODE">
-                                <button onclick="(async()=>{if(!confirm('💾 마스터 코드를 변경하시겠습니까?')) return; const v=document.getElementById('master-code-input').value; if(v){globalConfig.masterCode=v; save(); await saveConfigToCloud(); showToast('✅ 마스터 코드가 변경되었습니다.');}else{showToast('⚠️ 유효한 코드를 입력하세요');}})()"
+                                <button onclick="(async()=>{if(!confirm('?�� 마스??코드�?변경하?�겠?�니�?')) return; const v=document.getElementById('master-code-input').value; if(v){globalConfig.masterCode=v; save(); await saveConfigToCloud(); showToast('??마스??코드가 변경되?�습?�다.');}else{showToast('?�️ ?�효??코드�??�력?�세??);}})()"
                                         class="bg-indigo-600 text-white px-6 py-3 rounded-xl fs-14 font-bold hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap shadow-md flex-none">SAVE</button>
                             </div>
                         </div>
@@ -1644,29 +1644,29 @@ function renderMainConfig(c) {
                 <!-- Server Infrastructure (Apps Script + Main Folder in ONE card) -->
                 <div>
                     <h3 class="fs-24 text-slate-800 font-black uppercase tracking-tight mb-4 flex items-center gap-3">
-                        <span class="bg-blue-100 p-2 rounded-lg text-2xl">🌩️</span> Server Infrastructure
+                        <span class="bg-blue-100 p-2 rounded-lg text-2xl">?���?/span> Server Infrastructure
                     </h3>
                     <div class="card !bg-white border-2 border-blue-100 hover:border-blue-400 transition-all duration-300 shadow-sm hover:shadow-xl space-y-0 relative overflow-hidden group">
                         <!-- Apps Script Hub -->
                         <div class="space-y-2 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">⚙️</span></div>
+                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">?�️</span></div>
                             <h4 class="fs-16 text-indigo-700 font-bold uppercase">Apps Script Hub</h4>
                             <p class="fs-14 text-slate-500">Google Apps Script Web App URL</p>
                             <div class="flex gap-3 items-center">
                                 <input type="text" id="m-url" autocomplete="off" class="ys-field flex-grow font-mono min-w-0" value="${globalConfig.masterUrl || ''}" placeholder="https://script.google.com/macros/s/...">
-                                <button onclick="(async()=>{if(!confirm('💾 마스터 싱크 주소를 변경하시겠습니까?')) return; const mVal=document.getElementById('m-url').value; globalConfig.masterUrl=mVal; save(); await saveConfigToCloud(); showToast('✅ 마스터 주소가 업데이트되었습니다.');})()"
+                                <button onclick="(async()=>{if(!confirm('?�� 마스???�크 주소�?변경하?�겠?�니�?')) return; const mVal=document.getElementById('m-url').value; globalConfig.masterUrl=mVal; save(); await saveConfigToCloud(); showToast('??마스??주소가 ?�데?�트?�었?�니??');})()"
                                         class="bg-indigo-600 text-white px-6 py-3 rounded-xl fs-14 font-bold hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap shadow-md flex-none">SAVE</button>
                             </div>
                         </div>
                         <div class="border-t border-slate-100"></div>
                         <!-- Main Server Folder -->
                         <div class="space-y-2 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">📂</span></div>
+                            <div class="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-7xl">?��</span></div>
                             <h4 class="fs-16 text-blue-700 font-bold uppercase">Main Server Folder</h4>
                             <p class="fs-14 text-slate-500">Google Drive Root Folder URL</p>
                             <div class="flex gap-3 items-center">
                                 <input type="text" id="main-server-folder" autocomplete="off" class="ys-field flex-grow font-mono min-w-0" value="${globalConfig.mainServerLink || ''}" placeholder="https://drive.google.com/drive/folders/...">
-                                <button onclick="(async()=>{const val=document.getElementById('main-server-folder').value; globalConfig.mainServerLink=val; save(); await saveConfigToCloud(); showToast('✅ 메인 서버 폴더가 연결되었습니다.');})()"
+                                <button onclick="(async()=>{const val=document.getElementById('main-server-folder').value; globalConfig.mainServerLink=val; save(); await saveConfigToCloud(); showToast('??메인 ?�버 ?�더가 ?�결?�었?�니??');})()"
                                         class="bg-blue-600 text-white px-6 py-3 rounded-xl fs-14 font-bold hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap shadow-md flex-none">SAVE</button>
                             </div>
                         </div>
@@ -1680,30 +1680,30 @@ function renderMainConfig(c) {
                 <!-- Class Management -->
                 <div>
                     <h3 class="fs-24 text-slate-800 font-black uppercase tracking-tight mb-4 flex items-center gap-3">
-                        <span class="bg-green-100 p-2 rounded-lg text-2xl">🏫</span> Class Management
+                        <span class="bg-green-100 p-2 rounded-lg text-2xl">?��</span> Class Management
                     </h3>
                     <div class="card !bg-white border-2 border-green-200 hover:border-green-500 transition-all duration-300 shadow-sm hover:shadow-xl relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-9xl">🏫</span></div>
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-9xl">?��</span></div>
                         <div class="flex flex-col gap-4">
-                            <!-- 제목 -->
+                            <!-- ?�목 -->
                             <div>
                                 <h4 class="fs-18 text-green-700 font-bold uppercase mb-1">Class Registration</h4>
-                                <p class="fs-14 text-slate-500">학년별로 학급을 등록하세요. 학년 선택 시 해당 학급만 입력 화면에 표시됩니다.</p>
+                                <p class="fs-14 text-slate-500">?�년별로 ?�급???�록?�세?? ?�년 ?�택 ???�당 ?�급�??�력 ?�면???�시?�니??</p>
                             </div>
-                            <!-- 입력 행: 학년 + 학급명 + 추가 + SAVE -->
+                            <!-- ?�력 ?? ?�년 + ?�급�?+ 추�? + SAVE -->
                             <div class="flex gap-2 items-center">
                                 <select id="new-class-grade" class="ys-field !w-32 flex-none">
-                                    <option value="">선택</option>
-                                    <option value="초1">초1</option><option value="초2">초2</option><option value="초3">초3</option>
-                                    <option value="초4">초4</option><option value="초5">초5</option><option value="초6">초6</option>
-                                    <option value="중1">중1</option><option value="중2">중2</option><option value="중3">중3</option>
-                                    <option value="고1">고1</option><option value="고2">고2</option><option value="고3">고3</option>
+                                    <option value="">?�택</option>
+                                    <option value="�?">�?</option><option value="�?">�?</option><option value="�?">�?</option>
+                                    <option value="�?">�?</option><option value="�?">�?</option><option value="�?">�?</option>
+                                    <option value="�?">�?</option><option value="�?">�?</option><option value="�?">�?</option>
+                                    <option value="�?">�?</option><option value="�?">�?</option><option value="�?">�?</option>
                                 </select>
-                                <input type="text" id="new-class-input" class="ys-field !w-auto flex-grow min-w-0" placeholder="예) A반, 영어반" autocomplete="off" onkeydown="if(event.key==='Enter') addClassItem()">
-                                <button onclick="addClassItem()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl fs-14 font-bold shadow-md transition-all active:scale-95 whitespace-nowrap flex-none">+ 추가</button>
+                                <input type="text" id="new-class-input" class="ys-field !w-auto flex-grow min-w-0" placeholder="?? A�? ?�어�? autocomplete="off" onkeydown="if(event.key==='Enter') addClassItem()">
+                                <button onclick="addClassItem()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl fs-14 font-bold shadow-md transition-all active:scale-95 whitespace-nowrap flex-none">+ 추�?</button>
                                 <button onclick="saveClassConfig()" class="bg-[#013976] hover:bg-[#002855] text-white px-6 py-3 rounded-xl fs-14 font-bold shadow-md transition-all active:scale-95 whitespace-nowrap flex-none">SAVE</button>
                             </div>
-                            <!-- 등록 학급 목록 -->
+                            <!-- ?�록 ?�급 목록 -->
                             <div id="class-list" class="space-y-2 min-h-[44px] bg-slate-50 rounded-xl p-3 border border-slate-200">
                                 ${renderClassListHtml()}
                             </div>
@@ -1714,22 +1714,22 @@ function renderMainConfig(c) {
                 <!-- Intelligence Engine -->
                 <div>
                     <h3 class="fs-24 text-slate-800 font-black uppercase tracking-tight mb-4 flex items-center gap-3">
-                        <span class="bg-purple-100 p-2 rounded-lg text-2xl">✨</span> Intelligence Engine
+                        <span class="bg-purple-100 p-2 rounded-lg text-2xl">??/span> Intelligence Engine
                     </h3>
                     <div class="card !bg-white border-2 border-purple-200 hover:border-purple-500 transition-all duration-300 shadow-sm hover:shadow-xl relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-9xl">✨</span></div>
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none"><span class="text-9xl">??/span></div>
                         <div class="flex flex-col gap-4 relative z-10">
                             <div>
                                 <h4 class="fs-18 text-purple-700 font-bold uppercase mb-1">Gemini AI API Key</h4>
-                                <p class="fs-14 text-slate-500">AI 문항 분석 및 자동 생성 기능을 위한 인증 키</p>
+                                <p class="fs-14 text-slate-500">AI 문항 분석 �??�동 ?�성 기능???�한 ?�증 ??/p>
                             </div>
                             <div class="flex gap-3 items-center">
                                 <input type="password" id="g-key" autocomplete="off" class="ys-field !bg-slate-50 !text-purple-900 border-slate-200 focus:border-purple-500 font-mono flex-grow" value="${globalConfig.geminiKey || ''}" placeholder="AI Studio Key">
                                 <a href="https://aistudio.google.com/app/apikey" target="_blank"
                                    class="py-3 px-5 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center gap-2 hover:bg-purple-100 transition-all no-underline whitespace-nowrap flex-none">
-                                    <span class="fs-14 font-bold text-purple-700">🔑 GET KEY</span>
+                                    <span class="fs-14 font-bold text-purple-700">?�� GET KEY</span>
                                 </a>
-                                <button onclick="(async()=>{if(!confirm('💾 API Key를 저장하시겠습니까?')) return; const gVal=document.getElementById('g-key').value; globalConfig.geminiKey=gVal; save(); await saveConfigToCloud(); showToast('✅ Gemini Key가 저장되었습니다.');})()"
+                                <button onclick="(async()=>{if(!confirm('?�� API Key�??�?�하?�겠?�니�?')) return; const gVal=document.getElementById('g-key').value; globalConfig.geminiKey=gVal; save(); await saveConfigToCloud(); showToast('??Gemini Key가 ?�?�되?�습?�다.');})()"
                                         class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl fs-14 font-bold shadow-md transition-all active:scale-95 whitespace-nowrap flex-none">SAVE</button>
                             </div>
                         </div>
@@ -1740,7 +1740,7 @@ function renderMainConfig(c) {
             <!-- ===== Row 3: Academy Branding (full width) ===== -->
             <div>
                 <h3 class="fs-24 text-slate-800 font-black uppercase tracking-tight mb-4 flex items-center gap-3">
-                    <span class="bg-pink-100 p-2 rounded-lg text-2xl">🎨</span> Academy Branding
+                    <span class="bg-pink-100 p-2 rounded-lg text-2xl">?��</span> Academy Branding
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Logo Config -->
@@ -1771,11 +1771,11 @@ function renderMainConfig(c) {
         </div>`
 }
 
-// 학급 목록 HTML 렌더링 (학년별 그룹)
+// ?�급 목록 HTML ?�더�?(?�년�?그룹)
 function renderClassListHtml() {
     const classes = (globalConfig.classes || []).filter(c => typeof c === 'object' && c.grade && c.name);
-    if (classes.length === 0) return '<span class="text-slate-400 fs-14">등록된 학급이 없습니다.</span>';
-    const GRADES = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3'];
+    if (classes.length === 0) return '<span class="text-slate-400 fs-14">?�록???�급???�습?�다.</span>';
+    const GRADES = ['�?','�?','�?','�?','�?','�?','�?','�?','�?','�?','�?','�?'];
     const groups = {};
     classes.forEach((c, i) => { if (!groups[c.grade]) groups[c.grade] = []; groups[c.grade].push({...c, idx: i}); });
     return GRADES.filter(g => groups[g])
@@ -1786,7 +1786,7 @@ function renderClassListHtml() {
         </div>`).join('');
 }
 
-// getClassesForGrade: 해당 학년의 학급 목록 반환
+// getClassesForGrade: ?�당 ?�년???�급 목록 반환
 function getClassesForGrade(grade) {
     if (!grade || !globalConfig.classes) return [];
     return (globalConfig.classes)
@@ -1799,12 +1799,12 @@ function addClassItem() {
     const inp = document.getElementById('new-class-input');
     const grade = gradeEl?.value;
     const name  = inp?.value.trim();
-    if (!grade) { showToast('학년을 선택하세요'); return; }
-    if (!name)  { showToast('학급명을 입력하세요'); return; }
+    if (!grade) { showToast('?�년???�택?�세??); return; }
+    if (!name)  { showToast('?�급명을 ?�력?�세??); return; }
     if (!globalConfig.classes) globalConfig.classes = [];
-    // 중복 확인
+    // 중복 ?�인
     if (globalConfig.classes.some(c => typeof c === 'object' && c.grade === grade && c.name === name)) {
-        showToast('이미 등록된 학급입니다'); return;
+        showToast('?��? ?�록???�급?�니??); return;
     }
     globalConfig.classes.push({ grade, name });
     inp.value = '';
@@ -1822,14 +1822,14 @@ function removeClassItem(idx) {
 async function saveClassConfig() {
     save();
     await saveConfigToCloud();
-    showToast('✅ 학급 목록이 저장되었습니다.');
+    showToast('???�급 목록???�?�되?�습?�다.');
 }
 
-// --- 카테고리 관리 별도 뷰 ---
-// ─── 학생 DB 뷰어 (Canvas 09-3) ───────────────────────────────────────────
+// --- 카테고리 관�?별도 �?---
+// ?�?�?� ?�생 DB 뷰어 (Canvas 09-3) ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
 let _sdbSort  = { col: 'name', dir: 1 };  // col: name|grade|year|md|score
 let _sdbCache = { catId: '', catName: '', records: [] };
-let _sdbList  = [];   // 필터 적용된 현재 목록
+let _sdbList  = [];   // ?�터 ?�용???�재 목록
 
 async function showStudentDBViewer(catId, catName) {
     const cat = globalConfig.categories.find(c => c.id === catId);
@@ -1846,31 +1846,31 @@ async function showStudentDBViewer(catId, catName) {
 
     c.innerHTML = `
     <div class="animate-fade-in-safe space-y-5 pb-10">
-        <!-- 헤더: 제목만 -->
+        <!-- ?�더: ?�목�?-->
         <div class="flex justify-between items-center">
-            <h2 class="fs-32 text-[#013976] leading-none font-black uppercase !border-none !pb-0">${catName} — 학생 DB</h2>
+            <h2 class="fs-32 text-[#013976] leading-none font-black uppercase !border-none !pb-0">${catName} ???�생 DB</h2>
         </div>
 
-        <!-- 필터 바 -->
+        <!-- ?�터 �?-->
         <div class="card !py-3.5 !px-6 flex flex-row items-center justify-between shadow-lg relative overflow-hidden flex-none gap-4 flex-nowrap" style="${bSty}">
             ${tBar}
             <div class="flex items-center gap-4 flex-grow">
-                <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">📅 응시년도</span>
+                <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">?�� ?�시?�도</span>
                 <select id="sdb-year" class="ys-field flex-grow !text-[16px] !font-normal !bg-white">
-                    <option value="전체">전체</option>
+                    <option value="?�체">?�체</option>
                 </select>
-                <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">🎓 학년</span>
+                <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">?�� ?�년</span>
                 <select id="sdb-grade" class="ys-field flex-grow !text-[16px] !font-normal !bg-white">
-                    <option value="전체">전체</option>
+                    <option value="?�체">?�체</option>
                 </select>
             </div>
-            <button onclick="applyStudentDBFilters()" class="btn-ys !bg-[#013976] !text-white !border-[#013976] hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex-shrink-0 flex items-center gap-2">🔍 확인</button>
+            <button onclick="applyStudentDBFilters()" class="btn-ys !bg-[#013976] !text-white !border-[#013976] hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex-shrink-0 flex items-center gap-2">?�� ?�인</button>
             <span id="sdb-count" class="whitespace-nowrap" style="font-size:16px; font-weight:700; color:#a855f7;"></span>
         </div>
 
-        <!-- 테이블 영역 -->
+        <!-- ?�이�??�역 -->
         <div class="card !p-0 overflow-hidden shadow-sm">
-            <div id="sdb-table-wrap"><p class="text-slate-400 text-center py-10">불러오는 중...</p></div>
+            <div id="sdb-table-wrap"><p class="text-slate-400 text-center py-10">불러?�는 �?..</p></div>
         </div>
     </div>`;
 
@@ -1881,48 +1881,48 @@ async function showStudentDBViewer(catId, catName) {
         const rawList = res.data || [];
         _sdbCache.records = rawList;
 
-        // 필터 드롭다운 채우기
-        const years  = [...new Set(rawList.map(r => String(r['응시일']||r.date||'').substring(0,4)).filter(y => /^\d{4}$/.test(y)))].sort((a,b) => b.localeCompare(a));
-        const grades = [...new Set(rawList.map(r => String(r['학년']||r.grade||'')).filter(g => g))].sort((a,b) => a.localeCompare(b,'ko'));
+        // ?�터 ?�롭?�운 채우�?
+        const years  = [...new Set(rawList.map(r => String(r['?�시??]||r.date||'').substring(0,4)).filter(y => /^\d{4}$/.test(y)))].sort((a,b) => b.localeCompare(a));
+        const grades = [...new Set(rawList.map(r => String(r['?�년']||r.grade||'')).filter(g => g))].sort((a,b) => a.localeCompare(b,'ko'));
         const ySel = document.getElementById('sdb-year');
         const gSel = document.getElementById('sdb-grade');
-        if (ySel) ySel.innerHTML = '<option value="전체">전체</option>' + years.map(y  => `<option value="${y}">${y}년</option>`).join('');
-        if (gSel) gSel.innerHTML = '<option value="전체">전체</option>' + grades.map(g => `<option value="${g}">${g}</option>`).join('');
+        if (ySel) ySel.innerHTML = '<option value="?�체">?�체</option>' + years.map(y  => `<option value="${y}">${y}??/option>`).join('');
+        if (gSel) gSel.innerHTML = '<option value="?�체">?�체</option>' + grades.map(g => `<option value="${g}">${g}</option>`).join('');
 
         applyStudentDBFilters();
     } catch(e) {
         const w = document.getElementById('sdb-table-wrap');
-        if (w) w.innerHTML = `<p class="text-red-400 text-center py-6">오류: ${e.message}</p>`;
+        if (w) w.innerHTML = `<p class="text-red-400 text-center py-6">?�류: ${e.message}</p>`;
     } finally { toggleLoading(false); }
 }
 
-// 필터 적용 후 테이블 재렌더링
+// ?�터 ?�용 ???�이�??�렌?�링
 function applyStudentDBFilters() {
-    const year  = document.getElementById('sdb-year')?.value  || '전체';
-    const grade = document.getElementById('sdb-grade')?.value || '전체';
+    const year  = document.getElementById('sdb-year')?.value  || '?�체';
+    const grade = document.getElementById('sdb-grade')?.value || '?�체';
     let list = (_sdbCache.records || []).slice();
-    if (year  !== '전체') list = list.filter(r => String(r['응시일']||r.date||'').substring(0,4) === year);
-    if (grade !== '전체') list = list.filter(r => String(r['학년']||r.grade||'') === grade);
+    if (year  !== '?�체') list = list.filter(r => String(r['?�시??]||r.date||'').substring(0,4) === year);
+    if (grade !== '?�체') list = list.filter(r => String(r['?�년']||r.grade||'') === grade);
     _sdbList = list;
     _renderStudentDBTable();
 }
 
-// 컬럼 헤더 클릭 정렬
+// 컬럼 ?�더 ?�릭 ?�렬
 function sortStudentDB(col) {
     _sdbSort.dir = (_sdbSort.col === col) ? _sdbSort.dir * -1 : 1;
     _sdbSort.col = col;
     _renderStudentDBTable();
 }
 
-// 테이블 렌더링
+// ?�이�??�더�?
 function _renderStudentDBTable() {
     const { col, dir } = _sdbSort;
     const catId = _sdbCache.catId;
     const sorted = _sdbList.slice().sort((a, b) => {
-        const dA = String(a['응시일']||a.date||''), dB = String(b['응시일']||b.date||'');
+        const dA = String(a['?�시??]||a.date||''), dB = String(b['?�시??]||b.date||'');
         switch(col) {
-            case 'name':  return dir * String(a['학생명']||a.name||'').localeCompare(String(b['학생명']||b.name||''), 'ko');
-            case 'grade': return dir * String(a['학년']||a.grade||'').localeCompare(String(b['학년']||b.grade||''), 'ko');
+            case 'name':  return dir * String(a['?�생�?]||a.name||'').localeCompare(String(b['?�생�?]||b.name||''), 'ko');
+            case 'grade': return dir * String(a['?�년']||a.grade||'').localeCompare(String(b['?�년']||b.grade||''), 'ko');
             case 'year':  return dir * dA.substring(0,4).localeCompare(dB.substring(0,4));
             case 'md':    return dir * dA.substring(5).localeCompare(dB.substring(5));
             case 'score': return dir * ((parseFloat(a['총점']??a.totalScore??0)||0) - (parseFloat(b['총점']??b.totalScore??0)||0));
@@ -1931,35 +1931,35 @@ function _renderStudentDBTable() {
     });
 
     const cnt = document.getElementById('sdb-count');
-    if (cnt) cnt.textContent = `총 ${sorted.length}명`;
+    if (cnt) cnt.textContent = `�?${sorted.length}�?;
     const wrap = document.getElementById('sdb-table-wrap');
     if (!wrap) return;
 
     if (sorted.length === 0) {
-        wrap.innerHTML = '<p class="text-slate-400 text-center py-10">해당 조건의 학생이 없습니다.</p>';
+        wrap.innerHTML = '<p class="text-slate-400 text-center py-10">?�당 조건???�생???�습?�다.</p>';
         return;
     }
 
-    const arw = c => col === c ? (dir === 1 ? ' ▲' : ' ▼') : ' <span class="opacity-30">⇅</span>';
+    const arw = c => col === c ? (dir === 1 ? ' ?? : ' ??) : ' <span class="opacity-30">??/span>';
     const th = (c, lbl) => `<th class="cursor-pointer select-none hover:bg-[#012a5e] transition-colors text-left px-4 py-3 font-black text-white fs-15" onclick="sortStudentDB('${c}')">${lbl}${arw(c)}</th>`;
     wrap.innerHTML = `
     <table class="w-full border-collapse">
         <thead>
             <tr class="bg-[#013976]">
-                ${th('name','이름')}${th('grade','학년')}${th('year','응시년도')}${th('md','응시월일')}${th('score','점수')}
-                <th class="px-4 py-3 text-white fs-15 font-black text-center">삭제</th>
+                ${th('name','?�름')}${th('grade','?�년')}${th('year','?�시?�도')}${th('md','?�시?�일')}${th('score','?�수')}
+                <th class="px-4 py-3 text-white fs-15 font-black text-center">??��</th>
             </tr>
         </thead>
         <tbody>
             ${sorted.map((s, i) => {
-                const sid   = s['학생ID']||s.id||'';
-                const name  = s['학생명']||s.name||'-';
-                const grade = s['학년']||s.grade||'-';
-                const _rawDate = String(s['응시일']||s.date||'-');
+                const sid   = s['?�생ID']||s.id||'';
+                const name  = s['?�생�?]||s.name||'-';
+                const grade = s['?�년']||s.grade||'-';
+                const _rawDate = String(s['?�시??]||s.date||'-');
                 const full = (() => {
                     if (!_rawDate || _rawDate === '-') return '-';
                     if (_rawDate.includes('T')) {
-                        // GAS가 UTC ISO 형식으로 반환 시 로컬 timezone 기준으로 변환 (UTC→KST 날짜 불일치 방지)
+                        // GAS가 UTC ISO ?�식?�로 반환 ??로컬 timezone 기�??�로 변??(UTC?�KST ?�짜 불일�?방�?)
                         const d = new Date(_rawDate);
                         const y = d.getFullYear();
                         const m = String(d.getMonth()+1).padStart(2,'0');
@@ -1980,7 +1980,7 @@ function _renderStudentDBTable() {
                     <td class="px-4 py-3 text-slate-600 fs-15">${md}</td>
                     <td class="px-4 py-3 font-bold text-slate-800 fs-15">${score}${max?'/'+max:''}</td>
                     <td class="px-4 py-3 text-center">
-                        <button onclick="deleteStudentRecord('${catId}','${sid}','${name}')" class="text-red-500 hover:text-red-700 fs-13 font-bold px-3 py-1 rounded-lg border border-red-200 hover:bg-red-50">🗑️ 삭제</button>
+                        <button onclick="deleteStudentRecord('${catId}','${sid}','${name}')" class="text-red-500 hover:text-red-700 fs-13 font-bold px-3 py-1 rounded-lg border border-red-200 hover:bg-red-50">?���???��</button>
                     </td>
                 </tr>`;
             }).join('')}
@@ -1989,16 +1989,16 @@ function _renderStudentDBTable() {
 }
 
 async function deleteStudentRecord(catId, studentId, studentName) {
-    if (!confirm(`⚠️ [${studentName}] 학생의 성적 데이터를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
+    if (!confirm(`?�️ [${studentName}] ?�생???�적 ?�이?��? ??��?�시겠습?�까?\n\n???�업?� ?�돌�????�습?�다.`)) return;
     const cat = globalConfig.categories.find(c => c.id === catId);
     if (!cat) return;
     toggleLoading(true);
     try {
         const folderId = extractFolderId(cat.targetFolderUrl);
         await sendReliableRequest({ type: 'DELETE_STUDENT', parentFolderId: folderId, studentId });
-        showToast(`✅ ${studentName} 데이터 삭제 완료`);
+        showToast(`??${studentName} ?�이????�� ?�료`);
         showStudentDBViewer(catId, cat.name);
-    } catch(e) { showToast('❌ 삭제 실패: ' + e.message); }
+    } catch(e) { showToast('????�� ?�패: ' + e.message); }
     finally { toggleLoading(false); }
 }
 
@@ -2008,30 +2008,30 @@ function renderCatManage(c) {
         <div class="animate-fade-in-safe flex flex-col h-full space-y-6">
             <h2 class="fs-32 text-[#013976] leading-none font-black uppercase !border-none !pb-0">Exam Paper Management</h2>
 
-            <!-- 상단 헤더 바 (캔버스08 스타일) -->
+            <!-- ?�단 ?�더 �?(캔버??8 ?��??? -->
             <div class="card !p-6 flex flex-row items-center justify-between shadow-lg relative overflow-hidden flex-none gap-4 flex-nowrap" style="background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%); border: 2px solid rgba(1,57,118,0.15);">
                 <div style="position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, #60a5fa, #6366f1, #a855f7);"></div>
                 <div class="flex items-center gap-4 flex-grow">
-                    <label class="ys-label !mb-0 whitespace-nowrap !text-[#013976] font-bold">📂 시험지 목록</label>
+                    <label class="ys-label !mb-0 whitespace-nowrap !text-[#013976] font-bold">?�� ?�험지 목록</label>
                 </div>
                 <button onclick="showCat()" class="btn-ys !bg-[#013976] !text-white !border-[#013976] hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex-shrink-0 flex items-center gap-2">
-                    ➕ NEW EXAM PAPER
+                    ??NEW EXAM PAPER
                 </button>
             </div>
 
-            <!-- 시험지 목록 컨테이너 (캔버스08 스타일) -->
+            <!-- ?�험지 목록 컨테?�너 (캔버??8 ?��??? -->
             <div class="flex-grow overflow-auto bg-white rounded-2xl border border-slate-200 flex flex-col shadow-sm p-4 space-y-3">
                 ${globalConfig.categories.length === 0
-                    ? `<div class="p-20 text-center text-slate-400">📭 등록된 시험지가 없습니다. NEW 버튼으로 추가하세요.</div>`
+                    ? `<div class="p-20 text-center text-slate-400">?�� ?�록???�험지가 ?�습?�다. NEW 버튼?�로 추�??�세??</div>`
                     : globalConfig.categories.map(cat => `
                         <div class="flex justify-between items-center bg-slate-50 px-6 py-4 rounded-xl border-2 border-slate-200 hover:shadow-md hover:bg-white hover:border-blue-300 transition-all">
                             <div class="text-[#013976] fs-18 font-bold">${cat.name}</div>
                                                     <div class="flex items-center gap-4">
-                                <button onclick="editCat('${cat.id}')" class="fs-18 text-blue-600 hover:text-blue-800">✏️ 수정</button>
+                                <button onclick="editCat('${cat.id}')" class="fs-18 text-blue-600 hover:text-blue-800">?�️ ?�정</button>
                                 <span class="text-slate-300">|</span>
-                                <button onclick="showStudentDBViewer('${cat.id}', '${cat.name}')" class="fs-18 text-purple-600 hover:text-purple-800">📋 학생 DB</button>
+                                <button onclick="showStudentDBViewer('${cat.id}', '${cat.name}')" class="fs-18 text-purple-600 hover:text-purple-800">?�� ?�생 DB</button>
                                 <span class="text-slate-300">|</span>
-                                <button onclick="delCat('${cat.id}')" class="fs-18 text-red-500 underline hover:text-red-700">🗑️ 삭제</button>
+                                <button onclick="delCat('${cat.id}')" class="fs-18 text-red-500 underline hover:text-red-700">?���???��</button>
                             </div>
                         </div>`).join('')}
             </div>
@@ -2044,15 +2044,15 @@ function showCat(editId = null) {
     const isEdit = !!editId;
     const cat = isEdit ? globalConfig.categories.find(c => c.id === editId) : null;
     const title = isEdit ? "EDIT EXAM PAPER" : "NEW EXAM PAPER";
-    const btnText = isEdit ? "💾 변경사항 저장" : "🚀 신규 생성 및 저장";
+    const btnText = isEdit ? "?�� 변경사???�?? : "?? ?�규 ?�성 �??�??;
 
     const classificationOptions = [
-        { name: "등록 진단지 (A)", code: "A" },
-        { name: "초등 평가지 (B)", code: "B" },
-        { name: "중1 평가지 (C)", code: "C" },
-        { name: "중2 평가지 (D)", code: "D" },
-        { name: "중3 평가지 (E)", code: "E" },
-        { name: "고등 평가지 (F)", code: "F" }
+        { name: "?�록 진단지 (A)", code: "A" },
+        { name: "초등 ?��?지 (B)", code: "B" },
+        { name: "�? ?��?지 (C)", code: "C" },
+        { name: "�? ?��?지 (D)", code: "D" },
+        { name: "�? ?��?지 (E)", code: "E" },
+        { name: "고등 ?��?지 (F)", code: "F" }
     ].map(opt => `<option value="${opt.code}" ${cat?.classification === opt.code ? 'selected' : ''}>${opt.name}</option>`).join('');
 
     const dateReadonly = isEdit ? 'readonly' : '';
@@ -2074,52 +2074,52 @@ function showCat(editId = null) {
             <div class="canvas-premium-box !max-w-3xl w-full">
                 <div class="flex flex-row items-start gap-10">
 
-                    <!-- 좌측: 아이콘 + 제목 -->
+                    <!-- 좌측: ?�이�?+ ?�목 -->
                     <div class="flex flex-col items-center gap-4 flex-shrink-0 w-40 border-r border-slate-200 pr-10">
                         <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl shadow-inner relative z-10 unified-animate">
-                            📂
+                            ?��
                             <div class="absolute inset-0 bg-blue-100/30 rounded-full blur-2xl opacity-50 scale-150 -z-10"></div>
                         </div>
                         <h2 class="fs-18 text-[#013976] uppercase text-center font-black tracking-tight leading-tight">${title}</h2>
                     </div>
 
-                    <!-- 우측: 폼 -->
+                    <!-- ?�측: ??-->
                     <div class="flex-1 space-y-4 text-left">
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-2">
-                                <label class="ys-label font-bold !mb-0">🏷️ 구분</label>
+                                <label class="ys-label font-bold !mb-0">?���?구분</label>
                                 <select id="cc" class="ys-field !bg-slate-50/50 hover:border-blue-400 focus:bg-white transition-all shadow-sm ${classStyle}" ${classDisabled}>
                                     ${classificationOptions}
                                 </select>
                             </div>
                             <div class="space-y-2">
-                                <label class="ys-label font-bold !mb-0">📅 생성년월</label>
+                                <label class="ys-label font-bold !mb-0">?�� ?�성?�월</label>
                                 <input type="text" id="cd" autocomplete="off" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm ${dateClass}"
-                                       placeholder="예: 2602" value="${defaultYm}" maxlength="4" ${dateReadonly}>
+                                       placeholder="?? 2602" value="${defaultYm}" maxlength="4" ${dateReadonly}>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-2">
-                                <label class="ys-label font-bold !mb-0">🎓 권장 평가 학년</label>
+                                <label class="ys-label font-bold !mb-0">?�� 권장 ?��? ?�년</label>
                                 <select id="cgr" class="ys-field !bg-slate-50/50 hover:border-blue-400 focus:bg-white transition-all shadow-sm">
-                                    <option value="" disabled ${!cat?.targetGrade ? 'selected' : ''} hidden>선택 (선택사항)</option>
-                                    ${['초등', '중1', '중2', '중3', '고등'].map(g => `<option value="${g}" ${cat?.targetGrade === g ? 'selected' : ''}>${g}</option>`).join('')}
+                                    <option value="" disabled ${!cat?.targetGrade ? 'selected' : ''} hidden>?�택 (?�택?�항)</option>
+                                    ${['초등', '�?', '�?', '�?', '고등'].map(g => `<option value="${g}" ${cat?.targetGrade === g ? 'selected' : ''}>${g}</option>`).join('')}
                                 </select>
                             </div>
                             <div class="space-y-2">
-                                <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
-                                <input type="number" id="ctm" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="0 = 무제한" value="${cat?.timeLimit || 0}" min="0">
+                                <label class="ys-label font-bold !mb-0">?�️ 권장 ?��? ?�간 (�?</label>
+                                <input type="number" id="ctm" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="0 = 무제?? value="${cat?.timeLimit || 0}" min="0">
                             </div>
                         </div>
 
                         <div class="space-y-2">
-                            <label class="ys-label font-bold !mb-0">📝 시험지 이름</label>
+                            <label class="ys-label font-bold !mb-0">?�� ?�험지 ?�름</label>
                             <input type="text" id="cn" autocomplete="off" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm"
-                                   placeholder="시험지 이름을 입력하세요." value="${cat?.name || ''}">
+                                   placeholder="?�험지 ?�름???�력?�세??" value="${cat?.name || ''}">
                         </div>
 
-                        ${isEdit ? '<p class="text-xs text-slate-500 text-center font-medium mt-1">⚠️ 이름/시간/학년 정보만 수정 가능합니다.</p>' : ''}
+                        ${isEdit ? '<p class="text-xs text-slate-500 text-center font-medium mt-1">?�️ ?�름/?�간/?�년 ?�보�??�정 가?�합?�다.</p>' : ''}
 
                         <div>
                             <button onclick="saveCat('${editId || ''}')" class="btn-ys w-full !py-4 fs-16 font-bold transition-all active:scale-95 shadow-lg mt-2">
@@ -2145,12 +2145,12 @@ async function saveCat(editId = '') {
     const tLimit = document.getElementById('ctm')?.value || 0;
     let u = '';
 
-    if (!n) return showToast("시험지 이름을 입력해 주세요.");
-    if (!d) return showToast("생성년월 4자리를 입력하세요. (예: 2602)");
-    if (!/^\d{4}$/.test(d)) return showToast("생성년월은 4자리 숫자로 입력해 주세요. (예: 2602)");
+    if (!n) return showToast("?�험지 ?�름???�력??주세??");
+    if (!d) return showToast("?�성?�월 4?�리�??�력?�세?? (?? 2602)");
+    if (!/^\d{4}$/.test(d)) return showToast("?�성?�월?� 4?�리 ?�자�??�력??주세?? (?? 2602)");
 
     if (editId) {
-        if (!confirm('💾 수정된 시험지 정보를 저장하시겠습니까?')) return;
+        if (!confirm('?�� ?�정???�험지 ?�보�??�?�하?�겠?�니�?')) return;
         const cat = globalConfig.categories.find(c => c.id === editId);
         if (cat) {
             const oldName = cat.name;
@@ -2161,7 +2161,7 @@ async function saveCat(editId = '') {
                 if (folderId && globalConfig.masterUrl) {
                     try {
                         toggleLoading(true);
-                        showToast(`🛰️ 폴더명 변경 중: [${newName}]...`);
+                        showToast(`?���??�더�?변�?�? [${newName}]...`);
                         const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
                         const finalFolderName = `${cat.classification || 'A'}_${cat.createdDate}_${newName}`;
                         const res = await fetch(masterUrl, {
@@ -2173,13 +2173,13 @@ async function saveCat(editId = '') {
                         try { result = JSON.parse(resultText); } catch (pe) { if (resultText.includes("Success")) result = { status: "Success" }; }
 
                         if (result.status === "Success") {
-                            showToast("✅ 드라이브 폴더명 변경 완료");
+                            showToast("???�라?�브 ?�더�?변�??�료");
                         } else {
-                            showToast(`⚠️ 폴더명 변경 실패: ${result.message || '알 수 없는 오류'}`);
+                            showToast(`?�️ ?�더�?변�??�패: ${result.message || '?????�는 ?�류'}`);
                         }
                     } catch (err) {
                         console.error("Folder rename failed:", err);
-                        showToast("⚠️ 폴더명 변경 실패 (설정만 수정됨)");
+                        showToast("?�️ ?�더�?변�??�패 (?�정�??�정??");
                     } finally {
                         toggleLoading(false);
                     }
@@ -2191,20 +2191,20 @@ async function saveCat(editId = '') {
             cat.timeLimit = tLimit;
             save();
             await saveConfigToCloud();
-            showToast(`[${n}] 시험지 정보가 업데이트되었습니다.`);
+            showToast(`[${n}] ?�험지 ?�보가 ?�데?�트?�었?�니??`);
             changeTab('cat_manage');
             return;
         }
     } else {
-        if (!globalConfig.mainServerLink) return showToast("❌ 폴더 생성을 위해선 [Main Server Folder] 설정이 필요합니다.");
+        if (!globalConfig.mainServerLink) return showToast("???�더 ?�성???�해??[Main Server Folder] ?�정???�요?�니??");
 
         const finalFolderName = `${cCode}_${d}_${n}`;
-        if (!confirm(`💾 [${finalFolderName}] 신규 시험지를 생성 및 저장하시겠습니까?\n(드라이브에 폴더가 자동 생성됩니다)`)) return;
+        if (!confirm(`?�� [${finalFolderName}] ?�규 ?�험지�??�성 �??�?�하?�겠?�니�?\n(?�라?�브???�더가 ?�동 ?�성?�니??`)) return;
 
-        showToast("⏳ 구글 드라이브 폴더 생성 중...");
+        showToast("??구�? ?�라?�브 ?�더 ?�성 �?..");
         try {
             const rootId = extractFolderId(globalConfig.mainServerLink);
-            if (!rootId) return showToast("❌ 메인 서버 폴더 주소가 올바르지 않습니다.");
+            if (!rootId) return showToast("??메인 ?�버 ?�더 주소가 ?�바르�? ?�습?�다.");
 
             const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
             const res = await fetch(masterUrl, {
@@ -2218,14 +2218,14 @@ async function saveCat(editId = '') {
 
             if (json.status === "Success" && json.folderUrl) {
                 u = json.folderUrl;
-                showToast("✅ 폴더 생성 완료 및 적용됨!");
+                showToast("???�더 ?�성 ?�료 �??�용??");
             } else {
-                throw new Error(json.message || "서버에서 오류를 반환했습니다.");
+                throw new Error(json.message || "?�버?�서 ?�류�?반환?�습?�다.");
             }
         } catch (e) {
             console.error(e);
             toggleLoading(false);
-            return showToast("❌ 폴더 자동 생성 실패: " + e.message);
+            return showToast("???�더 ?�동 ?�성 ?�패: " + e.message);
         }
     }
 
@@ -2240,14 +2240,14 @@ async function saveCat(editId = '') {
     });
     save();
     await saveConfigToCloud();
-    showToast(`✅ [${n}] 테스트 분류가 성공적으로 저장되었습니다.`);
+    showToast(`??[${n}] ?�스??분류가 ?�공?�으�??�?�되?�습?�다.`);
     changeTab('cat_manage');
 }
 async function delCat(id) {
     const cat = globalConfig.categories.find(c => c.id === id);
     if (!cat) return;
 
-    if (!confirm(`⚠️ 정말로 [${cat.name}] 카테고리를 삭제하시겠습니까?\n\n삭제 시 해당 폴더는 "백업" 폴더로 이동됩니다.`)) return;
+    if (!confirm(`?�️ ?�말�?[${cat.name}] 카테고리�???��?�시겠습?�까?\n\n??�� ???�당 ?�더??"백업" ?�더�??�동?�니??`)) return;
 
     toggleLoading(true);
     let proceedWithDelete = false;
@@ -2271,21 +2271,21 @@ async function delCat(id) {
             }
 
             if (json.status === "Success") {
-                showToast(`📁 [${cat.name}] 폴더가 백업 폴더로 이동되었습니다.`);
+                showToast(`?�� [${cat.name}] ?�더가 백업 ?�더�??�동?�었?�니??`);
                 proceedWithDelete = true;
             } else {
-                if (confirm(`⚠️ 폴더 백업 작업에 실패했습니다.\n(사유: ${json.message || 'ID 찾을 수 없음'})\n\n폴더 백업 없이 설정을 삭제할까요?`)) {
+                if (confirm(`?�️ ?�더 백업 ?�업???�패?�습?�다.\n(?�유: ${json.message || 'ID 찾을 ???�음'})\n\n?�더 백업 ?�이 ?�정????��?�까??`)) {
                     proceedWithDelete = true;
                 }
             }
         } catch (err) {
             console.error(err);
-            if (confirm(`⚠️ 백업 서버와 통신 중 오류가 발생했습니다.\n\n폴더 백업 없이 설정을 삭제하시겠습니까?`)) {
+            if (confirm(`?�️ 백업 ?�버?� ?�신 �??�류가 발생?�습?�다.\n\n?�더 백업 ?�이 ?�정????��?�시겠습?�까?`)) {
                 proceedWithDelete = true;
             }
         }
     } else {
-        if (confirm(`⚠️ 백업할 유효한 폴더 주소가 설정되어 있지 않습니다.\n\n해당 카테고리 설정만 삭제하시겠습니까?`)) {
+        if (confirm(`?�️ 백업???�효???�더 주소가 ?�정?�어 ?��? ?�습?�다.\n\n?�당 카테고리 ?�정�???��?�시겠습?�까?`)) {
             proceedWithDelete = true;
         }
     }
@@ -2296,11 +2296,11 @@ async function delCat(id) {
             if (curCatId === id) curCatId = globalConfig.categories[0]?.id || "";
             save();
             await saveConfigToCloud();
-            showToast(`✅ [${cat.name}] 카테고리 정보가 삭제되었습니다.`);
+            showToast(`??[${cat.name}] 카테고리 ?�보가 ??��?�었?�니??`);
             changeTab('cat_manage');
         } catch (saveErr) {
             console.error(saveErr);
-            showToast('⚠️ 설정 삭제 중 오류 발생');
+            showToast('?�️ ?�정 ??�� �??�류 발생');
         }
     }
     toggleLoading(false);
@@ -2309,12 +2309,12 @@ async function resetCategoryDB(id, type) {
     const cat = globalConfig.categories.find(c => c.id === id);
     if (!cat) return;
 
-    const dbName = type === 'student' ? '학생 DB' : '문항 DB';
-    if (!confirm(`⚠️ 정말로 [${cat.name}]의 [${dbName}]를 초기화하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 시트의 모든 데이터가 영구 삭제됩니다.\n(폴더 파일은 유지됩니다)`)) return;
+    const dbName = type === 'student' ? '?�생 DB' : '문항 DB';
+    if (!confirm(`?�️ ?�말�?[${cat.name}]??[${dbName}]�?초기?�하?�겠?�니�?\n\n???�업?� ?�돌�????�으�? ?�트??모든 ?�이?��? ?�구 ??��?�니??\n(?�더 ?�일?� ?��??�니??`)) return;
 
     toggleLoading(true);
     try {
-        // Apps Script에 리셋 요청
+        // Apps Script??리셋 ?�청
         const folderId = extractFolderId(cat.targetFolderUrl);
         if (folderId) {
             const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
@@ -2344,10 +2344,10 @@ async function resetCategoryDB(id, type) {
             }
 
             if (json.status === "Success") {
-                showToast(`♻️ [${dbName}] 시트가 초기화되었습니다.`);
-                // 문항 DB 리셋 시 로컬 데이터도 필터링
+                showToast(`?�️ [${dbName}] ?�트가 초기?�되?�습?�다.`);
+                // 문항 DB 리셋 ??로컬 ?�이?�도 ?�터�?
                 if (type === 'question') {
-                    showToast('⚠️ 로컬 데이터 동기화를 위해 페이지를 새로고침해주세요.');
+                    showToast('?�️ 로컬 ?�이???�기?��? ?�해 ?�이지�??�로고침?�주?�요.');
                     // [Optional] Local clean up if needed immediately
                     // globalConfig.questions = globalConfig.questions.filter(q => q.catId !== id);
                     // save();
@@ -2358,48 +2358,48 @@ async function resetCategoryDB(id, type) {
         }
     } catch (err) {
         console.error(err);
-        showToast('⚠️ DB 초기화 요청 실패 (Apps Script 업데이트 필요)');
+        showToast('?�️ DB 초기???�청 ?�패 (Apps Script ?�데?�트 ?�요)');
     } finally {
         toggleLoading(false);
     }
 }
 
 async function generateUniqueStudentId(dateStr, gradeStr) {
-    // 1. 날짜 포맷 (YYMMDD)
+    // 1. ?�짜 ?�맷 (YYMMDD)
     const d = new Date(dateStr);
     const yy = d.getFullYear().toString().slice(2);
     const mm = (d.getMonth() + 1).toString().padStart(2, '0');
     const dd = d.getDate().toString().padStart(2, '0');
     const dateCode = `${yy}${mm}${dd}`;
 
-    // 2. 학년 코드 변환
-    // 초4~초6: E4~E6, 중1~중3: M1~M3, 고1~고3: H1~H3
+    // 2. ?�년 코드 변??
+    // �?~�?: E4~E6, �?~�?: M1~M3, �?~�?: H1~H3
     let gradeCode = "E";
-    if (gradeStr.includes('초')) gradeCode = "E" + gradeStr.replace('초', '');
-    else if (gradeStr.includes('중')) gradeCode = "M" + gradeStr.replace('중', '');
-    else if (gradeStr.includes('고')) gradeCode = "H" + gradeStr.replace('고', '');
+    if (gradeStr.includes('�?)) gradeCode = "E" + gradeStr.replace('�?, '');
+    else if (gradeStr.includes('�?)) gradeCode = "M" + gradeStr.replace('�?, '');
+    else if (gradeStr.includes('�?)) gradeCode = "H" + gradeStr.replace('�?, '');
 
-    const groupKey = dateCode + gradeCode; // 예: 260129M2
+    const groupKey = dateCode + gradeCode; // ?? 260129M2
 
-    // 3. 무작위 4자리 등록번호 생성 (0000 ~ 9999)
-    // 기존 idCounters 대신 시계열/랜덤성을 조합해 충돌 방지
+    // 3. 무작??4?�리 ?�록번호 ?�성 (0000 ~ 9999)
+    // 기존 idCounters ?�???�계???�덤?�을 조합??충돌 방�?
     const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString();
     const studentId = `${groupKey}${randomSuffix}`;
 
     return studentId;
 }
 
-// --- 관리자 코드 변경 ---
+// --- 관리자 코드 변�?---
 function renderAdminCode(c) {
     c.innerHTML = `
                 <div class="animate-fade-in-safe space-y-4 pb-20 text-left">
                     <h2 class="fs-32 text-[#013976] underline decoration-slate-200 decoration-8 underline-offset-8 font-black mb-12  uppercase tracking-tighter">Admin Code Setting</h2>
                     <div class="card !bg-[#013976] !p-12 text-white border-none">
                         <h3 class="fs-32 text-white font-black uppercase tracking-tighter underline decoration-blue-400/30 decoration-8 underline-offset-8 mb-6 leading-none">Change Management Code</h3>
-                        <p class="fs-18 text-blue-200 mb-8">관리자 모드(Admin) 접속에 사용할 새로운 액세스 코드를 설정하세요.</p>
-                        <input type="text" id="new-admin-code" autocomplete="off" class="ys-field !bg-white/10 !text-white border-white/20" value="${globalConfig.adminCode}" placeholder="새 코드 입력">
-                        <button onclick="(async()=>{const val=document.getElementById('new-admin-code').value; if(!val) return showToast('코드를 입력하세요'); globalConfig.adminCode=val; save(); await saveConfigToCloud(); showToast('관리자 코드가 성공적으로 변경 및 동기화되었습니다.'); changeTab('main_config');})()" 
-                        class="bg-white text-[#013976] w-full py-6 rounded-2xl fs-18 mt-4 hover:bg-slate-100 transition-all uppercase">💾 Update & Sync Code</button>
+                        <p class="fs-18 text-blue-200 mb-8">관리자 모드(Admin) ?�속???�용???�로???�세??코드�??�정?�세??</p>
+                        <input type="text" id="new-admin-code" autocomplete="off" class="ys-field !bg-white/10 !text-white border-white/20" value="${globalConfig.adminCode}" placeholder="??코드 ?�력">
+                        <button onclick="(async()=>{const val=document.getElementById('new-admin-code').value; if(!val) return showToast('코드�??�력?�세??); globalConfig.adminCode=val; save(); await saveConfigToCloud(); showToast('관리자 코드가 ?�공?�으�?변�?�??�기?�되?�습?�다.'); changeTab('main_config');})()" 
+                        class="bg-white text-[#013976] w-full py-6 rounded-2xl fs-18 mt-4 hover:bg-slate-100 transition-all uppercase">?�� Update & Sync Code</button>
                     </div>
                 </div>`;
 }
@@ -2412,29 +2412,29 @@ window.onload = () => {
     }
     applyBranding();
 
-    // [Fix] 앱 진입 시 무조건 백그라운드에서 최신 데이터를 동기화하도록 강제
+    // [Fix] ??진입 ??무조�?백그?�운?�에??최신 ?�이?��? ?�기?�하?�록 강제
     if (globalConfig.masterUrl) {
-        console.log("🔄 Initializing background cloud sync for latest configuration...");
+        console.log("?�� Initializing background cloud sync for latest configuration...");
         loadConfigFromCloud(true).then((success) => {
             if (success) {
-                console.log("✅ Auto-sync success!");
+                console.log("??Auto-sync success!");
                 applyBranding();
 
-                // 학생 화면 등 선택 목록 UI 갱신 (이미 진입한 경우 대비)
+                // ?�생 ?�면 ???�택 목록 UI 갱신 (?��? 진입??경우 ?��?
                 const c = document.getElementById('dynamic-content');
                 if (c && c.getAttribute('data-canvas-id') === '02') {
                     renderStudentLogin(); // Reload student form if active
                 }
             } else {
-                console.log("⚠️ Auto-sync failed or no newer config found.");
+                console.log("?�️ Auto-sync failed or no newer config found.");
             }
         });
     }
 };
 
-// ===== 학생 성적 관리 시스템 =====
+// ===== ?�생 ?�적 관�??�스??=====
 
-// 학생 성적 입력 UI 렌더링
+// ?�생 ?�적 ?�력 UI ?�더�?
 function renderScoreInput(c) {
     if (!globalConfig.categories || globalConfig.categories.length === 0) {
         renderEmptyState(c, 'Student Score Input');
@@ -2498,7 +2498,7 @@ function renderScoreInput(c) {
                         <div>
                             <label class="ys-label font-bold" style="color:#7c3aed">&#x1F3EB; &#xB4F1;&#xB85D;&#xD559;&#xAE09;(&#xC608;&#xC815;)</label>
                             <select id="input-student-class" class="ys-field" style="border-color:#7c3aed;color:#7c3aed;font-weight:700">
-                                <option value="">학급 선택 (학년 먼저 선택)</option>
+                                <option value="">?�급 ?�택 (?�년 먼�? ?�택)</option>
                             </select>
                         </div>
                     </div>
@@ -2527,10 +2527,10 @@ function renderScoreInput(c) {
                     <div id="question-score-list" class="space-y-2"></div>
                 </div>
 
-                <!-- 아코디언 + 버튼 (같은 row) -->
+                <!-- ?�코?�언 + 버튼 (같�? row) -->
                 <div class="flex items-start gap-4">
 
-                    <!-- 아코디언 (조건부 보임) -->
+                    <!-- ?�코?�언 (조건부 보임) -->
                     <div id="accordion-wrapper" class="hidden flex-1">
                         <div class="card !p-0 overflow-hidden">
                             <button onclick="toggleAccordion('accordion-section')" class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-slate-50 transition-all">
@@ -2555,7 +2555,7 @@ function renderScoreInput(c) {
                         </div>
                     </div>
 
-                    <!-- 버튼들 (항상 우측, 아코디언 유무와 무관) -->
+                    <!-- 버튼??(??�� ?�측, ?�코?�언 ?�무?� 무�?) -->
                     <div class="flex gap-4 items-center ml-auto flex-none">
                         <button onclick="clearScoreInputs()" class="px-8 py-4 rounded-2xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-700 transition-all">
                             &#x1F504; &#xCD08;&#xAE30;&#xD654; (Reset)
@@ -2581,11 +2581,11 @@ async function handleScoreCategoryChange(catId) {
     if (!category) return;
 
     const folderId = extractFolderId(category.targetFolderUrl);
-    if (!folderId) { showToast('⚠️ 폴더 ID 오류: 카테고리 설정을 확인하세요.'); return; }
+    if (!folderId) { showToast('?�️ ?�더 ID ?�류: 카테고리 ?�정???�인?�세??'); return; }
 
     const listEl = document.getElementById('question-score-list');
     if (!listEl) return;
-    listEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-10">⏳ 문항 정보 불러오는 중...</p>';
+    listEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-10">??문항 ?�보 불러?�는 �?..</p>';
 
     toggleLoading(true);
     let catQuestions = [];
@@ -2603,7 +2603,7 @@ async function handleScoreCategoryChange(catId) {
         catQuestions = newQuestions.sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0));
     } catch(e) {
         console.error(e);
-        showToast('⚠️ 문항 불러오기 실패: ' + e.message);
+        showToast('?�️ 문항 불러?�기 ?�패: ' + e.message);
         catQuestions = (globalConfig.questions || [])
             .filter(q => String(q.catId) === String(catId))
             .sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0));
@@ -2617,13 +2617,13 @@ async function handleScoreCategoryChange(catId) {
     if (totalDisp) totalDisp.textContent = '0';
     if (maxDisp) maxDisp.textContent = maxScore;
 
-    // 영역별/난이도별 만점 span 업데이트
+    // ?�역�??�이?�별 만점 span ?�데?�트
     const setMax = (spanId, val) => {
         const el = document.getElementById(spanId);
         if (!el) return;
-        if (val > 0) { el.textContent = '만점 ' + val + '점'; el.style.color = ''; }
-        else { el.textContent = '없음'; el.style.color = '#94a3b8'; }
-        // 연결된 input의 max 속성도 갱신
+        if (val > 0) { el.textContent = '만점 ' + val + '??; el.style.color = ''; }
+        else { el.textContent = '?�음'; el.style.color = '#94a3b8'; }
+        // ?�결??input??max ?�성??갱신
         const inp = document.querySelector(`[data-max-id="${spanId}"]`);
         if (inp) inp.max = val > 0 ? val : 9999;
     };
@@ -2637,11 +2637,11 @@ async function handleScoreCategoryChange(catId) {
     setMax('max-vocab',         sm('Vocabulary'));
 
     if (catQuestions.length === 0) {
-        listEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">등록된 문항이 없습니다. 문항 리스트에서 먼저 문항을 등록해 주세요.</p>';
+        listEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">?�록??문항???�습?�다. 문항 리스?�에??먼�? 문항???�록??주세??</p>';
         return;
     }
 
-    // 10개씩 청크로 나눠 전치 테이블 렌더링
+    // 10개씩 �?���??�눠 ?�치 ?�이�??�더�?
     const CHUNK_SIZE = 10;
     const chunks = [];
     for (let i = 0; i < catQuestions.length; i += CHUNK_SIZE) {
@@ -2650,7 +2650,7 @@ async function handleScoreCategoryChange(catId) {
 
     listEl.innerHTML = chunks.map((chunk, chunkIdx) => {
         const startNo = chunkIdx * CHUNK_SIZE + 1;
-        // 항상 10열 고정: 부족한 칸은 빈 셀로 채움
+        // ??�� 10??고정: 부족한 칸�? �??��?채�?
         const padLen = CHUNK_SIZE - chunk.length;
         const emptyTh = '<th class="text-center font-black text-white text-[15px] px-2 py-1.5" style="width:9%;"></th>';
         const emptyTd = '<td class="px-2 py-1.5"></td>';
@@ -2658,7 +2658,7 @@ async function handleScoreCategoryChange(catId) {
         const typeCells = chunk.map(q => `<td class="text-center text-sm text-slate-500 px-2 py-1.5 truncate" title="${q.type || ''}">${q.type || '-'}</td>`).join('') + emptyTd.repeat(padLen);
         const subTypeCells = chunk.map(q => `<td class="text-center text-sm text-slate-500 px-2 py-1.5 truncate" title="${q.subType || ''}">${q.subType || '-'}</td>`).join('') + emptyTd.repeat(padLen);
         const difficultyCells = chunk.map(q => `<td class="text-center text-sm text-slate-500 px-2 py-1.5 truncate" title="${q.difficulty || ''}">${q.difficulty || '-'}</td>`).join('') + emptyTd.repeat(padLen);
-        const maxCells = chunk.map(q => `<td class="text-center text-sm font-bold text-slate-600 px-2 py-1.5">${parseInt(q.score)||0}<span class="text-sm font-normal text-slate-400">점</span></td>`).join('') + emptyTd.repeat(padLen);
+        const maxCells = chunk.map(q => `<td class="text-center text-sm font-bold text-slate-600 px-2 py-1.5">${parseInt(q.score)||0}<span class="text-sm font-normal text-slate-400">??/span></td>`).join('') + emptyTd.repeat(padLen);
         const inputCells = chunk.map(q => {
             const maxQ = parseInt(q.score) || 0;
             return `<td class="px-1 py-1.5"><input type="number" id="q-score-${q.id}" data-qid="${q.id}" data-max="${maxQ}" class="w-full ys-field !py-0.5 text-center font-bold !text-[#013976] !text-[15px]" placeholder="0" min="0" max="${maxQ}" value="" oninput="clampQScore(this); calculateTotalScore();"></td>`;
@@ -2674,15 +2674,15 @@ async function handleScoreCategoryChange(catId) {
                 </thead>
                 <tbody>
                     <tr class="border-b border-slate-100 bg-slate-50">
-                        <td class="text-center text-sm font-bold text-slate-400 px-3 py-1.5 whitespace-nowrap">영역</td>
+                        <td class="text-center text-sm font-bold text-slate-400 px-3 py-1.5 whitespace-nowrap">?�역</td>
                         ${typeCells}
                     </tr>
                     <tr class="border-b border-slate-100">
-                        <td class="text-center text-sm font-bold text-slate-400 px-3 py-1.5 whitespace-nowrap">세부영역</td>
+                        <td class="text-center text-sm font-bold text-slate-400 px-3 py-1.5 whitespace-nowrap">?��??�역</td>
                         ${subTypeCells}
                     </tr>
                     <tr class="border-b border-slate-100 bg-slate-50">
-                        <td class="text-center text-sm font-bold text-slate-400 px-3 py-1.5 whitespace-nowrap">난이도</td>
+                        <td class="text-center text-sm font-bold text-slate-400 px-3 py-1.5 whitespace-nowrap">?�이??/td>
                         ${difficultyCells}
                     </tr>
                     <tr class="border-b border-slate-100">
@@ -2690,7 +2690,7 @@ async function handleScoreCategoryChange(catId) {
                         ${maxCells}
                     </tr>
                     <tr class="bg-blue-50/40">
-                        <td class="text-center text-sm font-bold text-[#013976] px-3 py-1.5 whitespace-nowrap">점수입력</td>
+                        <td class="text-center text-sm font-bold text-[#013976] px-3 py-1.5 whitespace-nowrap">?�수?�력</td>
                         ${inputCells}
                     </tr>
                 </tbody>
@@ -2700,11 +2700,11 @@ async function handleScoreCategoryChange(catId) {
 
 
     showToast('\u2705 ' + catQuestions.length + '\uAC1C \uBB38\uD56D \uB85C\uB4DC \uC644\uB8CC (\uB9CC\uC810 ' + maxScore + '\uC810)');
-    // Flatpickr 달력 적용
+    // Flatpickr ?�력 ?�용
     setTimeout(() => applyYsDatePicker('#input-test-date'), 50);
 }
 
-// 공유 Flatpickr 달력 헬퍼 (수동 입력 허용)
+// 공유 Flatpickr ?�력 ?�퍼 (?�동 ?�력 ?�용)
 function applyYsDatePicker(selector, extraOpts = {}) {
     if (typeof flatpickr === 'undefined') return;
     const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
@@ -2740,12 +2740,12 @@ function applyYsDatePicker(selector, extraOpts = {}) {
     }, extraOpts));
 }
 
-// Canvas 06: 학년 선택 시 해당 학년 학급만 dropdown에 표시
+// Canvas 06: ?�년 ?�택 ???�당 ?�년 ?�급�?dropdown???�시
 function updateClassDropdown06(grade) {
     const sel = document.getElementById('input-student-class');
     if (!sel) return;
     const list = getClassesForGrade(grade);
-    sel.innerHTML = `<option value="">${list.length ? '학급 선택' : '등록된 학급 없음'}</option>`
+    sel.innerHTML = `<option value="">${list.length ? '?�급 ?�택' : '?�록???�급 ?�음'}</option>`
         + list.map(n => `<option value="${n}">${n}</option>`).join('');
 }
 
@@ -2854,16 +2854,16 @@ async function saveStudentScore() {
                 score: sc, maxScore: maxQ });
         });
 
-        // ── 영역별·난이도별 점수 계산 ──
-        // 문항별 점수를 입력한 경우: 각 문항의 section/difficulty로 자동 합산
-        // 아코디언만 입력한 경우: 해당 입력값 그대로 사용 (폴백)
+        // ?�?� ?�역별·난?�도�??�수 계산 ?�?�
+        // 문항�??�수�??�력??경우: �?문항??section/difficulty�??�동 ?�산
+        // ?�코?�언�??�력??경우: ?�당 ?�력�?그�?�??�용 (?�백)
         let grammarScore, writingScore, readingScore, listeningScore, vocabScore;
 
-        // 체크박스 "문항별 점수 정보 없음" 여부로 분기
+        // 체크박스 "문항�??�수 ?�보 ?�음" ?��?�?분기
         const noQScoreMode = document.getElementById('chk-no-qscore')?.checked;
 
         if (!noQScoreMode) {
-            // 문항별 입력 → section/difficulty 자동 집계
+            // 문항�??�력 ??section/difficulty ?�동 집계
             const calcS = (sec) => questionScores.reduce((sum, qs) => {
                 const q = (globalConfig.questions || []).find(q => String(q.id) === String(qs.id));
                 return sum + (q?.section === sec ? (qs.score || 0) : 0);
@@ -2874,7 +2874,7 @@ async function saveStudentScore() {
             listeningScore = calcS('Listening');
             vocabScore     = calcS('Vocabulary');
         } else {
-            // 아코디언 직접 입력 → 해당 값 사용
+            // ?�코?�언 직접 ?�력 ???�당 �??�용
             grammarScore   = parseInt(document.getElementById('input-grammar')?.value)       || 0;
             writingScore   = parseInt(document.getElementById('input-writing')?.value)        || 0;
             readingScore   = parseInt(document.getElementById('input-reading')?.value)        || 0;
@@ -2882,7 +2882,7 @@ async function saveStudentScore() {
             vocabScore     = parseInt(document.getElementById('input-vocab')?.value)          || 0;
         }
 
-        // ── 영역별 만점: 문항 배점 합산 ──
+        // ?�?� ?�역�?만점: 문항 배점 ?�산 ?�?�
         const catQs = (globalConfig.questions || []).filter(q => String(q.catId) === String(categoryId));
         const calcMax = (field, val) => catQs.filter(q => q[field] === val).reduce((s, q) => s + (parseInt(q.score) || 0), 0);
         const grammarMax   = calcMax('section', 'Grammar');
@@ -2899,12 +2899,12 @@ async function saveStudentScore() {
             ? maxFromQ
             : parseInt(document.getElementById('score-max-display')?.textContent) || 100;
 
-        // ── 난이도별 점수 계산 (문항별 입력 모드에서만) ──
-        const difficulties = { '최상':{score:0,max:0}, '상':{score:0,max:0}, '중':{score:0,max:0}, '하':{score:0,max:0}, '기초':{score:0,max:0} };
+        // ?�?� ?�이?�별 ?�수 계산 (문항�??�력 모드?�서�? ?�?�
+        const difficulties = { '최상':{score:0,max:0}, '??:{score:0,max:0}, '�?:{score:0,max:0}, '??:{score:0,max:0}, '기초':{score:0,max:0} };
         if (!noQScoreMode) {
             questionScores.forEach(qs => {
                 const q = catQs.find(q => String(q.id) === String(qs.id));
-                const diff = q?.difficulty || '중';
+                const diff = q?.difficulty || '�?;
                 if (difficulties[diff]) {
                     difficulties[diff].score += (qs.score || 0);
                     difficulties[diff].max   += (parseInt(q?.score) || 0);
@@ -2924,9 +2924,9 @@ async function saveStudentScore() {
             listeningScore, listeningMax,
             vocabScore,     vocabMax,
             difficulty_highest: difficulties['최상'].score, difficulty_highest_max: difficulties['최상'].max,
-            difficulty_high:    difficulties['상'].score,   difficulty_high_max:    difficulties['상'].max,
-            difficulty_mid:     difficulties['중'].score,   difficulty_mid_max:     difficulties['중'].max,
-            difficulty_low:     difficulties['하'].score,   difficulty_low_max:     difficulties['하'].max,
+            difficulty_high:    difficulties['??].score,   difficulty_high_max:    difficulties['??].max,
+            difficulty_mid:     difficulties['�?].score,   difficulty_mid_max:     difficulties['�?].max,
+            difficulty_low:     difficulties['??].score,   difficulty_low_max:     difficulties['??].max,
             difficulty_basic:   difficulties['기초'].score, difficulty_basic_max:   difficulties['기초'].max,
             inputMode: noQScoreMode ? 'section' : 'question',
             totalScore, maxScore
@@ -2952,14 +2952,14 @@ function startExamTimer() {
     const timerEl = document.getElementById('timer');
     const limitMin = examSession.timeLimit || 0;
 
-    // 타이머 업데이트 함수
+    // ?�?�머 ?�데?�트 ?�수
     const update = () => {
         if (!timerEl) return;
         const now = Date.now();
-        const diffSec = Math.floor((now - examSession.startTime) / 1000); // 경과 시간(초)
+        const diffSec = Math.floor((now - examSession.startTime) / 1000); // 경과 ?�간(�?
 
         if (limitMin > 0) {
-            // 카운트다운 모드
+            // 카운?�다??모드
             const limitSec = limitMin * 60;
             const remainSec = limitSec - diffSec;
 
@@ -2967,18 +2967,18 @@ function startExamTimer() {
                 timerEl.innerText = "00:00:00";
                 timerEl.classList.add('text-red-600', 'animate-pulse');
                 clearInterval(examTimer);
-                examSession.isExamActive = false; // 입력 완전 차단
+                examSession.isExamActive = false; // ?�력 ?�전 차단
 
-                // 모든 입력 비활성화 (라디오 버튼 포함 전체 입력/라벨 차단)
+                // 모든 ?�력 비활?�화 (?�디??버튼 ?�함 ?�체 ?�력/?�벨 차단)
                 const examContainer = document.getElementById('exam-container');
                 if (examContainer) {
-                    // 입력 필드 및 텍스트 영역 비활성화
+                    // ?�력 ?�드 �??�스???�역 비활?�화
                     examContainer.querySelectorAll('input, textarea, select').forEach(el => {
                         el.disabled = true;
                         el.style.opacity = '0.5';
                         el.style.cursor = 'not-allowed';
                     });
-                    // 선택이 가능한 라벨(Label) 영역 클릭 방지
+                    // ?�택??가?�한 ?�벨(Label) ?�역 ?�릭 방�?
                     examContainer.querySelectorAll('label').forEach(lb => {
                         lb.style.pointerEvents = 'none';
                         lb.style.opacity = '0.5';
@@ -2986,7 +2986,7 @@ function startExamTimer() {
                     });
                 }
 
-                alert("시험 시간이 만료되었습니다. 이제 입력이 불가능합니다.\n하단의 제출 버튼을 눌러 시험을 종료하세요.");
+                alert("?�험 ?�간??만료?�었?�니?? ?�제 ?�력??불�??�합?�다.\n?�단???�출 버튼???�러 ?�험??종료?�세??");
                 return;
             }
 
@@ -2995,12 +2995,12 @@ function startExamTimer() {
             const s = (remainSec % 60).toString().padStart(2, '0');
             timerEl.innerText = `${h}:${m}:${s}`;
 
-            // 5분 미만 시 경고 효과
+            // 5�?미만 ??경고 ?�과
             if (remainSec < 300) timerEl.classList.add('text-red-600', 'animate-pulse');
             else timerEl.classList.remove('text-red-600', 'animate-pulse');
 
         } else {
-            // 카운트업 모드 (기존 유지)
+            // 카운?�업 모드 (기존 ?��?)
             const h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
             const m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
             const s = (diffSec % 60).toString().padStart(2, '0');
@@ -3008,11 +3008,11 @@ function startExamTimer() {
         }
     };
 
-    update(); // 즉시 1회 실행
+    update(); // 즉시 1???�행
     examTimer = setInterval(update, 1000);
 }
 
-// [Removed] updateAnswer 첫 번째 정의 삭제 — 동일 함수가 3324줄에 최종 정의됨
+// [Removed] updateAnswer �?번째 ?�의 ??�� ???�일 ?�수가 3324줄에 최종 ?�의??
 
 // [Refactored] Student Exam View System
 let currentExamGridCols = 1;
@@ -3176,7 +3176,7 @@ function renderExamContent() {
         // Right: continue message
         const rightCol = document.createElement('div');
         rightCol.className = 'h-full flex items-center justify-center bg-slate-50/30';
-        rightCol.innerHTML = '<div class="text-center text-slate-400"><span class="text-4xl block mb-3">📄</span><span class="text-[16px] font-medium">\ub2e4\uc74c \ud654\uba74\uc5d0 \ubb38\ud56d\uc774 \uacc4\uc18d\ub429\ub2c8\ub2e4.</span></div>';
+        rightCol.innerHTML = '<div class="text-center text-slate-400"><span class="text-4xl block mb-3">?��</span><span class="text-[16px] font-medium">\ub2e4\uc74c \ud654\uba74\uc5d0 \ubb38\ud56d\uc774 \uacc4\uc18d\ub429\ub2c8\ub2e4.</span></div>';
 
         container.appendChild(leftCol);
         container.appendChild(rightCol);
@@ -3215,25 +3215,25 @@ function renderExamResult(results, earned, total) {
     const percentage = Math.round((earned / total) * 100) || 0;
     const c = document.getElementById('dynamic-content');
     setCanvasId('02-2');
-    // [Fix] dynamic-content 자체 스타일 건드리지 않음 → 래퍼 div에 중앙정렬 적용
+    // [Fix] dynamic-content ?�체 ?��???건드리�? ?�음 ???�퍼 div??중앙?�렬 ?�용
     c.style.cssText = '';
 
     c.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:center; width:100%; min-height:60vh;">
                     <div class="animate-fade-in-safe bg-white p-24 rounded-[2rem] border-2 border-[#013976]/20 flex flex-col items-center shadow-2xl">
-                        <span class="text-6xl mb-8 font-black unified-animate">✅</span>
-                        <h2 class="fs-32 text-[#013976] font-black uppercase mb-4 leading-none text-center">제출이 완료되었습니다</h2>
+                        <span class="text-6xl mb-8 font-black unified-animate">??/span>
+                        <h2 class="fs-32 text-[#013976] font-black uppercase mb-4 leading-none text-center">?�출???�료?�었?�니??/h2>
                         <p class="fs-18 text-slate-400 tracking-tight mb-8 font-medium">Exam Submitted Successfully</p>
                         <div class="bg-blue-50 px-10 py-6 rounded-3xl mb-10 border border-blue-100">
-                             <p class="text-blue-900 fs-18 font-bold">수고하셨습니다!</p>
+                             <p class="text-blue-900 fs-18 font-bold">?�고?�셨?�니??</p>
                         </div>
-                        <button onclick="goHome()" class="btn-ys !px-16 !py-5 fs-18 shadow-lg">🏠 Back to Home</button>
+                        <button onclick="goHome()" class="btn-ys !px-16 !py-5 fs-18 shadow-lg">?�� Back to Home</button>
                     </div>
                 </div>
             `;
 }
 
-// 학생 성적표 UI 렌더링
+// ?�생 ?�적??UI ?�더�?
 // --- Missing Helper Functions Implementation ---
 
 function getMediaHtml(q) {
@@ -3256,13 +3256,13 @@ function getMediaHtml(q) {
 function getInputHtml(q) {
     const savedAns = examSession.answers[q.id] || "";
 
-    if (q.type === '객관형' || !q.type) { // Default to Objective
+    if (q.type === '객�??? || !q.type) { // Default to Objective
         // Ensure options exists
         let options = q.choices;
         if (typeof options === 'string') {
             try { options = JSON.parse(options); } catch (e) { options = []; }
         }
-        if (!options || options.length === 0) return '<div class="text-red-500">보기 데이터 없음</div>';
+        if (!options || options.length === 0) return '<div class="text-red-500">보기 ?�이???�음</div>';
 
         return `
             <div class="space-y-3">
@@ -3289,7 +3289,7 @@ function getInputHtml(q) {
         // Subjective
         return `
             <textarea class="w-full p-4 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all fs-16 resize-none min-h-[120px]" 
-                placeholder="답안을 입력하세요..." 
+                placeholder="?�안???�력?�세??.." 
                 oninput="updateAnswer('${q.id}', this.value)">${savedAns}</textarea>
         `;
     }
@@ -3321,7 +3321,7 @@ function updateAnswer(qId, value) {
 }
 
 async function submitExam() {
-    if (!confirm("시험을 제출하시겠습니까?")) return;
+    if (!confirm("?�험???�출?�시겠습?�까?")) return;
 
     toggleLoading(true);
 
@@ -3342,16 +3342,16 @@ async function submitExam() {
         // Define Difficulties
         const difficulties = {
             '최상': { score: 0, max: 0 },
-            '상': { score: 0, max: 0 },
-            '중': { score: 0, max: 0 },
-            '하': { score: 0, max: 0 },
+            '??: { score: 0, max: 0 },
+            '�?: { score: 0, max: 0 },
+            '??: { score: 0, max: 0 },
             '기초': { score: 0, max: 0 }
         };
 
         const questionScores = [];
         const rawQuestions = globalConfig.questions.filter(q => String(q.catId) === String(examSession.categoryId));
 
-        // [Fix] 묶음 지문 데이터 주입 (AI 채점 시 지문 문맥 전달을 위해)
+        // [Fix] 묶음 지�??�이??주입 (AI 채점 ??지�?문맥 ?�달???�해)
         const questions = rawQuestions.map(q => {
             const copy = { ...q };
             if (copy.setId) {
@@ -3371,18 +3371,18 @@ async function submitExam() {
             const maxQ = parseInt(q.score) || 0;
             const correctAns = String(q.answer || '').trim();
 
-            if (q.type === '객관형') {
-                // 객관형: 단순 문자열 비교
+            if (q.type === '객�???) {
+                // 객�??? ?�순 문자??비교
                 isCorrect = String(studentAns).trim() === String(q.answer).trim();
                 earnedScore = isCorrect ? maxQ : 0;
             } else {
-                // 주관형: 1단계 키워드 매칭 → 2단계 AI 채점
+                // 주�??? 1?�계 ?�워??매칭 ??2?�계 AI 채점
                 if (!studentAns.trim()) {
-                    // 미답변 → 0점
+                    // 미답변 ??0??
                     isCorrect = false;
                     earnedScore = 0;
                 } else if (correctAns) {
-                    // 1단계: 관대한 키워드 매칭 (대소문자·띄어쓰기·구두점 무시)
+                    // 1?�계: 관?�???�워??매칭 (?�?�문?�·띄?�쓰기·구?�점 무시)
                     const normalize = s => s.toLowerCase().replace(/[\s,.\-_'"!?;:()`\u2018\u2019\u201C\u201D]/g, '').trim();
                     const acceptableAnswers = correctAns.split(',').map(a => normalize(a));
                     const normalizedStudentAns = normalize(String(studentAns));
@@ -3390,18 +3390,18 @@ async function submitExam() {
                     earnedScore = isCorrect ? maxQ : 0;
                 }
 
-                // 2단계: 키워드 매칭 실패 시 AI 채점 시도
+                // 2?�계: ?�워??매칭 ?�패 ??AI 채점 ?�도
                 if (!isCorrect && studentAns.trim() && globalConfig.geminiKey) {
                     try {
                         const aiResult = await gradeWithAI(q, studentAns);
                         if (aiResult && aiResult.score !== undefined) {
                             earnedScore = Math.min(Math.max(0, Math.round(aiResult.score)), maxQ);
-                            isCorrect = earnedScore >= maxQ; // 만점이면 O 표시
-                            console.log(`🤖 AI 채점 [문항 ${q.no}]: ${earnedScore}/${maxQ} (${aiResult.feedback})`);
+                            isCorrect = earnedScore >= maxQ; // 만점?�면 O ?�시
+                            console.log(`?�� AI 채점 [문항 ${q.no}]: ${earnedScore}/${maxQ} (${aiResult.feedback})`);
                         }
                     } catch (aiErr) {
-                        console.warn(`⚠️ AI 채점 실패 [문항 ${q.no}]:`, aiErr.message);
-                        // AI 실패 시 0점 유지
+                        console.warn(`?�️ AI 채점 ?�패 [문항 ${q.no}]:`, aiErr.message);
+                        // AI ?�패 ??0???��?
                     }
                 }
             }
@@ -3417,7 +3417,7 @@ async function submitExam() {
             }
 
             // Difficulty Stats
-            const diff = q.difficulty || '중';
+            const diff = q.difficulty || '�?;
             if (difficulties[diff]) {
                 difficulties[diff].score += earnedScore;
                 difficulties[diff].max += maxQ;
@@ -3461,20 +3461,20 @@ async function submitExam() {
             vocabScore: sections['Vocabulary'].score,  vocabMax: sections['Vocabulary'].max,
 
             difficulty_highest: difficulties['최상'].score, difficulty_highest_max: difficulties['최상'].max,
-            difficulty_high:    difficulties['상'].score,   difficulty_high_max:    difficulties['상'].max,
-            difficulty_mid:     difficulties['중'].score,   difficulty_mid_max:     difficulties['중'].max,
-            difficulty_low:     difficulties['하'].score,   difficulty_low_max:     difficulties['하'].max,
+            difficulty_high:    difficulties['??].score,   difficulty_high_max:    difficulties['??].max,
+            difficulty_mid:     difficulties['�?].score,   difficulty_mid_max:     difficulties['�?].max,
+            difficulty_low:     difficulties['??].score,   difficulty_low_max:     difficulties['??].max,
             difficulty_basic:   difficulties['기초'].score, difficulty_basic_max:   difficulties['기초'].max,
 
             totalScore: totalScore,
             maxScore: maxScore
         };
 
-        // ── 진단용 로그 (F12 콘솔에서 확인) ──
-        console.log("=== SUBMIT PAYLOAD 점검 ===");
+        // ?�?� 진단??로그 (F12 콘솔?�서 ?�인) ?�?�
+        console.log("=== SUBMIT PAYLOAD ?��? ===");
         console.log("Fields:", Object.keys(apiPayload).join(', '));
         console.log("totalScore:", apiPayload.totalScore, "| maxScore:", apiPayload.maxScore);
-        console.log("studentClass 존재여부:", 'studentClass' in apiPayload, "| inputMode 존재여부:", 'inputMode' in apiPayload);
+        console.log("studentClass 존재?��?:", 'studentClass' in apiPayload, "| inputMode 존재?��?:", 'inputMode' in apiPayload);
         console.log("Full payload:", JSON.stringify(apiPayload, null, 2));
 
         // Send to Backend
@@ -3485,14 +3485,14 @@ async function submitExam() {
 
     } catch (e) {
         console.error(e);
-        showToast("❌ 제출 실패: " + e.message);
-        alert("제출 중 오류가 발생했습니다: " + e.message);
+        showToast("???�출 ?�패: " + e.message);
+        alert("?�출 �??�류가 발생?�습?�다: " + e.message);
     } finally {
         toggleLoading(false);
     }
 }
 
-// 학생 성적표 UI 렌더링 (시험지→년도→학년→학생 계단식 필터)
+// ?�생 ?�적??UI ?�더�?(?�험지?�년?�→?�년?�학??계단???�터)
 function renderRecords(c) {
     if (!globalConfig.categories || globalConfig.categories.length === 0) {
         renderEmptyState(c, 'Individual Reports');
@@ -3506,64 +3506,64 @@ function renderRecords(c) {
         <div class="animate-fade-in-safe space-y-6">
             <div class="relative no-print">
                 <h2 class="fs-32 text-[#013976] leading-none font-black uppercase !border-none !pb-0">Individual Reports</h2>
-                <button onclick="printReport()" class="absolute right-0 flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-700 text-white font-bold fs-15 hover:bg-slate-900 transition-all active:scale-95 shadow" style="top:50%; transform:translateY(-50%);">🖨️ 인쇄</button>
+                <button onclick="printReport()" class="absolute right-0 flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-700 text-white font-bold fs-15 hover:bg-slate-900 transition-all active:scale-95 shadow" style="top:50%; transform:translateY(-50%);">?���??�쇄</button>
             </div>
 
-            <!-- 시험지 · 년도 · 학년 · 학생 선택 (4단계 계단식) -->
+            <!-- ?�험지 · ?�도 · ?�년 · ?�생 ?�택 (4?�계 계단?? -->
             <div class="grid grid-cols-4 gap-4 no-print">
-                <!-- Box 1: 시험지 -->
+                <!-- Box 1: ?�험지 -->
                 <div class="card !p-6 flex flex-col justify-center shadow-lg relative overflow-hidden" style="${boxStyle}">
                     ${topBar}
                     <div class="space-y-3">
-                        <label class="ys-label !mb-0 !text-[#013976] font-bold">📂 시험지 선택</label>
+                        <label class="ys-label !mb-0 !text-[#013976] font-bold">?�� ?�험지 ?�택</label>
                         <select id="report-category" onchange="onReportCategoryChange();" class="ys-field w-full !font-normal !text-[#013976] !bg-white !text-[16px]">
-                            <option value="" disabled selected hidden>시험지를 선택하세요</option>
+                            <option value="" disabled selected hidden>?�험지�??�택?�세??/option>
                             ${globalConfig.categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
                         </select>
                     </div>
                 </div>
 
-                <!-- Box 2: 년도 -->
+                <!-- Box 2: ?�도 -->
                 <div class="card !p-6 flex flex-col justify-center shadow-lg relative overflow-hidden" style="${boxStyle}">
                     ${topBar}
                     <div class="space-y-3">
-                        <label class="ys-label !mb-0 !text-[#013976] font-bold">📅 년도 선택</label>
+                        <label class="ys-label !mb-0 !text-[#013976] font-bold">?�� ?�도 ?�택</label>
                         <select id="report-year" onchange="onReportYearChange();" class="ys-field w-full !font-normal !text-[#013976] !bg-white !text-[16px]" disabled>
-                            <option value="" disabled selected hidden>시험지 먼저 선택</option>
+                            <option value="" disabled selected hidden>?�험지 먼�? ?�택</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Box 3: 학년 -->
+                <!-- Box 3: ?�년 -->
                 <div class="card !p-6 flex flex-col justify-center shadow-lg relative overflow-hidden" style="${boxStyle}">
                     ${topBar}
                     <div class="space-y-3">
-                        <label class="ys-label !mb-0 !text-[#013976] font-bold">🎓 학년 선택</label>
+                        <label class="ys-label !mb-0 !text-[#013976] font-bold">?�� ?�년 ?�택</label>
                         <select id="report-grade" onchange="onReportGradeChange();" class="ys-field w-full !font-normal !text-[#013976] !bg-white !text-[16px]" disabled>
-                            <option value="" disabled selected hidden>년도 먼저 선택</option>
+                            <option value="" disabled selected hidden>?�도 먼�? ?�택</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Box 4: 학생 -->
+                <!-- Box 4: ?�생 -->
                 <div class="card !p-6 flex flex-col justify-center shadow-lg relative overflow-hidden" style="${boxStyle}">
                     ${topBar}
                     <div class="space-y-3">
-                        <label class="ys-label !mb-0 !text-[#013976] font-bold">👤 학생 선택</label>
+                        <label class="ys-label !mb-0 !text-[#013976] font-bold">?�� ?�생 ?�택</label>
                         <select id="report-student" onchange="loadStudentReport();" class="ys-field w-full !font-normal !text-[#013976] !bg-white !text-[16px]" disabled>
-                            <option value="" disabled selected hidden>학생을 선택하세요</option>
+                            <option value="" disabled selected hidden>?�생???�택?�세??/option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <!-- 성적표 표시 영역 -->
+            <!-- ?�적???�시 ?�역 -->
             <div id="report-display"></div>
         </div>
     `;
 }
 
-// 학생 목록 로드
+// ?�생 목록 로드
 async function loadStudentList() {
     const categoryId = document.getElementById('report-category')?.value;
     if (!categoryId) return;
@@ -3577,7 +3577,7 @@ async function loadStudentList() {
     console.log("Extracted Folder ID:", folderId);
 
     if (!folderId || folderId.length < 5) {
-        showToast("⚠️ 유효한 폴더 ID가 없습니다. 카테고리 설정을 확인해주세요.");
+        showToast("?�️ ?�효???�더 ID가 ?�습?�다. 카테고리 ?�정???�인?�주?�요.");
         return;
     }
 
@@ -3598,9 +3598,9 @@ async function loadStudentList() {
             window.cachedStudentRecords = records;
 
             if (!records || !Array.isArray(records) || records.length === 0) {
-                showToast('⚠️ 학생 데이터가 없습니다.');
+                showToast('?�️ ?�생 ?�이?��? ?�습?�다.');
                 const yearSel = document.getElementById('report-year');
-                if (yearSel) { yearSel.innerHTML = '<option value="" disabled selected hidden>데이터 없음</option>'; yearSel.disabled = true; }
+                if (yearSel) { yearSel.innerHTML = '<option value="" disabled selected hidden>?�이???�음</option>'; yearSel.disabled = true; }
                 return;
             }
             populateYearDropdown(records);
@@ -3609,81 +3609,81 @@ async function loadStudentList() {
         }
     } catch (err) {
         console.error("Load Error:", err);
-        showToast(`❌ 로드 실패: ${err.message}`);
+        showToast(`??로드 ?�패: ${err.message}`);
     } finally {
         toggleLoading(false);
     }
 }
 
-// ── 시험지 선택 시 호출 (reset + load)
+// ?�?� ?�험지 ?�택 ???�출 (reset + load)
 async function onReportCategoryChange() {
     const yearSel  = document.getElementById('report-year');
     const gradeSel = document.getElementById('report-grade');
     const stuSel   = document.getElementById('report-student');
-    if (yearSel)  { yearSel.innerHTML  = '<option value="" disabled selected hidden>불러오는 중...</option>'; yearSel.disabled  = true; }
-    if (gradeSel) { gradeSel.innerHTML = '<option value="" disabled selected hidden>년도 먼저 선택</option>';  gradeSel.disabled = true; }
-    if (stuSel)   { stuSel.innerHTML   = '<option value="" disabled selected hidden>학생을 선택하세요</option>'; stuSel.disabled   = true; }
+    if (yearSel)  { yearSel.innerHTML  = '<option value="" disabled selected hidden>불러?�는 �?..</option>'; yearSel.disabled  = true; }
+    if (gradeSel) { gradeSel.innerHTML = '<option value="" disabled selected hidden>?�도 먼�? ?�택</option>';  gradeSel.disabled = true; }
+    if (stuSel)   { stuSel.innerHTML   = '<option value="" disabled selected hidden>?�생???�택?�세??/option>'; stuSel.disabled   = true; }
     const rpt = document.getElementById('report-display');
     if (rpt) rpt.innerHTML = '';
     await loadStudentList();
 }
 
-// ── 로드된 레코드로 년도 드롭다운 채우기
+// ?�?� 로드???�코?�로 ?�도 ?�롭?�운 채우�?
 function populateYearDropdown(records) {
     const yearSel = document.getElementById('report-year');
     if (!yearSel) return;
     const years = [...new Set(
-        records.map(r => String(r['응시일'] || r.date || '').substring(0, 4))
+        records.map(r => String(r['?�시??] || r.date || '').substring(0, 4))
                .filter(y => /^\d{4}$/.test(y))
-    )].sort((a, b) => b.localeCompare(a)); // 최신년도 먼저
-    yearSel.innerHTML = '<option value="전체">전체</option>' +
-        years.map(y => `<option value="${y}">${y}년</option>`).join('');
+    )].sort((a, b) => b.localeCompare(a)); // 최신?�도 먼�?
+    yearSel.innerHTML = '<option value="?�체">?�체</option>' +
+        years.map(y => `<option value="${y}">${y}??/option>`).join('');
     yearSel.disabled = false;
-    yearSel.value = '전체';
+    yearSel.value = '?�체';
     onReportYearChange();
 }
 
-// ── 년도 선택 시 → 학년 드롭다운 채우기
+// ?�?� ?�도 ?�택 ?????�년 ?�롭?�운 채우�?
 function onReportYearChange() {
     const year    = document.getElementById('report-year')?.value;
     const records = window.cachedStudentRecords || [];
-    const filtered = (!year || year === '전체') ? records
-        : records.filter(r => String(r['응시일'] || r.date || '').substring(0, 4) === year);
+    const filtered = (!year || year === '?�체') ? records
+        : records.filter(r => String(r['?�시??] || r.date || '').substring(0, 4) === year);
 
     const gradeSel = document.getElementById('report-grade');
     const stuSel   = document.getElementById('report-student');
     if (!gradeSel) return;
 
     const grades = [...new Set(
-        filtered.map(r => String(r['학년'] || r.grade || '')).filter(g => g)
+        filtered.map(r => String(r['?�년'] || r.grade || '')).filter(g => g)
     )].sort((a, b) => a.localeCompare(b, 'ko'));
 
-    gradeSel.innerHTML = '<option value="전체">전체</option>' +
+    gradeSel.innerHTML = '<option value="?�체">?�체</option>' +
         grades.map(g => `<option value="${g}">${g}</option>`).join('');
     gradeSel.disabled = false;
-    gradeSel.value = '전체';
+    gradeSel.value = '?�체';
 
-    if (stuSel) { stuSel.innerHTML = '<option value="" disabled selected hidden>학생을 선택하세요</option>'; stuSel.disabled = true; }
+    if (stuSel) { stuSel.innerHTML = '<option value="" disabled selected hidden>?�생???�택?�세??/option>'; stuSel.disabled = true; }
     const rpt = document.getElementById('report-display');
     if (rpt) rpt.innerHTML = '';
     onReportGradeChange();
 }
 
-// ── 학년 선택 시 → 학생 드롭다운 채우기
+// ?�?� ?�년 ?�택 ?????�생 ?�롭?�운 채우�?
 function onReportGradeChange() {
     const year  = document.getElementById('report-year')?.value;
     const grade = document.getElementById('report-grade')?.value;
     const records = window.cachedStudentRecords || [];
 
     let filtered = records;
-    if (year  && year  !== '전체') filtered = filtered.filter(r => String(r['응시일'] || r.date || '').substring(0, 4) === year);
-    if (grade && grade !== '전체') filtered = filtered.filter(r => String(r['학년'] || r.grade || '') === grade);
+    if (year  && year  !== '?�체') filtered = filtered.filter(r => String(r['?�시??] || r.date || '').substring(0, 4) === year);
+    if (grade && grade !== '?�체') filtered = filtered.filter(r => String(r['?�년'] || r.grade || '') === grade);
 
     const stuSel = document.getElementById('report-student');
     if (!stuSel) return;
 
-    const idKeys   = ['학생ID', 'studentId', 'id'];
-    const nameKeys = ['학생명', 'studentName', 'name', '이름'];
+    const idKeys   = ['?�생ID', 'studentId', 'id'];
+    const nameKeys = ['?�생�?, 'studentName', 'name', '?�름'];
     const getV = (rec, keys) => { for (const k of keys) { if (rec[k] !== undefined && rec[k] !== '') return rec[k]; } return null; };
 
     const studentMap = new Map();
@@ -3693,38 +3693,38 @@ function onReportGradeChange() {
     });
 
     if (studentMap.size === 0) {
-        stuSel.innerHTML = '<option value="" disabled selected hidden>해당 조건의 학생 없음</option>';
+        stuSel.innerHTML = '<option value="" disabled selected hidden>?�당 조건???�생 ?�음</option>';
         stuSel.disabled = true;
         return;
     }
     const sorted = Array.from(studentMap.entries()).sort((a, b) => String(a[1]).localeCompare(String(b[1]), 'ko'));
-    stuSel.innerHTML = '<option value="" disabled selected hidden>학생을 선택하세요</option>' +
+    stuSel.innerHTML = '<option value="" disabled selected hidden>?�생???�택?�세??/option>' +
         sorted.map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
     stuSel.disabled = false;
     const rpt = document.getElementById('report-display');
     if (rpt) rpt.innerHTML = '';
-    showToast(`✅ ${studentMap.size}명 조회됨`);
+    showToast(`??${studentMap.size}�?조회??);
 }
-// 학년별 AI 톤앤매너 정의
+// ?�년�?AI ?�앤매너 ?�의
 function getGradeTone(grade) {
     const g = String(grade || '').trim();
-    const HONORIFIC = '\n[필수 규칙] 모든 문장은 반드시 ~ㅂ니다/~습니다 형식의 격식 존댓말로 작성하세요. ~요, ~네요, ~거예요 등 해요체는 절대 사용하지 마세요. 반말도 절대 금지입니다. 문단 사이에 빈 줄을 넣지 마세요.';
-    // 초등: 초1~6
-    if (/^초[1-6]$/.test(g) || /^초등/.test(g)) {
-        return `당신은 초등학교 영어 학생을 위한 친절한 선생님입니다.
-[톤앤매너] 따뜻하고 친근한 말투로 작성하세요. 어려운 용어는 쓰지 마세요. 칭찬을 먼저 충분히 하고, 개선점은 "다음엔 이렇게 해보면 어떨까요?" 같이 부드럽게 제안하세요. 항상 격려로 마무리하세요.${HONORIFIC}`;
+    const HONORIFIC = '\n[?�수 규칙] 모든 문장?� 반드??~?�니??~?�니???�식??격식 존댓말로 ?�성?�세?? ~?? ~?�요, ~거예?????�요체는 ?��? ?�용?��? 마세?? 반말???��? 금�??�니?? 문단 ?�이??�?줄을 ?��? 마세??';
+    // 초등: �?~6
+    if (/^�?1-6]$/.test(g) || /^초등/.test(g)) {
+        return `?�신?� 초등?�교 ?�어 ?�생???�한 친절???�생?�입?�다.
+[?�앤매너] ?�뜻?�고 친근??말투�??�성?�세?? ?�려???�어???��? 마세?? �?��??먼�? 충분???�고, 개선?��? "?�음???�렇�??�보�??�떨까요?" 같이 부?�럽�??�안?�세?? ??�� 격려�?마무리하?�요.${HONORIFIC}`;
     }
-    // 고등: 고1~3
-    if (/^고[1-3]$/.test(g) || /^고등/.test(g)) {
-        return `당신은 고등학교 영어 학생을 위한 전문 강사입니다.
-[톤앤매너] 전문적이고 간결한 어조로 작성하세요. 수능/내신을 감안한 실질적인 학습 전략을 제시하세요. 격려는 한 문장으로 간결하게 하고, 분석과 학습 방향 제시에 집중하세요.${HONORIFIC}`;
+    // 고등: �?~3
+    if (/^�?1-3]$/.test(g) || /^고등/.test(g)) {
+        return `?�신?� 고등?�교 ?�어 ?�생???�한 ?�문 강사?�니??
+[?�앤매너] ?�문?�이�?간결???�조�??�성?�세?? ?�능/?�신??감안???�질?�인 ?�습 ?�략???�시?�세?? 격려????문장?�로 간결?�게 ?�고, 분석�??�습 방향 ?�시??집중?�세??${HONORIFIC}`;
     }
-    // 중등: 중1~3 (기본값)
-    return `당신은 중학교 영어 학생을 위한 영어 강사입니다.
-[톤앤매너] 직접적이되 존중하는 톤으로 작성하세요. 부족한 부분은 명확하게 지적하되, 도전 의욕을 불러일으키는 언어를 사용하세요. 학생 스스로 목표를 세울 수 있도록 구체적인 방향을 제시하세요.${HONORIFIC}`;
+    // 중등: �?~3 (기본�?
+    return `?�신?� 중학�??�어 ?�생???�한 ?�어 강사?�니??
+[?�앤매너] 직접?�이??존중?�는 ?�으�??�성?�세?? 부족한 부분�? 명확?�게 지?�하?? ?�전 ?�욕??불러?�으?�는 ?�어�??�용?�세?? ?�생 ?�스�?목표�??�울 ???�도�?구체?�인 방향???�시?�세??${HONORIFIC}`;
 }
 
-// AI 종합 코멘트 생성 (영역별 코멘트 기반 종합분석)
+// AI 종합 코멘???�성 (?�역�?코멘??기반 종합분석)
 async function generateOverallComment(record, averages, activeSections, sectionComments = {}) {
     const secMap = {
         'Grammar': 'grammarScore', 'Writing': 'writingScore',
@@ -3739,39 +3739,39 @@ async function generateOverallComment(record, averages, activeSections, sectionC
     const totalMax   = parseFloat(record['만점'] || record.maxScore || 100);
     const totalAvg   = parseFloat(averages['총점'] || 0);
     const totalRate  = totalMax > 0 ? (totalScore / totalMax * 100).toFixed(1) : '?';
-    const totalLevel = (totalScore / totalMax * 100) >= 90 ? '우수' : (totalScore / totalMax * 100) >= 70 ? '보통' : '부진';
+    const totalLevel = (totalScore / totalMax * 100) >= 90 ? '?�수' : (totalScore / totalMax * 100) >= 70 ? '보통' : '부�?;
 
-    const gradeTone = getGradeTone(record.grade || record['학년']);
+    const gradeTone = getGradeTone(record.grade || record['?�년']);
 
     const sectionSummary = activeSections.map(s => {
-        const score = parseFloat(record[s + '_점수'] || record[secMap[s]] || 0);
+        const score = parseFloat(record[s + '_?�수'] || record[secMap[s]] || 0);
         const max   = parseFloat(record[s + '_만점'] || record[maxMap[s]] || averages[maxMap[s]] || 0);
-        const avg   = parseFloat(averages[s + '_점수'] || averages[secMap[s]] || 0);
-        const cmt   = sectionComments[s] || '(코멘트 없음)';
-        return `[영역: ${s}] 개인 ${score}점 / 만점 ${max > 0 ? max + '점' : '?'} / 평균 ${avg.toFixed(1)}점\n영역 코멘트: ${cmt}`;
+        const avg   = parseFloat(averages[s + '_?�수'] || averages[secMap[s]] || 0);
+        const cmt   = sectionComments[s] || '(코멘???�음)';
+        return `[?�역: ${s}] 개인 ${score}??/ 만점 ${max > 0 ? max + '?? : '?'} / ?�균 ${avg.toFixed(1)}??n?�역 코멘?? ${cmt}`;
     }).join('\n\n');
 
     const prompt = `${gradeTone}
 
-아래 학생의 영역별 코멘트를 종합해 전체 피드백을 작성해주세요.
+?�래 ?�생???�역�?코멘?��? 종합???�체 ?�드백을 ?�성?�주?�요.
 
-[영역별 분석 요약]
+[?�역�?분석 ?�약]
 ${sectionSummary}
 
-[총점 현황]
-개인 총점: ${totalScore}점 / 시험지 만점: ${totalMax}점 / 반 평균: ${totalAvg.toFixed(1)}점 / 정답률: ${totalRate}% / 성취레벨: ${totalLevel}
+[총점 ?�황]
+개인 총점: ${totalScore}??/ ?�험지 만점: ${totalMax}??/ �??�균: ${totalAvg.toFixed(1)}??/ ?�답�? ${totalRate}% / ?�취?�벨: ${totalLevel}
 
-[작성 규칙]
-1) 각 영역에서의 강점 종합 (1~2문장)
-2) 부족한 영역과 코멘트를 바탕으로 실질적 학습 방향 (1~2문장)
-3) 전체적 격려 메시지 (1문장)
+[?�성 규칙]
+1) �??�역?�서??강점 종합 (1~2문장)
+2) 부족한 ?�역�?코멘?��? 바탕?�로 ?�질???�습 방향 (1~2문장)
+3) ?�체??격려 메시지 (1문장)
 
-실제 총점/만점을 반드시 언급하세요. 학원명, 교재명, 브랜드명은 절대 언급하지 마세요. 모든 답변은 순수 한국어로만 작성하세요.`;
+?�제 총점/만점??반드???�급?�세?? ?�원�? 교재�? 브랜?�명?� ?��? ?�급?��? 마세?? 모든 ?��??� ?�수 ?�국?�로�??�성?�세??`;
 
     return await callGeminiAPI(prompt);
 }
 
-// 학생 성적표 로드 및 표시
+// ?�생 ?�적??로드 �??�시
 async function loadStudentReport() {
     const studentId = document.getElementById('report-student')?.value;
     if (!studentId) {
@@ -3793,10 +3793,10 @@ async function loadStudentReport() {
 
         const result = await sendReliableRequest(payload);
 
-        // [Fix] 문항별 상세보기를 위해 해당 카테고리의 문항 데이터가 없으면 백엔드에서 직접 로드
+        // [Fix] 문항�??�세보기�??�해 ?�당 카테고리??문항 ?�이?��? ?�으�?백엔?�에??직접 로드
         const catQuestions = (globalConfig.questions || []).filter(q => String(q.catId) === String(categoryId));
         if (catQuestions.length === 0) {
-            console.log('📦 성적표용 문항 데이터 백엔드 로드:', category.name);
+            console.log('?�� ?�적?�용 문항 ?�이??백엔??로드:', category.name);
             try {
                 const folderId = extractFolderId(category.targetFolderUrl);
                 const qResult = await sendReliableRequest({
@@ -3808,16 +3808,16 @@ async function loadStudentReport() {
                     const fetched = qResult.questions.map(q => ({ ...q, catId: categoryId }));
                     if (!globalConfig.questions) globalConfig.questions = [];
                     globalConfig.questions.push(...fetched);
-                    // 번들 데이터도 저장
+                    // 번들 ?�이?�도 ?�??
                     if (qResult.bundles && qResult.bundles.length > 0) {
                         if (!globalConfig.bundles) globalConfig.bundles = [];
                         globalConfig.bundles.push(...qResult.bundles.map(b => ({ ...b, catId: categoryId })));
                     }
                     save();
-                    console.log(`✅ 문항 ${fetched.length}개 로드 완료`);
+                    console.log(`??문항 ${fetched.length}�?로드 ?�료`);
                 }
             } catch (e) {
-                console.warn('⚠️ 문항 데이터 로드 실패:', e.message);
+                console.warn('?�️ 문항 ?�이??로드 ?�패:', e.message);
             }
         }
 
@@ -3842,7 +3842,7 @@ async function loadStudentReport() {
             // OR, we can ask backend to calculate averages?
             // The GS code for GET_STUDENT_REPORT only finds the specific row.
 
-            // 평균 계산 (캐시된 전체 학생 데이터 사용)
+            // ?�균 계산 (캐시???�체 ?�생 ?�이???�용)
             const allRecords = window.cachedStudentRecords || [];
             const validRecs  = allRecords.filter(r => {
                 const v = r['총점'] ?? r.totalScore;
@@ -3861,21 +3861,21 @@ async function loadStudentReport() {
             const averages = {
                 '총점':           avgOf('총점', 'totalScore'),
                 '만점':           parseFloat(report['만점'] || report.maxScore || 100),
-                grammarScore:   avgOf('Grammar_점수',   'grammarScore'),
-                writingScore:   avgOf('Writing_점수',   'writingScore'),
-                readingScore:   avgOf('Reading_점수',   'readingScore'),
-                listeningScore: avgOf('Listening_점수', 'listeningScore'),
-                vocabScore:     avgOf('Vocabulary_점수','vocabScore'),
+                grammarScore:   avgOf('Grammar_?�수',   'grammarScore'),
+                writingScore:   avgOf('Writing_?�수',   'writingScore'),
+                readingScore:   avgOf('Reading_?�수',   'readingScore'),
+                listeningScore: avgOf('Listening_?�수', 'listeningScore'),
+                vocabScore:     avgOf('Vocabulary_?�수','vocabScore'),
             };
-            averages['Grammar_점수']   = averages.grammarScore;
-            averages['Writing_점수']   = averages.writingScore;
-            averages['Reading_점수']   = averages.readingScore;
-            averages['Listening_점수'] = averages.listeningScore;
-            averages['Vocabulary_점수']= averages.vocabScore;
+            averages['Grammar_?�수']   = averages.grammarScore;
+            averages['Writing_?�수']   = averages.writingScore;
+            averages['Reading_?�수']   = averages.readingScore;
+            averages['Listening_?�수'] = averages.listeningScore;
+            averages['Vocabulary_?�수']= averages.vocabScore;
 
             const activeSections = allSections.filter(section => {
-                const score = report[section + '_점수'] !== undefined
-                    ? parseFloat(report[section + '_점수'])
+                const score = report[section + '_?�수'] !== undefined
+                    ? parseFloat(report[section + '_?�수'])
                     : parseFloat(report[secMap[section]] || 0);
                 return score > 0;
             });
@@ -3885,36 +3885,36 @@ async function loadStudentReport() {
             window.currentReportData = { record: report, averages, activeSections, sectionComments: savedSections, overallComment: savedOverall };
 
             renderReportCard(report, averages, savedSections, savedOverall, activeSections);
-            showToast(`✅ 성적표 로드 완료 (평균 ${validRecs.length}명 기준)`);
+            showToast(`???�적??로드 ?�료 (?�균 ${validRecs.length}�?기�?)`);
 
         } else {
-            document.getElementById('report-display').innerHTML = '<div class="card text-center text-slate-500">성적 데이터를 찾을 수 없습니다.</div>';
+            document.getElementById('report-display').innerHTML = '<div class="card text-center text-slate-500">?�적 ?�이?��? 찾을 ???�습?�다.</div>';
         }
 
     } catch (err) {
         console.error("Load Error:", err);
-        showToast(`❌ 로드 실패: ${err.message}`);
+        showToast(`??로드 ?�패: ${err.message}`);
     } finally {
         toggleLoading(false);
     }
 }
 
-// 평균 계산 함수
+// ?�균 계산 ?�수
 function calculateAverages(records) {
     if (records.length === 0) return {};
 
     const sums = {
-        '문법_점수': 0, '작문_점수': 0, '독해_점수': 0, '듣기_점수': 0, '어휘_점수': 0, '총점': 0
+        '문법_?�수': 0, '?�문_?�수': 0, '?�해_?�수': 0, '?�기_?�수': 0, '?�휘_?�수': 0, '총점': 0
     };
 
-    // 유효 레코드 수 계산 (각 영역별로 응시자가 다를 수 있으나 여기선 전체 기준)
+    // ?�효 ?�코????계산 (�??�역별로 ?�시?��? ?��? ???�으???�기???�체 기�?)
     let count = 0;
     const scoreMap = {
-        '문법_점수': ['문법_점수', 'grammarScore', 'Grammar'],
-        '작문_점수': ['작문_점수', 'writingScore', 'Writing'],
-        '독해_점수': ['독해_점수', 'readingScore', 'Reading'],
-        '듣기_점수': ['듣기_점수', 'listeningScore', 'Listening'],
-        '어휘_점수': ['어휘_점수', 'vocabScore', 'Vocab', 'Vocabulary'],
+        '문법_?�수': ['문법_?�수', 'grammarScore', 'Grammar'],
+        '?�문_?�수': ['?�문_?�수', 'writingScore', 'Writing'],
+        '?�해_?�수': ['?�해_?�수', 'readingScore', 'Reading'],
+        '?�기_?�수': ['?�기_?�수', 'listeningScore', 'Listening'],
+        '?�휘_?�수': ['?�휘_?�수', 'vocabScore', 'Vocab', 'Vocabulary'],
         '총점': ['총점', 'totalScore', 'Total']
     };
 
@@ -3927,13 +3927,13 @@ function calculateAverages(records) {
     };
 
     records.forEach(record => {
-        // 간단한 유효성 검사 (총점 관련 키가 있는 경우만)
+        // 간단???�효??검??(총점 관???��? ?�는 경우�?
         if (getScore(record, '총점') > 0 || record['총점'] !== undefined || record['totalScore'] !== undefined) {
-            sums['문법_점수'] += getScore(record, '문법_점수');
-            sums['작문_점수'] += getScore(record, '작문_점수');
-            sums['독해_점수'] += getScore(record, '독해_점수');
-            sums['듣기_점수'] += getScore(record, '듣기_점수');
-            sums['어휘_점수'] += getScore(record, '어휘_점수');
+            sums['문법_?�수'] += getScore(record, '문법_?�수');
+            sums['?�문_?�수'] += getScore(record, '?�문_?�수');
+            sums['?�해_?�수'] += getScore(record, '?�해_?�수');
+            sums['?�기_?�수'] += getScore(record, '?�기_?�수');
+            sums['?�휘_?�수'] += getScore(record, '?�휘_?�수');
             sums['총점'] += getScore(record, '총점');
             count++;
         }
@@ -3942,16 +3942,16 @@ function calculateAverages(records) {
     if (count === 0) return sums;
 
     return {
-        '문법_점수': sums['문법_점수'] / count,
-        '작문_점수': sums['작문_점수'] / count,
-        '독해_점수': sums['독해_점수'] / count,
-        '듣기_점수': sums['듣기_점수'] / count,
-        '어휘_점수': sums['어휘_점수'] / count,
+        '문법_?�수': sums['문법_?�수'] / count,
+        '?�문_?�수': sums['?�문_?�수'] / count,
+        '?�해_?�수': sums['?�해_?�수'] / count,
+        '?�기_?�수': sums['?�기_?�수'] / count,
+        '?�휘_?�수': sums['?�휘_?�수'] / count,
         '총점': sums['총점'] / count
     };
 }
 
-// AI 영역별 코멘트 생성
+// AI ?�역�?코멘???�성
 async function generateSectionComments(record, averages, activeSections) {
     const comments = {};
     const secMap = {
@@ -3963,24 +3963,24 @@ async function generateSectionComments(record, averages, activeSections) {
         'Reading': 'readingMax', 'Listening': 'listeningMax', 'Vocabulary': 'vocabMax'
     };
 
-    // 문항별 세부 데이터 파싱
+    // 문항�??��? ?�이???�싱
     let questionScores = [];
     try {
-        const qRaw = record['문항별상세(JSON)'] || record.questionScores || '[]';
+        const qRaw = record['문항별상??JSON)'] || record.questionScores || '[]';
         questionScores = typeof qRaw === 'string' ? JSON.parse(qRaw) : (Array.isArray(qRaw) ? qRaw : []);
     } catch(e) { questionScores = []; }
     const catQs = globalConfig.questions || [];
 
     for (let section of activeSections) {
-        const studentScore = parseFloat(record[section + '_점수'] || record[secMap[section]] || 0);
-        const avgScore    = parseFloat(averages[section + '_점수'] || averages[secMap[section]] || 0);
+        const studentScore = parseFloat(record[section + '_?�수'] || record[secMap[section]] || 0);
+        const avgScore    = parseFloat(averages[section + '_?�수'] || averages[secMap[section]] || 0);
         const maxScore    = parseFloat(record[section + '_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
 
-        // 성취레벨 계산
+        // ?�취?�벨 계산
         const rate = maxScore > 0 ? (studentScore / maxScore * 100) : 0;
-        const level = rate >= 90 ? '우수' : rate >= 70 ? '보통' : '부진';
+        const level = rate >= 90 ? '?�수' : rate >= 70 ? '보통' : '부�?;
 
-        // 세부영역(subType) + 정오답 문항 파싱
+        // ?��??�역(subType) + ?�오??문항 ?�싱
         let subTypeInfo = '';
         let wrongInfo = '';
         if (questionScores.length > 0) {
@@ -3993,39 +3993,39 @@ async function generateSectionComments(record, averages, activeSections) {
                 const wrongItems = [];
                 secItems.forEach(q => {
                     const cq = catQs.find(cq => String(cq.id) === String(q.id));
-                    const sub = cq?.subType || '기타';
+                    const sub = cq?.subType || '기�?';
                     if (!subMap[sub]) subMap[sub] = { score: 0, max: 0 };
                     subMap[sub].score += parseFloat(q.score || 0);
                     subMap[sub].max   += parseFloat(q.maxScore || 0);
-                    // 오답 문항 수집
+                    // ?�답 문항 ?�집
                     const isWrong = (q.correct === false || q.correct === 'X') ||
                                     (parseFloat(q.score || 0) < parseFloat(q.maxScore || 0));
-                    if (isWrong) wrongItems.push(`${q.no || '?'}번(${sub})`);
+                    if (isWrong) wrongItems.push(`${q.no || '?'}�?${sub})`);
                 });
                 const subLines = Object.entries(subMap)
-                    .map(([sub, v]) => `  - ${sub}: ${v.score}/${v.max}점`)
+                    .map(([sub, v]) => `  - ${sub}: ${v.score}/${v.max}??)
                     .join('\n');
-                subTypeInfo = `\n세부 영역별 점수:\n${subLines}`;
+                subTypeInfo = `\n?��? ?�역�??�수:\n${subLines}`;
                 if (wrongItems.length > 0)
-                    wrongInfo = `\n오답/감점 문항: ${wrongItems.join(', ')}`;
+                    wrongInfo = `\n?�답/감점 문항: ${wrongItems.join(', ')}`;
             }
         }
 
-        const gradeTone = getGradeTone(record.grade || record['학년']);
+        const gradeTone = getGradeTone(record.grade || record['?�년']);
 
         const prompt = `${gradeTone}
 
-아래 학생의 ${section} 영역 성적 데이터를 바탕으로 피드백을 작성해주세요.
+?�래 ?�생??${section} ?�역 ?�적 ?�이?��? 바탕?�로 ?�드백을 ?�성?�주?�요.
 
-[성적 데이터]
-개인 점수: ${studentScore}점 / 영역 만점: ${maxScore > 0 ? maxScore + '점' : '정보 없음'} / 반 평균: ${avgScore.toFixed(1)}점 / 성취레벨: ${level}(${rate.toFixed(0)}%)${subTypeInfo}${wrongInfo}
+[?�적 ?�이??
+개인 ?�수: ${studentScore}??/ ?�역 만점: ${maxScore > 0 ? maxScore + '?? : '?�보 ?�음'} / �??�균: ${avgScore.toFixed(1)}??/ ?�취?�벨: ${level}(${rate.toFixed(0)}%)${subTypeInfo}${wrongInfo}
 
-[작성 규칙]
-1) 잘한 점 (2문장)
-2) 미흡한 점 또는 약점 (1문장)
-3) 구체적 학습 방향 제시 (1문장)
+[?�성 규칙]
+1) ?�한 ??(2문장)
+2) 미흡?????�는 ?�점 (1문장)
+3) 구체???�습 방향 ?�시 (1문장)
 
-실제 점수와 만점을 반드시 언급하세요. 학원명, 교재명, 브랜드명은 절대 언급하지 마세요. 모든 답변은 순수 한국어바탕으로 하세요.`;
+?�제 ?�수?� 만점??반드???�급?�세?? ?�원�? 교재�? 브랜?�명?� ?��? ?�급?��? 마세?? 모든 ?��??� ?�수 ?�국?�바?�으�??�세??`;
 
         comments[section] = await callGeminiAPI(prompt);
     }
@@ -4033,12 +4033,12 @@ async function generateSectionComments(record, averages, activeSections) {
 }
 
 
-// Gemini API 호출
-// Gemini API 호출 (Fixed Scope & Backend Proxy)
+// Gemini API ?�출
+// Gemini API ?�출 (Fixed Scope & Backend Proxy)
 async function callGeminiAPI(prompt, silent = false) {
     if (!globalConfig.geminiKey) {
-        if (!silent) showToast("⚠️ 설정에서 Gemini API Key를 먼저 등록해주세요.");
-        return "AI 설정 필요";
+        if (!silent) showToast("?�️ ?�정?�서 Gemini API Key�?먼�? ?�록?�주?�요.");
+        return "AI ?�정 ?�요";
     }
 
     // [Proxy] Call Backend Instead of Direct API
@@ -4062,39 +4062,39 @@ async function callGeminiAPI(prompt, silent = false) {
                 return data.candidates[0].content.parts[0].text;
             } else {
                 console.warn("Gemini API (Proxy) returned no candidates:", data);
-                return "AI 분석을 생성할 수 없습니다. (내용이 안전 정책에 의해 필터링됨)";
+                return "AI 분석???�성?????�습?�다. (?�용???�전 ?�책???�해 ?�터링됨)";
             }
         } else {
             console.error("Gemini Proxy Error:", result.message);
-            return "AI 서비스 오류: " + (result.message || "Unknown Proxy Error");
+            return "AI ?�비???�류: " + (result.message || "Unknown Proxy Error");
         }
 
     } catch (e) {
         if (!silent) toggleLoading(false);
         console.error("Gemini Call Exception:", e);
-        return "AI 서비스 연결 실패";
+        return "AI ?�비???�결 ?�패";
     }
 }
 
-// 성적표 렌더링 (Chart.js 포함)
+// ?�적???�더�?(Chart.js ?�함)
 function renderReportCard(record, averages, sectionComments, overallComment, activeSections) {
     const display = document.getElementById('report-display');
     if (!display) return;
 
-    setCanvasId('05-1'); // 개인 성적표 캔버스
+    setCanvasId('05-1'); // 개인 ?�적??캔버??
 
     function getVal(obj, keys) {
         for (const k of keys) { if (obj[k] !== undefined && obj[k] !== '') return obj[k]; }
         return '';
     }
 
-    const sName  = getVal(record, ['이름','name','studentName']);
-    const sGrade = getVal(record, ['학년','grade']);
-    const sDateRaw = getVal(record, ['응시일','testDate','date']);
+    const sName  = getVal(record, ['?�름','name','studentName']);
+    const sGrade = getVal(record, ['?�년','grade']);
+    const sDateRaw = getVal(record, ['?�시??,'testDate','date']);
     const sDate  = sDateRaw ? String(sDateRaw).split('T')[0] : '';
     const sTotal = parseFloat(getVal(record, ['총점','totalScore','total']) || 0);
     const sMax   = parseFloat(getVal(record, ['만점','maxScore','max']) || 100);
-    let sRate    = getVal(record, ['정답률(%)','정답률','rate']);
+    let sRate    = getVal(record, ['?�답�?%)','?�답�?,'rate']);
     if (!sRate && sMax) sRate = ((sTotal / sMax) * 100).toFixed(1);
 
     const secMap = { Grammar:'grammarScore', Writing:'writingScore', Reading:'readingScore', Listening:'listeningScore', Vocabulary:'vocabScore' };
@@ -4103,99 +4103,99 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
     display.innerHTML = `
     <div class="card space-y-8 animate-fade-in mt-5">
 
-        <!-- 학생 기본 정보 -->
+        <!-- ?�생 기본 ?�보 -->
         <div class="border-b pb-6 flex items-start justify-between">
             <div>
-                <h3 style="font-size:24px;font-weight:900;color:#013976;">${sName} 학생 성적표</h3>
-                <p class="fs-18 text-slate-600 mt-2">${sGrade}학년 | 응시일: ${sDate}</p>
+                <h3 style="font-size:24px;font-weight:900;color:#013976;">${sName} ?�생 ?�적??/h3>
+                <p class="fs-18 text-slate-600 mt-2">${sGrade}?�년 | ?�시?? ${sDate}</p>
             </div>
-            <!-- 우상단: 등록권장 학급 + 총점 -->
+            <!-- ?�상?? ?�록권장 ?�급 + 총점 -->
             <div class="flex items-stretch gap-6">
 
-                <!-- 권장학급 (통합 박스: 배경색 구분) -->
+                <!-- 권장?�급 (?�합 박스: 배경??구분) -->
                 <div style="border:2px solid #013976;border-radius:1rem;height:65px;min-width:160px;display:flex;align-items:stretch;overflow:hidden;">
-                    <!-- 라벨 (네이비 배경) -->
+                    <!-- ?�벨 (?�이�?배경) -->
                     <div style="background:#013976;color:white;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 14px;white-space:nowrap;letter-spacing:0.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-                        권장<br>학급
+                        권장<br>?�급
                     </div>
-                    <!-- 드롭다운 (흰 배경) -->
+                    <!-- ?�롭?�운 (??배경) -->
                     <select id="report-student-class"
                         style="border:none;outline:none;font-size:20px;font-weight:900;color:#013976;background:white;text-align:center;cursor:pointer;-webkit-appearance:none;min-width:80px;padding:0 12px;">
-                        <option value="" style="font-size:16px;">선택</option>
-                        ${(getClassesForGrade(record['학년']||record.grade||'') || []).map(c =>
-                            `<option value="${c}" style="font-size:16px;" ${(record.studentClass||record['등록학급']||'')===c?'selected':''}>${c}</option>`
+                        <option value="" style="font-size:16px;">?�택</option>
+                        ${(getClassesForGrade(record['?�년']||record.grade||'') || []).map(c =>
+                            `<option value="${c}" style="font-size:16px;" ${(record.studentClass||record['?�록?�급']||'')===c?'selected':''}>${c}</option>`
                         ).join('')}
                     </select>
                 </div>
 
-                <!-- 세로 구분선 -->
+                <!-- ?�로 구분??-->
                 <div style="width:1px;background:#cbd5e1;align-self:stretch;margin:0 2px;"></div>
 
                 <!-- 총점 -->
                 <div style="background:linear-gradient(135deg,#013976 0%,#1a5276 100%);border-radius:1rem;width:160px;height:65px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;" class="shadow-lg">
                     <div style="font-size:24px;font-weight:900;line-height:1;">${sTotal}</div>
-                    <div style="font-size:14px;opacity:0.75;margin-top:5px;">/ ${sMax}점 (${sRate}%)</div>
+                    <div style="font-size:14px;opacity:0.75;margin-top:5px;">/ ${sMax}??(${sRate}%)</div>
                 </div>
             </div>
         </div>
 
-        <!-- 1. 총점 막대그래프 -->
+        <!-- 1. 총점 막�?그래??-->
         <div>
-            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">📊 총점 비교</h4>
+            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">?�� 총점 비교</h4>
             <canvas id="chart-total" style="max-height:240px;"></canvas>
         </div>
 
-        <!-- 2. 영역별 막대그래프 -->
+        <!-- 2. ?�역�?막�?그래??-->
         <div>
-            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">📊 영역별 점수 비교</h4>
+            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">?�� ?�역�??�수 비교</h4>
             <canvas id="chart-sections-bar" style="max-height:320px;"></canvas>
         </div>
 
-        <!-- 3. 레이더 차트 -->
+        <!-- 3. ?�이??차트 -->
         <div>
-            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">🕸 영역별 균형도</h4>
+            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">?�� ?�역�?균형??/h4>
             <canvas id="chart-radar" style="max-height:380px;"></canvas>
         </div>
 
-        <!-- 4. 영역별 코멘트 -->
+        <!-- 4. ?�역�?코멘??-->
         <div id="qdetail-checkbox-row" class="flex items-center gap-3 py-3 px-4 bg-slate-100 rounded-2xl border">
             <input type="checkbox" id="chk-qdetail" onchange="toggleAllQuestionDetail(this.checked)"
                 class="w-5 h-5 cursor-pointer accent-[#013976]">
-            <label for="chk-qdetail" class="cursor-pointer font-bold text-[#013976] fs-16 select-none">문항별 상세 보기</label>
+            <label for="chk-qdetail" class="cursor-pointer font-bold text-[#013976] fs-16 select-none">문항�??�세 보기</label>
         </div>
         <div class="space-y-4" id="sections-container">
             ${activeSections.map(section => {
-                const sScore = parseFloat(record[section+'_점수'] || record[secMap[section]] || 0);
+                const sScore = parseFloat(record[section+'_?�수'] || record[secMap[section]] || 0);
                 const sMaxV  = parseFloat(record[section+'_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
-                const aScore = parseFloat(averages[section+'_점수'] || averages[secMap[section]] || 0);
+                const aScore = parseFloat(averages[section+'_?�수'] || averages[secMap[section]] || 0);
                 const comment = sectionComments?.[section];
                 return `<div class="bg-slate-50 rounded-2xl border overflow-hidden">
                     <div class="px-6 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-3 flex-wrap">
-                            <h5 class="font-black text-[#013976] fs-18">${section} 영역</h5>
-                            <span class="text-slate-500" style="font-size:15px;">개인: ${sScore}점 | 평균: ${aScore.toFixed(1)}점${sMaxV>0?' | 만점: '+sMaxV+'점':''}</span>
+                            <h5 class="font-black text-[#013976] fs-18">${section} ?�역</h5>
+                            <span class="text-slate-500" style="font-size:15px;">개인: ${sScore}??| ?�균: ${aScore.toFixed(1)}??{sMaxV>0?' | 만점: '+sMaxV+'??:''}</span>
                         </div>
-                        <button onclick="regenerateSectionComment('${section}')" class="no-print text-xl px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all" title="이 영역 코멘트 재생성">🔄</button>
+                        <button onclick="regenerateSectionComment('${section}')" class="no-print text-xl px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all" title="???�역 코멘???�생??>?��</button>
                     </div>
                     ${comment
                         ? `<div class="px-6 pb-4 border-t border-slate-200 pt-3"><p class="fs-15 text-slate-600 leading-relaxed">${comment.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p></div>`
-                        : `<div class="px-6 pb-4 border-t border-slate-200 pt-3"><p class="text-slate-400 fs-14 italic text-center py-2">분석 대기 중...</p></div>`
+                        : `<div class="px-6 pb-4 border-t border-slate-200 pt-3"><p class="text-slate-400 fs-14 italic text-center py-2">분석 ?��?�?..</p></div>`
                     }
                     <div id="qdetail-${section}" class="hidden px-6 pb-6 border-t border-slate-100">
-                        <p class="text-slate-400 fs-14 text-center py-4">로딩 중...</p>
+                        <p class="text-slate-400 fs-14 text-center py-4">로딩 �?..</p>
                     </div>
                 </div>`;
             }).join('')}
         </div>
 
-        <!-- 5. 종합분석 코멘트 -->
+        <!-- 5. 종합분석 코멘??-->
         <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-3xl border-2 border-blue-200">
-            <h4 class="ys-label text-blue-700 mb-3">🤖 종합분석 코멘트</h4>
+            <h4 class="ys-label text-blue-700 mb-3">?�� 종합분석 코멘??/h4>
             ${overallComment
                 ? `<p class="text-slate-700 leading-relaxed whitespace-pre-wrap fs-15">${overallComment}</p>`
                 : `<div class="text-center py-4">
-                    <p class="text-slate-500 mb-4 fs-15">AI 심층 분석을 통해 학생의 강점과 약점을 파악해보세요.</p>
-                    <button onclick="triggerAIAnalysis()" class="btn-ys !bg-[#013976] !text-white !py-3 !px-8 shadow-lg hover:scale-105 transition-all fs-16 font-bold flex items-center gap-2 mx-auto">✨ AI 분석 생성하기</button>
+                    <p class="text-slate-500 mb-4 fs-15">AI ?�층 분석???�해 ?�생??강점�??�점???�악?�보?�요.</p>
+                    <button onclick="triggerAIAnalysis()" class="btn-ys !bg-[#013976] !text-white !py-3 !px-8 shadow-lg hover:scale-105 transition-all fs-16 font-bold flex items-center gap-2 mx-auto">??AI 분석 ?�성?�기</button>
                   </div>`
             }
         </div>
@@ -4206,7 +4206,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         </div>
     </div>`;
 
-    // 차트 렌더링
+    // 차트 ?�더�?
     setTimeout(() => {
         renderTotalChart(record, averages, sTotal, sMax);
         renderSectionsBarChart(record, averages, activeSections, secMap, maxMap);
@@ -4214,29 +4214,29 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
     }, 100);
 }
 
-// [New] 재채점 — 기존 학생 답안을 새 채점 로직으로 재계산
+// [New] ?�채????기존 ?�생 ?�안????채점 로직?�로 ?�계??
 async function regradeStudent(silent = false) {
-    if (!window.currentReportData) { if (!silent) showToast('⚠️ 성적표를 먼저 로드해주세요.'); return; }
-    if (!silent && !confirm('이 학생의 답안을 새 채점 로직(관대한 매칭 + AI)으로 재채점합니다.\n계속하시겠습니까?')) return;
+    if (!window.currentReportData) { if (!silent) showToast('?�️ ?�적?��? 먼�? 로드?�주?�요.'); return; }
+    if (!silent && !confirm('???�생???�안????채점 로직(관?�??매칭 + AI)?�로 ?�채?�합?�다.\n계속?�시겠습?�까?')) return;
 
     const { record } = window.currentReportData;
     const categoryId = document.getElementById('report-category')?.value;
     const category = globalConfig.categories.find(c => c.id === categoryId);
-    if (!category) { if (!silent) showToast('❌ 카테고리를 찾을 수 없습니다.'); return; }
+    if (!category) { if (!silent) showToast('??카테고리�?찾을 ???�습?�다.'); return; }
 
     toggleLoading(true);
     try {
-        // 1. 기존 questionScores 파싱
-        const qs = JSON.parse(record.questionScores || record['문항별상세(JSON)'] || '[]');
-        if (qs.length === 0) { if (!silent) showToast('⚠️ 문항별 데이터가 없어 재채점 불가합니다.'); return; }
+        // 1. 기존 questionScores ?�싱
+        const qs = JSON.parse(record.questionScores || record['문항별상??JSON)'] || '[]');
+        if (qs.length === 0) { if (!silent) showToast('?�️ 문항�??�이?��? ?�어 ?�채??불�??�니??'); return; }
 
-        // 2. 문항 뱅크 로드 (section/difficulty/modelAnswer 참조용)
+        // 2. 문항 뱅크 로드 (section/difficulty/modelAnswer 참조??
         const catQs = (globalConfig.questions || []).filter(q => String(q.catId) === String(categoryId));
 
-        // 3. 새 로직으로 재채점
+        // 3. ??로직?�로 ?�채??
         const normalize = s => s.toLowerCase().replace(/[\s,.\-_'"!?;:()`\u2018\u2019\u201C\u201D]/g, '').trim();
         const sections = { Grammar:{s:0,m:0}, Writing:{s:0,m:0}, Reading:{s:0,m:0}, Listening:{s:0,m:0}, Vocabulary:{s:0,m:0} };
-        const difficulties = { '최상':{s:0,m:0}, '상':{s:0,m:0}, '중':{s:0,m:0}, '하':{s:0,m:0}, '기초':{s:0,m:0} };
+        const difficulties = { '최상':{s:0,m:0}, '??:{s:0,m:0}, '�?:{s:0,m:0}, '??:{s:0,m:0}, '기초':{s:0,m:0} };
         let totalScore = 0, maxScore = 0;
 
         for (const q of qs) {
@@ -4247,7 +4247,7 @@ async function regradeStudent(silent = false) {
             let earnedScore = 0;
             let isCorrect = false;
 
-            if (q.type === '객관형') {
+            if (q.type === '객�???) {
                 isCorrect = normalize(studentAns) === normalize(correctAns);
                 earnedScore = isCorrect ? maxQ : 0;
             } else {
@@ -4260,40 +4260,40 @@ async function regradeStudent(silent = false) {
                 }
                 if (!isCorrect && studentAns && globalConfig.geminiKey) {
                     try {
-                        const aiQ = bankQ || { questionTitle: q.no + '번', questionType: q.type, section: q.section || '', answer: correctAns, modelAnswer: '', score: maxQ };
+                        const aiQ = bankQ || { questionTitle: q.no + '�?, questionType: q.type, section: q.section || '', answer: correctAns, modelAnswer: '', score: maxQ };
                         const aiResult = await gradeWithAI(aiQ, studentAns);
                         if (aiResult && aiResult.score !== undefined) {
                             earnedScore = Math.min(Math.max(0, Math.round(aiResult.score)), maxQ);
                             isCorrect = earnedScore >= maxQ;
-                            console.log(`🔄 재채점 [문항 ${q.no}]: ${earnedScore}/${maxQ} (${aiResult.feedback})`);
+                            console.log(`?�� ?�채??[문항 ${q.no}]: ${earnedScore}/${maxQ} (${aiResult.feedback})`);
                         }
-                    } catch (e) { console.warn(`⚠️ AI 재채점 실패 [${q.no}]:`, e.message); }
+                    } catch (e) { console.warn(`?�️ AI ?�채???�패 [${q.no}]:`, e.message); }
                 }
             }
 
             q.score = earnedScore;
             q.correct = isCorrect;
-            q._gradingV2 = true; // 재채점 완료 플래그
+            q._gradingV2 = true; // ?�채???�료 ?�래�?
             totalScore += earnedScore;
             maxScore += maxQ;
 
             const sec = q.section || bankQ?.section || 'Reading';
-            const diff = q.difficulty || bankQ?.difficulty || '중';
+            const diff = q.difficulty || bankQ?.difficulty || '�?;
             if (sections[sec]) { sections[sec].s += earnedScore; sections[sec].m += maxQ; }
             if (difficulties[diff]) { difficulties[diff].s += earnedScore; difficulties[diff].m += maxQ; }
         }
 
-        // 4. 서버 업데이트 저장
+        // 4. ?�버 ?�데?�트 ?�??
         const folderId = extractFolderId(category.targetFolderUrl);
         const payload = {
             type: 'STUDENT_SAVE',
             categoryId: categoryId,
             categoryName: category.name,
             parentFolderId: folderId,
-            testDate: record['날짜'] || record.testDate || '',
-            studentId: record['학생ID'] || record.studentId || '',
-            studentName: record['이름'] || record.studentName || '',
-            grade: record['학년'] || record.grade || '',
+            testDate: record['?�짜'] || record.testDate || '',
+            studentId: record['?�생ID'] || record.studentId || '',
+            studentName: record['?�름'] || record.studentName || '',
+            grade: record['?�년'] || record.grade || '',
             questionScores: JSON.stringify(qs),
             grammarScore: sections.Grammar.s, grammarMax: sections.Grammar.m,
             writingScore: sections.Writing.s, writingMax: sections.Writing.m,
@@ -4301,23 +4301,23 @@ async function regradeStudent(silent = false) {
             listeningScore: sections.Listening.s, listeningMax: sections.Listening.m,
             vocabScore: sections.Vocabulary.s, vocabMax: sections.Vocabulary.m,
             difficulty_highest: difficulties['최상'].s, difficulty_highest_max: difficulties['최상'].m,
-            difficulty_high: difficulties['상'].s, difficulty_high_max: difficulties['상'].m,
-            difficulty_mid: difficulties['중'].s, difficulty_mid_max: difficulties['중'].m,
-            difficulty_low: difficulties['하'].s, difficulty_low_max: difficulties['하'].m,
+            difficulty_high: difficulties['??].s, difficulty_high_max: difficulties['??].m,
+            difficulty_mid: difficulties['�?].s, difficulty_mid_max: difficulties['�?].m,
+            difficulty_low: difficulties['??].s, difficulty_low_max: difficulties['??].m,
             difficulty_basic: difficulties['기초'].s, difficulty_basic_max: difficulties['기초'].m,
             totalScore: totalScore,
             maxScore: maxScore
         };
 
         await sendReliableRequest(payload);
-        showToast(`✅ 재채점 완료! 총점: ${totalScore}/${maxScore}`);
+        showToast(`???�채???�료! 총점: ${totalScore}/${maxScore}`);
 
-        // 5. 성적표 새로고침 (이번엔 _gradingV2 플래그가 있으므로 재채점 건너뜀)
+        // 5. ?�적???�로고침 (?�번??_gradingV2 ?�래그�? ?�으므�??�채??건너?�)
         await loadStudentReport();
 
     } catch (e) {
-        console.error('재채점 오류:', e);
-        showToast('❌ 재채점 실패: ' + e.message);
+        console.error('?�채???�류:', e);
+        showToast('???�채???�패: ' + e.message);
     } finally {
         toggleLoading(false);
     }
@@ -4328,9 +4328,9 @@ function toggleAllQuestionDetail(checked) {
     const isSection = record.inputMode === 'section';
 
     if (isSection) {
-        // section 모드: 체크 해제 후 안내 토스트
+        // section 모드: 체크 ?�제 ???�내 ?�스??
         document.getElementById('chk-qdetail').checked = false;
-        showToast('⚠️ 영역별 점수만 입력된 학생으로, 문항별 정보가 입력되지 않아 불가합니다.');
+        showToast('?�️ ?�역�??�수�??�력???�생?�로, 문항�??�보가 ?�력?��? ?�아 불�??�니??');
         return;
     }
 
@@ -4340,9 +4340,9 @@ function toggleAllQuestionDetail(checked) {
         return;
     }
 
-    // 펼치기: 각 섹션 렌더링
+    // ?�치�? �??�션 ?�더�?
     try {
-        const qs = JSON.parse(record['문항별상세(JSON)'] || record.questionScores || '[]');
+        const qs = JSON.parse(record['문항별상??JSON)'] || record.questionScores || '[]');
         const catQs = globalConfig.questions || [];
 
         const mark = (q) => {
@@ -4350,21 +4350,21 @@ function toggleAllQuestionDetail(checked) {
             if (q.correct === false || q.correct === 'X') return '<span class="text-red-500 font-black">X</span>';
             if (q.score > 0 && q.maxScore > 0 && q.score === q.maxScore) return '<span class="text-green-600 font-black">O</span>';
             if (q.score === 0 && q.maxScore > 0) return '<span class="text-red-500 font-black">X</span>';
-            return '<span class="text-slate-400">△</span>';
+            return '<span class="text-slate-400">??/span>';
         };
 
         allQdetail.forEach(el => {
             const section = el.id.replace('qdetail-', '');
             el.classList.remove('hidden');
-            // [Fix] questionScores 자체의 section 필드 우선 사용, 없으면 no(문항번호)로 catQs 매칭
-            // (GET_FULL_DB가 매번 랜덤 ID를 생성하므로, id 매칭은 불가능 → no 매칭 사용)
+            // [Fix] questionScores ?�체??section ?�드 ?�선 ?�용, ?�으�?no(문항번호)�?catQs 매칭
+            // (GET_FULL_DB가 매번 ?�덤 ID�??�성?��?�? id 매칭?� 불�?????no 매칭 ?�용)
             const secItems = qs.filter(q => {
                 if (q.section) return q.section === section;
                 const found = catQs.find(cq => String(cq.no) === String(q.no));
                 return found?.section === section;
             });
-            if (secItems.length === 0) { el.innerHTML = '<p class="text-slate-400 fs-14 text-center py-4">문항 정보 없음</p>'; return; }
-            // [Redesign] 가로 그리드 레이아웃 (10개씩 묶음)
+            if (secItems.length === 0) { el.innerHTML = '<p class="text-slate-400 fs-14 text-center py-4">문항 ?�보 ?�음</p>'; return; }
+            // [Redesign] 가�?그리???�이?�웃 (10개씩 묶음)
             let gridHtml = '';
             for (let i = 0; i < secItems.length; i += 10) {
                 const chunk = secItems.slice(i, i + 10);
@@ -4374,28 +4374,28 @@ function toggleAllQuestionDetail(checked) {
                         `<th class="py-1.5 px-1 text-center font-bold border border-[#013976]" style="width:10%">${q.no||'-'}</th>`
                     ).join('')}${'<th class="border-0" style="width:10%"></th>'.repeat(10 - cols)}</tr>
                     <tr class="bg-slate-50">${chunk.map(q =>
-                        `<td class="py-1 px-1 text-center text-slate-500 border border-slate-200 text-[14px]">${q.maxScore||0}점</td>`
+                        `<td class="py-1 px-1 text-center text-slate-500 border border-slate-200 text-[14px]">${q.maxScore||0}??/td>`
                     ).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-white">${chunk.map(q => {
                         const cq = catQs.find(cq => String(cq.no) === String(q.no));
                         const diff = q.difficulty || cq?.difficulty || '-';
-                        const diffColor = {'최상':'text-red-600','상':'text-orange-500','중':'text-blue-500','하':'text-green-500','기초':'text-slate-400'}[diff] || 'text-slate-500';
+                        const diffColor = {'최상':'text-red-600','??:'text-orange-500','�?:'text-blue-500','??:'text-green-500','기초':'text-slate-400'}[diff] || 'text-slate-500';
                         return `<td class="py-1 px-1 text-center border border-slate-200 text-[14px] ${diffColor}">${diff}</td>`;
                     }).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-slate-50">${chunk.map(q =>
-                        `<td class="py-1 px-1 text-center font-bold border border-slate-200 text-[14px]">${q.score||0}점</td>`
+                        `<td class="py-1 px-1 text-center font-bold border border-slate-200 text-[14px]">${q.score||0}??/td>`
                     ).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-white">${chunk.map(q =>
                         `<td class="py-1.5 px-1 text-center font-black border border-slate-200 text-[15px]">${mark(q)}</td>`
                     ).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
                 </table>`;
             }
-            // 행 라벨 추가
+            // ???�벨 추�?
             el.innerHTML = `<div class="mt-3 space-y-1">
                 ${gridHtml}
             </div>`;
         });
-    } catch(e) { showToast('❌ 문항 데이터 오류: ' + e.message); }
+    } catch(e) { showToast('??문항 ?�이???�류: ' + e.message); }
 }
 
 function renderTotalChart(record, averages, sTotal, sMax) {
@@ -4411,8 +4411,8 @@ function renderTotalChart(record, averages, sTotal, sMax) {
         data: {
             labels: ['총점'],
             datasets: [
-                { label: '개인 점수', data: [sTotal], backgroundColor: '#e74c3c', borderRadius: 8 },
-                { label: '평균',      data: [avgTotal], backgroundColor: '#94a3b8', borderRadius: 8 },
+                { label: '개인 ?�수', data: [sTotal], backgroundColor: '#e74c3c', borderRadius: 8 },
+                { label: '?�균',      data: [avgTotal], backgroundColor: '#94a3b8', borderRadius: 8 },
                 { label: '만점',      data: [sMax],     backgroundColor: '#013976', borderRadius: 8 }
             ]
         },
@@ -4433,15 +4433,15 @@ function renderTotalChart(record, averages, sTotal, sMax) {
     });
 }
 
-// 영역별 막대 (그룹)
+// ?�역�?막�? (그룹)
 function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap) {
     const ctx = document.getElementById('chart-sections-bar');
     if (!ctx) return;
     if (ctx._chartInstance) ctx._chartInstance.destroy();
     const DL = window.ChartDataLabels;
     const labels = activeSections.map(s => s);
-    const personal = activeSections.map(s => parseFloat(record[s+'_점수'] || record[secMap[s]] || 0));
-    const avg      = activeSections.map(s => parseFloat(averages[s+'_점수'] || averages[secMap[s]] || 0));
+    const personal = activeSections.map(s => parseFloat(record[s+'_?�수'] || record[secMap[s]] || 0));
+    const avg      = activeSections.map(s => parseFloat(averages[s+'_?�수'] || averages[secMap[s]] || 0));
     const maxV     = activeSections.map(s => parseFloat(record[s+'_만점'] || record[maxMap[s]] || averages[maxMap[s]] || 0));
     ctx._chartInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
@@ -4449,20 +4449,20 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
         data: {
             labels,
             datasets: [
-                { label: '개인 점수', data: personal, backgroundColor: '#e74c3c', borderRadius: 6 },
-                { label: '평균',      data: avg.map(v => +parseFloat(v).toFixed(1)), backgroundColor: '#94a3b8', borderRadius: 6 },
+                { label: '개인 ?�수', data: personal, backgroundColor: '#e74c3c', borderRadius: 6 },
+                { label: '?�균',      data: avg.map(v => +parseFloat(v).toFixed(1)), backgroundColor: '#94a3b8', borderRadius: 6 },
                 { label: '만점',      data: maxV,     backgroundColor: '#013976', borderRadius: 6 }
             ]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            scales: { y:{beginAtZero:true, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)}}, x:{ticks:{font:{size:16}}} },
+            scales: { y:{beginAtZero:true, ticks:{font:{size:20}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)}}, x:{ticks:{font:{size:20}}} },
             plugins: {
-                legend: { position: 'right', labels:{font:{size:16}} },
-                tooltip: { bodyFont:{size:16}, titleFont:{size:16}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
+                legend: { position: 'right', labels:{font:{size:20}} },
+                tooltip: { bodyFont:{size:20}, titleFont:{size:20}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
                 datalabels: DL ? {
                     anchor: 'center', align: 'center',
-                    font: { size: 16, weight: 'bold' },
+                    font: { size:20, weight: 'bold' },
                     color: 'white',
                     formatter: (v) => v > 0 ? parseFloat(v).toFixed(1) : ''
                 } : false
@@ -4471,29 +4471,29 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
     });
 }
 
-// 인쇄 함수 — canvas를 이미지로 변환 후 새 창 출력
+// ?�쇄 ?�수 ??canvas�??��?지�?변??????�?출력
 function printReport() {
     const catVal = document.getElementById('report-category')?.value;
     const stuVal = document.getElementById('report-student')?.value;
     if (!catVal || !stuVal) {
-        showToast('⚠️ 시험지와 학생을 먼저 선택해주세요.');
+        showToast('?�️ ?�험지?� ?�생??먼�? ?�택?�주?�요.');
         return;
     }
 
-    // 등록학급 필수 체크
+    // ?�록?�급 ?�수 체크
     const clsEl  = document.getElementById('report-student-class');
     const clsVal = clsEl?.value?.trim() || '';
     if (!clsVal) {
-        showToast('⚠️ 등록학급을 선택해야 출력할 수 있습니다.');
+        showToast('?�️ ?�록?�급???�택?�야 출력?????�습?�다.');
         clsEl?.focus();
         return;
     }
 
-    // [Fix] AI 종합 분석 코멘트가 없으면 경고 팝업
+    // [Fix] AI 종합 분석 코멘?��? ?�으�?경고 ?�업
     const aiCommentEl = document.getElementById('report-display')?.querySelector('[id^="ai-summary"], [id^="ai-comment"]');
-    const aiSectionTexts = Array.from(document.getElementById('report-display')?.querySelectorAll('p') || []).filter(p => p.textContent.includes('분석 대기 중') || p.textContent.includes('로딩 중'));
+    const aiSectionTexts = Array.from(document.getElementById('report-display')?.querySelectorAll('p') || []).filter(p => p.textContent.includes('분석 ?��?�?) || p.textContent.includes('로딩 �?));
     if (aiSectionTexts.length > 0) {
-        if (!confirm('⚠️ AI 분석 코멘트가 아직 생성되지 않았습니다.\n\n코멘트 없이 인쇄하시겠습니까?\n("취소"를 눌러 코멘트를 먼저 생성하세요)')) {
+        if (!confirm('?�️ AI 분석 코멘?��? ?�직 ?�성?��? ?�았?�니??\n\n코멘???�이 ?�쇄?�시겠습?�까?\n("취소"�??�러 코멘?��? 먼�? ?�성?�세??')) {
             return;
         }
     }
@@ -4501,13 +4501,13 @@ function printReport() {
     const display = document.getElementById('report-display');
     if (!display) return;
 
-    // 1. 현재 페이지의 CSS 수집
+    // 1. ?�재 ?�이지??CSS ?�집
     const styles = Array.from(document.styleSheets).map(ss => {
         try { return Array.from(ss.cssRules).map(r => r.cssText).join('\n'); }
         catch(e) { return ''; }
     }).join('\n');
 
-    // 2. 모든 chart canvas를 PNG 이미지 데이터로 변환 (핵심 수정)
+    // 2. 모든 chart canvas�?PNG ?��?지 ?�이?�로 변??(?�심 ?�정)
     const canvasIds = ['chart-total', 'chart-sections-bar', 'chart-radar'];
     const imgDataMap = {};
     canvasIds.forEach(id => {
@@ -4521,7 +4521,7 @@ function printReport() {
         }
     });
 
-    // 3. display 내부 HTML 클론 후 canvas → img 교체
+    // 3. display ?��? HTML ?�론 ??canvas ??img 교체
     const clone = display.cloneNode(true);
     canvasIds.forEach(id => {
         const canvasEl = clone.querySelector('#' + id);
@@ -4536,10 +4536,10 @@ function printReport() {
         }
     });
 
-    // 3b. 인쇄 불필요 요소 제거
-    // [Fix] 문항별 상세보기: 체크박스 상태에 따라 표시/숨김
+    // 3b. ?�쇄 불필???�소 ?�거
+    // [Fix] 문항�??�세보기: 체크박스 ?�태???�라 ?�시/?��?
     const isDetailChecked = document.getElementById('chk-qdetail')?.checked || false;
-    // [Fix] 체크박스 행 전체를 확실히 제거 (id로 직접 지정)
+    // [Fix] 체크박스 ???�체�??�실???�거 (id�?직접 지??
     const chkRow = clone.querySelector('#qdetail-checkbox-row');
     if (chkRow) chkRow.remove();
     clone.querySelectorAll('[id^="qdetail-"]').forEach(el => {
@@ -4547,38 +4547,38 @@ function printReport() {
             el.classList.remove('hidden');
             el.style.display = '';
         } else {
-            el.remove(); // 체크 안 되어 있으면 완전 제거
+            el.remove(); // 체크 ???�어 ?�으�??�전 ?�거
         }
     });
 
-    // [Fix] "분석 대기 중...", "로딩 중..." 등 로딩 상태 텍스트 제거
+    // [Fix] "분석 ?��?�?..", "로딩 �?.." ??로딩 ?�태 ?�스???�거
     clone.querySelectorAll('p').forEach(p => {
         const txt = p.textContent.trim();
-        if (txt === '분석 대기 중...' || txt === '로딩 중...' || txt === '분석 중...') {
+        if (txt === '분석 ?��?�?..' || txt === '로딩 �?..' || txt === '분석 �?..') {
             const parent = p.closest('div');
             if (parent) parent.remove();
             else p.remove();
         }
     });
 
-    // 3b-2. 권장학급 <select> → 텍스트 span으로 교체 (select는 클론 시 JS 선택값 소실)
+    // 3b-2. 권장?�급 <select> ???�스??span?�로 교체 (select???�론 ??JS ?�택�??�실)
     const _clsSel = clone.querySelector('#report-student-class');
     if (_clsSel) {
         const _clsSpan = document.createElement('span');
         _clsSpan.style.cssText = 'font-size:20px;font-weight:900;color:#013976;background:white;display:inline-flex;align-items:center;justify-content:center;min-width:80px;padding:0 12px;height:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact;';
-        _clsSpan.textContent = clsVal || '미선택';
+        _clsSpan.textContent = clsVal || '미선??;
         _clsSel.parentNode.replaceChild(_clsSpan, _clsSel);
     }
 
 
-    // 3c. AI 종합 분석 섹션 앞에 페이지 강제 분리
+    // 3c. AI 종합 분석 ?�션 ?�에 ?�이지 강제 분리
     const aiHeader = Array.from(clone.querySelectorAll('h4')).find(h => h.textContent.includes('AI 종합'));
     if (aiHeader) {
         const aiSection = aiHeader.closest('div[class]');
         if (aiSection) aiSection.style.cssText += ';page-break-before:always;break-before:page;';
     }
 
-    // 3d. 각 차트 컨테이너 페이지 분리 방지
+    // 3d. �?차트 컨테?�너 ?�이지 분리 방�?
     clone.querySelectorAll('canvas, img').forEach(el => {
         el.style.pageBreakInside = 'avoid';
         if (el.parentElement) el.parentElement.style.pageBreakInside = 'avoid';
@@ -4597,7 +4597,7 @@ function printReport() {
         });
     }
 
-    // 4. 배너 HTML (우측 하단 고정, 50% 크기)
+    // 4. 배너 HTML (?�측 ?�단 고정, 50% ?�기)
     const bannerHtml = globalConfig.banner
         ? `<div style="position:fixed;bottom:0;right:0;width:50%;z-index:9999;">
                <img src="${getSafeImageUrl(globalConfig.banner)}" alt="Report Banner"
@@ -4605,13 +4605,13 @@ function printReport() {
            </div>`
         : '';
 
-    // 5. 팝업 창 열기 및 출력
+    // 5. ?�업 �??�기 �?출력
     const win = window.open('', '_blank', 'width=900,height=1200');
-    if (!win) { showToast('⚠️ 팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.'); return; }
+    if (!win) { showToast('?�️ ?�업??차단?�었?�니?? 브라?��? ?�업 ?�용 ???�시 ?�도?�주?�요.'); return; }
     win.document.write(`<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
-<title>성적표 인쇄</title>
+<title>?�적???�쇄</title>
 <script>
 (function(){
   const _f=a=>a[0]&&typeof a[0]==='string'&&a[0].includes('cdn.tailwindcss.com');
@@ -4645,26 +4645,26 @@ window.onload = function() { setTimeout(function(){ window.print(); }, 800); };
     win.document.close();
 }
 
-// 레이더 차트 — 정답률(%) 기준으로 정규화 (만점 다른 영역 공정 비교)
+// ?�이??차트 ???�답�?%) 기�??�로 ?�규??(만점 ?�른 ?�역 공정 비교)
 function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
     const ctx = document.getElementById('chart-radar');
     if (!ctx || activeSections.length < 3) return;
     if (ctx._chartInstance) ctx._chartInstance.destroy();
 
-    // 각 영역 만점 구하기 (record 우선, 없으면 globalConfig.questions 합산)
+    // �??�역 만점 구하�?(record ?�선, ?�으�?globalConfig.questions ?�산)
     const getSectionMax = (s) => {
         const fromRecord = parseFloat(record[s+'_만점'] || record[maxMap?.[s]] || 0);
         if (fromRecord > 0) return fromRecord;
-        // globalConfig에서 해당 영역 문항 배점 합산
+        // globalConfig?�서 ?�당 ?�역 문항 배점 ?�산
         const catQs = globalConfig?.questions || [];
         return catQs.filter(q => q.section === s).reduce((sum, q) => sum + (parseInt(q.score)||0), 0) || 100;
     };
 
-    const rawPersonal = activeSections.map(s => parseFloat(record[s+'_점수'] || record[secMap[s]] || 0));
-    const rawAvg      = activeSections.map(s => parseFloat(averages[s+'_점수'] || averages[secMap[s]] || 0));
+    const rawPersonal = activeSections.map(s => parseFloat(record[s+'_?�수'] || record[secMap[s]] || 0));
+    const rawAvg      = activeSections.map(s => parseFloat(averages[s+'_?�수'] || averages[secMap[s]] || 0));
     const maxScores   = activeSections.map(s => getSectionMax(s));
 
-    // 정답률(%) 변환
+    // ?�답�?%) 변??
     const pctPersonal = rawPersonal.map((v, i) => maxScores[i] > 0 ? +((v / maxScores[i]) * 100).toFixed(1) : 0);
     const pctAvg      = rawAvg.map((v, i)      => maxScores[i] > 0 ? +((v / maxScores[i]) * 100).toFixed(1) : 0);
 
@@ -4673,8 +4673,8 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
         data: {
             labels: activeSections,
             datasets: [
-                { label:'개인 정답률(%)', data:pctPersonal, borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,0.15)', borderWidth:2.5, pointBackgroundColor:'#e74c3c', pointBorderColor:'#fff', pointRadius:4 },
-                { label:'평균 정답률(%)', data:pctAvg,      borderColor:'#94a3b8', backgroundColor:'rgba(148,163,184,0.1)', borderWidth:2, pointBackgroundColor:'#94a3b8' }
+                { label:'개인 ?�답�?%)', data:pctPersonal, borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,0.15)', borderWidth:2.5, pointBackgroundColor:'#e74c3c', pointBorderColor:'#fff', pointRadius:4 },
+                { label:'?�균 ?�답�?%)', data:pctAvg,      borderColor:'#94a3b8', backgroundColor:'rgba(148,163,184,0.1)', borderWidth:2, pointBackgroundColor:'#94a3b8' }
             ]
         },
         options: {
@@ -4682,21 +4682,21 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
             scales: {
                 r: {
                     min: 0, max: 100,
-                    ticks: { stepSize: 20, font:{size:16}, backdropColor:'transparent', callback: v => v+'%' },
-                    pointLabels: { font:{size:16} }
+                    ticks: { stepSize: 20, font:{size:20}, backdropColor:'transparent', callback: v => v+'%' },
+                    pointLabels: { font:{size:20} }
                 }
             },
             plugins: {
-                legend: { position: 'right', labels: { font:{size:16} } },
+                legend: { position: 'right', labels: { font:{size:20} } },
                 tooltip: {
-                    bodyFont:{size:16}, titleFont:{size:16},
+                    bodyFont:{size:20}, titleFont:{size:20},
                     callbacks: {
                         label: (ctx) => {
                             const i = ctx.dataIndex;
                             const ds = ctx.datasetIndex;
                             const raw = ds === 0 ? rawPersonal[i] : rawAvg[i];
                             const mx  = maxScores[i];
-                            return ` ${ctx.dataset.label}: ${parseFloat(ctx.raw).toFixed(1)}% (${parseFloat(raw).toFixed(1)}/${mx}점)`;
+                            return ` ${ctx.dataset.label}: ${parseFloat(ctx.raw).toFixed(1)}% (${parseFloat(raw).toFixed(1)}/${mx}??`;
                         }
                     }
                 }
@@ -4706,30 +4706,30 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
 }
 
 
-// 영역별 개별 AI 코멘트 재생성
+// ?�역�?개별 AI 코멘???�생??
 async function regenerateSectionComment(section) {
-    if (!window.currentReportData) { showToast('⚠️ 성적 데이터가 없습니다.'); return; }
+    if (!window.currentReportData) { showToast('?�️ ?�적 ?�이?��? ?�습?�다.'); return; }
     const { record, averages, activeSections, sectionComments, overallComment } = window.currentReportData;
 
-    // 버튼 로딩 표시
+    // 버튼 로딩 ?�시
     const btn = document.querySelector(`button[onclick="regenerateSectionComment('${section}')"]`);
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ 생성 중...'; }
+    if (btn) { btn.disabled = true; btn.textContent = '???�성 �?..'; }
 
     try {
-        // 해당 섹션만 재생성
+        // ?�당 ?�션�??�생??
         const newComments = await generateSectionComments(record, averages, [section]);
         const updated = { ...(sectionComments || {}), ...newComments };
 
-        // currentReportData 업데이트
+        // currentReportData ?�데?�트
         window.currentReportData.sectionComments = updated;
 
-        // 카드 코멘트 영역만 직접 업데이트 (전체 리렌더 없이)
+        // 카드 코멘???�역�?직접 ?�데?�트 (?�체 리렌???�이)
         const secItems = activeSections.map(s => [s, updated[s]]);
         renderReportCard(record, averages, updated, overallComment, activeSections);
-        showToast(`✅ ${section} 코멘트 재생성 완료!`);
+        showToast(`??${section} 코멘???�생???�료!`);
     } catch(e) {
-        showToast('❌ 재생성 실패: ' + e.message);
-        if (btn) { btn.disabled = false; btn.textContent = '🔄 재생성'; }
+        showToast('???�생???�패: ' + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = '?�� ?�생??; }
     }
 }
 
@@ -4738,23 +4738,23 @@ async function triggerAIAnalysis() {
     const { record, averages, activeSections } = window.currentReportData;
     toggleLoading(true);
     try {
-        showToast('🤖 AI 영역별 코멘트 생성 중...');
+        showToast('?�� AI ?�역�?코멘???�성 �?..');
 
-        // 1단계: 영역별 코멘트 먼저 생성
+        // 1?�계: ?�역�?코멘??먼�? ?�성
         const sectionComments = await generateSectionComments(record, averages, activeSections);
 
-        showToast('🤖 영역별 코멘트 완료! 종합 코멘트 생성 중...');
+        showToast('?�� ?�역�?코멘???�료! 종합 코멘???�성 �?..');
 
-        // 2단계: 영역별 코멘트를 기반으로 종합 코멘트 생성
+        // 2?�계: ?�역�?코멘?��? 기반?�로 종합 코멘???�성
         const overallComment = await generateOverallComment(record, averages, activeSections, sectionComments);
 
-        // 코멘트 저장
+        // 코멘???�??
         window.currentReportData.sectionComments = sectionComments;
         window.currentReportData.overallComment   = overallComment;
         renderReportCard(record, averages, sectionComments, overallComment, activeSections);
-        showToast('✅ AI 분석 완료!');
+        showToast('??AI 분석 ?�료!');
 
-        // GAS 자동 저장 (비동기 실행으로 UI 블로킹 없음)
+        // GAS ?�동 ?�??(비동�??�행?�로 UI 블로???�음)
         const catVal2 = document.getElementById('report-category')?.value;
         const stuVal2 = document.getElementById('report-student')?.value;
         if (catVal2 && stuVal2) {
@@ -4767,21 +4767,21 @@ async function triggerAIAnalysis() {
                     studentId: stuVal2,
                     overallComment,
                     sectionComments
-                }).then(() => showToast('💾 AI 코멘트 저장 완료'))
-                  .catch(e => console.warn('AI 코멘트 GAS 저장 실패:', e));
+                }).then(() => showToast('?�� AI 코멘???�???�료'))
+                  .catch(e => console.warn('AI 코멘??GAS ?�???�패:', e));
             }
         }
     } catch (e) {
         console.error(e);
-        showToast('❌ AI 분석 실패: ' + e.message);
+        showToast('??AI 분석 ?�패: ' + e.message);
     } finally {
         toggleLoading(false);
     }
 }
 
-// ===== 문항 통계 시스템 =====
+// ===== 문항 ?�계 ?�스??=====
 
-// 문항 통계 대시보드 UI 렌더링
+// 문항 ?�계 ?�?�보??UI ?�더�?
 function renderStats(c) {
     if (!globalConfig.categories || globalConfig.categories.length === 0) {
         renderEmptyState(c, 'Question Statistics');
@@ -4793,41 +4793,41 @@ function renderStats(c) {
                 <div class="animate-fade-in-safe space-y-6 pb-10">
                     <h2 class="fs-32 text-[#013976] leading-none font-black uppercase !border-none !pb-0">Statistics</h2>
 
-                    <!-- 헤더의 요소 선택 + 통계 모드 버튼 -->
+                    <!-- ?�더???�소 ?�택 + ?�계 모드 버튼 -->
                     <div class="card !py-3.5 !px-6 !flex-row !flex-nowrap items-center justify-between shadow-lg relative overflow-hidden flex-none gap-4" style="background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%); border: 2px solid rgba(1,57,118,0.15);">
                         <div style="position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, #60a5fa, #6366f1, #a855f7);"></div>
                         <div class="flex items-center gap-4 flex-grow">
-                            <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">📂 시험지 선택</span>
+                            <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">?�� ?�험지 ?�택</span>
                             <select id="stats-category" onchange="onStatsCategoryChange()" class="ys-field flex-grow !font-normal !text-[#013976] !bg-white !text-[16px]">
-                                <option value="" disabled selected hidden>시험지를 선택하세요</option>
+                                <option value="" disabled selected hidden>?�험지�??�택?�세??/option>
                                 ${globalConfig.categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
                             </select>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <button id="btn-q-stats" onclick="switchStatsMode('question')" class="btn-ys !bg-[#013976] !text-white hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex items-center gap-2">📊 문항 통계</button>
-                            <button id="btn-s-stats" onclick="switchStatsMode('student')" class="btn-ys !bg-white !text-slate-500 !border-2 !border-slate-300 hover:!border-purple-500 hover:!text-purple-700 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl whitespace-nowrap flex items-center gap-2">👥 학생 통계</button>
+                            <button id="btn-q-stats" onclick="switchStatsMode('question')" class="btn-ys !bg-[#013976] !text-white hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex items-center gap-2">?�� 문항 ?�계</button>
+                            <button id="btn-s-stats" onclick="switchStatsMode('student')" class="btn-ys !bg-white !text-slate-500 !border-2 !border-slate-300 hover:!border-purple-500 hover:!text-purple-700 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl whitespace-nowrap flex items-center gap-2">?�� ?�생 ?�계</button>
                         </div>
-                        <!-- 학생 통계 년도 필터 (hidden by default) -->
+                        <!-- ?�생 ?�계 ?�도 ?�터 (hidden by default) -->
                         <div id="year-filter-wrap" class="hidden w-full flex items-center gap-3 pt-2 border-t border-slate-200 mt-1">
-                            <span style="font-size:17px;font-weight:700;color:#64748b;white-space:nowrap;">📅 년도</span>
+                            <span style="font-size:17px;font-weight:700;color:#64748b;white-space:nowrap;">?�� ?�도</span>
                             <select id="stats-year" onchange="loadStudentStats()" class="ys-field !w-36">
-                                <option value="">전체</option>
-                                ${Array.from({length: 5}, (_, i) => new Date().getFullYear() - i).map(y => `<option value="${y}">${y}년</option>`).join('')}
+                                <option value="">?�체</option>
+                                ${Array.from({length: 5}, (_, i) => new Date().getFullYear() - i).map(y => `<option value="${y}">${y}??/option>`).join('')}
                             </select>
                         </div>
                     </div>
 
-                    <!-- 통계 표시 영역 -->
+                    <!-- ?�계 ?�시 ?�역 -->
                     <div id="stats-display"></div>
                 </div>
             `;
 
-    // 기본은 문항 통계 모드
+    // 기본?� 문항 ?�계 모드
     window._statsMode = 'question';
     loadQuestionStats();
 }
 
-// ===================== 통계 모드 전환 =====================
+// ===================== ?�계 모드 ?�환 =====================
 function switchStatsMode(mode) {
     window._statsMode = mode;
     const qBtn = document.getElementById('btn-q-stats');
@@ -4847,7 +4847,7 @@ function onStatsCategoryChange() {
     else loadQuestionStats();
 }
 
-// ===================== 학생 통계 =====================
+// ===================== ?�생 ?�계 =====================
 async function loadStudentStats() {
     const categoryId = document.getElementById('stats-category')?.value;
     if (!categoryId) return;
@@ -4864,17 +4864,17 @@ async function loadStudentStats() {
             categoryName: category.name
         });
         let students = result.data || [];
-        // 년도 필터
+        // ?�도 ?�터
         if (selectedYear) {
             students = students.filter(s => {
-                const d = String(s['응시일'] || s.testDate || s.date || '');
+                const d = String(s['?�시??] || s.testDate || s.date || '');
                 return d.startsWith(selectedYear);
             });
         }
         renderStudentStatsUI(students, selectedYear);
     } catch(e) {
         document.getElementById('stats-display').innerHTML =
-            `<div class="card text-center text-red-400">오류: ${e.message}</div>`;
+            `<div class="card text-center text-red-400">?�류: ${e.message}</div>`;
     } finally { toggleLoading(false); }
 }
 
@@ -4886,7 +4886,7 @@ function renderStudentStatsUI(students, yearLabel) {
 
     const calcAvg = (list, sec) => {
         const vals = list.map(s => {
-            const v = parseFloat(s[scoreKey[sec]] ?? s[sec+'_점수'] ?? '');
+            const v = parseFloat(s[scoreKey[sec]] ?? s[sec+'_?�수'] ?? '');
             return isNaN(v) ? null : v;
         }).filter(v => v !== null);
         return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '-';
@@ -4911,10 +4911,10 @@ function renderStudentStatsUI(students, yearLabel) {
             }).join('')}
         </tr>`;
 
-    // 학급별 그룹핑
+    // ?�급�?그룹??
     const groups = {};
     students.forEach(s => {
-        const cls = s.studentClass || s['등록학급'] || '(미입력)';
+        const cls = s.studentClass || s['?�록?�급'] || '(미입??';
         if (!groups[cls]) groups[cls] = [];
         groups[cls].push(s);
     });
@@ -4926,35 +4926,35 @@ function renderStudentStatsUI(students, yearLabel) {
             i % 2 === 0 ? 'bg-purple-50/30' : ''
         )).join('');
 
-    const yearStr = yearLabel ? `${yearLabel}년` : '전체';
+    const yearStr = yearLabel ? `${yearLabel}?? : '?�체';
 
     display.innerHTML = `
         <div class="space-y-6 animate-fade-in">
             <div class="card">
-                <h3 class="fs-18 font-black text-[#013976] mb-4">📊 전체 통계 <span class="fs-14 text-slate-400 font-normal ml-2">${yearStr} · 총 ${students.length}명</span></h3>
-                ${students.length === 0 ? '<p class="text-slate-400 text-center py-6">해당 조건의 학생 데이터가 없습니다.</p>' : `
+                <h3 class="fs-18 font-black text-[#013976] mb-4">?�� ?�체 ?�계 <span class="fs-14 text-slate-400 font-normal ml-2">${yearStr} · �?${students.length}�?/span></h3>
+                ${students.length === 0 ? '<p class="text-slate-400 text-center py-6">?�당 조건???�생 ?�이?��? ?�습?�다.</p>' : `
                 <div class="overflow-x-auto rounded-xl border border-slate-200">
                     <table class="w-full text-[14px]">
                         <thead class="bg-[#013976] text-white"><tr>
                             <th class="px-4 py-2.5 text-left">구분</th>
-                            <th class="px-4 py-2.5 text-center">응시자수</th>
+                            <th class="px-4 py-2.5 text-center">?�시?�수</th>
                             ${sectionHeader}
                         </tr></thead>
                         <tbody>
-                            ${totalRow('전체 평균', students.length, students, 'bg-blue-50/40')}
+                            ${totalRow('?�체 ?�균', students.length, students, 'bg-blue-50/40')}
                         </tbody>
                     </table>
                 </div>`}
             </div>
 
             <div class="card">
-                <h3 class="fs-18 font-black text-[#013976] mb-4">🏫 학급별 통계 <span class="fs-14 text-slate-400 font-normal ml-2">${yearStr}</span></h3>
-                ${Object.keys(groups).length === 0 ? '<p class="text-slate-400 text-center py-6">등록학급 정보가 없습니다.</p>' : `
+                <h3 class="fs-18 font-black text-[#013976] mb-4">?�� ?�급�??�계 <span class="fs-14 text-slate-400 font-normal ml-2">${yearStr}</span></h3>
+                ${Object.keys(groups).length === 0 ? '<p class="text-slate-400 text-center py-6">?�록?�급 ?�보가 ?�습?�다.</p>' : `
                 <div class="overflow-x-auto rounded-xl border border-slate-200">
                     <table class="w-full text-[14px]">
                         <thead class="bg-purple-700 text-white"><tr>
-                            <th class="px-4 py-2.5 text-left">학급</th>
-                            <th class="px-4 py-2.5 text-center">응시자수</th>
+                            <th class="px-4 py-2.5 text-left">?�급</th>
+                            <th class="px-4 py-2.5 text-center">?�시?�수</th>
                             ${sectionHeader}
                         </tr></thead>
                         <tbody>${groupRows}</tbody>
@@ -4964,16 +4964,16 @@ function renderStudentStatsUI(students, yearLabel) {
         </div>`;
 }
 
-// 문항 통계 데이터 로드
+// 문항 ?�계 ?�이??로드
 async function loadQuestionStats() {
     const categoryId = document.getElementById('stats-category').value;
-    if (!categoryId) return; // 시험지 선택 전에는 동작하지 않음
+    if (!categoryId) return; // ?�험지 ?�택 ?�에???�작?��? ?�음
     const category = globalConfig.categories.find(c => c.id === categoryId);
     if (!category) return;
 
     const folderId = extractFolderId(category.targetFolderUrl);
     if (!folderId) {
-        showToast("⚠️ 폴더 ID를 찾을 수 없습니다.");
+        showToast("?�️ ?�더 ID�?찾을 ???�습?�다.");
         return;
     }
 
@@ -5007,43 +5007,43 @@ async function loadQuestionStats() {
         }
 
         if (questionsToUse.length === 0) {
-            document.getElementById('stats-display').innerHTML = '<div class="card text-center text-slate-500">문항 데이터가 없습니다. (서버/로컬)</div>';
+            document.getElementById('stats-display').innerHTML = '<div class="card text-center text-slate-500">문항 ?�이?��? ?�습?�다. (?�버/로컬)</div>';
             return;
         }
 
         const stats = calculateQuestionStats(questionsToUse);
         renderStatsCharts(stats);
-        showToast('✅ 통계 로드 완료!');
+        showToast('???�계 로드 ?�료!');
 
     } catch (err) {
         console.error(err);
-        showToast("⚠️ 통계 로드 실패: " + err.message);
+        showToast("?�️ ?�계 로드 ?�패: " + err.message);
     } finally {
         toggleLoading(false);
     }
 }
 
-// 통계 데이터 계산
+// ?�계 ?�이??계산
 function calculateQuestionStats(questions) {
     const total = questions.length;
 
-    // 영역별 집계
+    // ?�역�?집계
     const sections = {};
-    const sectionScores = {}; // [NEW] 영역별 배점 합계
+    const sectionScores = {}; // [NEW] ?�역�?배점 ?�계
     const types = {};
     const difficulties = {};
     const scores = {};
 
     questions.forEach(q => {
-        const section = q.section || q['영역'] || '미분류';
+        const section = q.section || q['?�역'] || '미분�?;
         sections[section] = (sections[section] || 0) + 1;
         const sc = parseFloat(q.score || q['배점'] || 1);
         sectionScores[section] = (sectionScores[section] || 0) + sc; // [NEW]
 
-        const type = q.type || q['문항유형'] || '객관형';
+        const type = q.type || q['문항?�형'] || '객�???;
         types[type] = (types[type] || 0) + 1;
 
-        const difficulty = q.difficulty || q['난이도'] || '중';
+        const difficulty = q.difficulty || q['?�이??] || '�?;
         difficulties[difficulty] = (difficulties[difficulty] || 0) + 1;
 
         const score = q.score || q['배점'] || 1;
@@ -5053,68 +5053,68 @@ function calculateQuestionStats(questions) {
     return { total, sections, sectionScores, types, difficulties, scores };
 }
 
-// 통계 차트 렌더링
+// ?�계 차트 ?�더�?
 function renderStatsCharts(stats) {
     const display = document.getElementById('stats-display');
 
     display.innerHTML = `
                 <div class="space-y-8 animate-fade-in-safe">
-                    <!-- 요약 정보 바 (한 줄 컴팩트) -->
+                    <!-- ?�약 ?�보 �?(??�?컴팩?? -->
                     ${(() => {
                         const totalScore = Object.entries(stats.scores).reduce((sum, [pt, cnt]) => sum + parseFloat(pt) * cnt, 0);
-                        const scoreBreakdown = Object.entries(stats.scores).sort((a,b) => parseFloat(a[0]) - parseFloat(b[0])).map(([pt, cnt]) => `${pt}점×${cnt}`).join(' / ');
+                        const scoreBreakdown = Object.entries(stats.scores).sort((a,b) => parseFloat(a[0]) - parseFloat(b[0])).map(([pt, cnt]) => `${pt}?��?{cnt}`).join(' / ');
                         const sectionBreakdown = Object.entries(stats.sections).map(([sec, cnt]) => {
                             const secScore = Math.round(stats.sectionScores?.[sec] || 0);
-                            return `<span style="font-size:14px;"><span class="font-bold text-[#013976]">${sec}</span> ${cnt}개<span class="text-slate-400">(${secScore}점)</span></span>`;
+                            return `<span style="font-size:14px;"><span class="font-bold text-[#013976]">${sec}</span> ${cnt}�?span class="text-slate-400">(${secScore}??</span></span>`;
                         }).join('<span class="text-slate-300 mx-2" style="font-size:14px;">|</span>');
                         return `
                         <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-2xl px-6 py-4 flex flex-wrap items-center gap-x-6 gap-y-2">
                             <div class="flex items-center gap-2 shrink-0">
-                                <span class="text-slate-500 font-bold" style="font-size:17px;">📋 총 문항</span>
-                                <span class="text-[#013976] font-black" style="font-size:26px;">${stats.total}<span class="text-slate-400 font-bold" style="font-size:14px;">개</span></span>
+                                <span class="text-slate-500 font-bold" style="font-size:17px;">?�� �?문항</span>
+                                <span class="text-[#013976] font-black" style="font-size:26px;">${stats.total}<span class="text-slate-400 font-bold" style="font-size:14px;">�?/span></span>
                             </div>
                             <div class="w-px h-7 bg-blue-200 shrink-0 hidden md:block"></div>
                             <div class="flex items-center gap-2 shrink-0">
-                                <span class="text-slate-500 font-bold" style="font-size:17px;">💯 총 배점</span>
-                                <span class="text-[#013976] font-black" style="font-size:26px;">${totalScore}<span class="text-slate-400 font-bold" style="font-size:14px;">점</span></span>
+                                <span class="text-slate-500 font-bold" style="font-size:17px;">?�� �?배점</span>
+                                <span class="text-[#013976] font-black" style="font-size:26px;">${totalScore}<span class="text-slate-400 font-bold" style="font-size:14px;">??/span></span>
                             </div>
                             <div class="w-px h-7 bg-blue-200 shrink-0 hidden md:block"></div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-slate-500 font-bold shrink-0" style="font-size:17px;">📚 영역별 문항과 배점</span>
+                                <span class="text-slate-500 font-bold shrink-0" style="font-size:17px;">?�� ?�역�?문항�?배점</span>
                                 <span class="text-slate-600">${sectionBreakdown}</span>
                             </div>
                         </div>`;
                     })()}
                     
-                    <!-- 차트 그리드 -->
+                    <!-- 차트 그리??-->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- 영역별 -->
+                        <!-- ?�역�?-->
                         <div class="card">
-                            <h3 class="ys-label mb-0">📚 영역별 분포</h3>
+                            <h3 class="ys-label mb-0">?�� ?�역�?분포</h3>
                             <div style="height: 300px;">
                                 <canvas id="chart-sections-stat"></canvas>
                             </div>
                         </div>
                         
-                        <!-- 유형별 -->
+                        <!-- ?�형�?-->
                         <div class="card">
-                            <h3 class="ys-label mb-0">📝 유형별 분포</h3>
+                            <h3 class="ys-label mb-0">?�� ?�형�?분포</h3>
                             <div style="height: 300px;">
                                 <canvas id="chart-types-stat"></canvas>
                             </div>
                         </div>
                         
-                        <!-- 난이도별 -->
+                        <!-- ?�이?�별 -->
                         <div class="card">
-                            <h3 class="ys-label mb-0">⭐ 난이도별 분포</h3>
+                            <h3 class="ys-label mb-0">�??�이?�별 분포</h3>
                             <div style="height: 300px;">
                                 <canvas id="chart-difficulties-stat"></canvas>
                             </div>
                         </div>
                         
-                        <!-- 배점별 -->
+                        <!-- 배점�?-->
                         <div class="card">
-                            <h3 class="ys-label mb-0">🎯 배점별 분포</h3>
+                            <h3 class="ys-label mb-0">?�� 배점�?분포</h3>
                             <div style="height: 300px;">
                                 <canvas id="chart-scores-stat"></canvas>
                             </div>
@@ -5122,16 +5122,16 @@ function renderStatsCharts(stats) {
                 </div>
             `;
 
-    // 차트 렌더링
+    // 차트 ?�더�?
     setTimeout(() => {
-        renderStatDoughnut('chart-sections-stat', stats.sections, stats.total, '영역');
-        renderStatDoughnut('chart-types-stat', stats.types, stats.total, '유형');
-        renderStatDoughnut('chart-difficulties-stat', stats.difficulties, stats.total, '난이도');
+        renderStatDoughnut('chart-sections-stat', stats.sections, stats.total, '?�역');
+        renderStatDoughnut('chart-types-stat', stats.types, stats.total, '?�형');
+        renderStatDoughnut('chart-difficulties-stat', stats.difficulties, stats.total, '?�이??);
         renderStatBar('chart-scores-stat', stats.scores);
     }, 100);
 }
 
-// 도넛 차트 렌더링 (통계용)
+// ?�넛 차트 ?�더�?(?�계??
 function renderStatDoughnut(canvasId, data, total, label) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
@@ -5139,7 +5139,7 @@ function renderStatDoughnut(canvasId, data, total, label) {
     const labels = Object.keys(data);
     const values = Object.values(data);
 
-    // [Plugin] 슬라이스 내부 숫자 표시
+    // [Plugin] ?�라?�스 ?��? ?�자 ?�시
     const innerLabelPlugin = {
         id: 'innerLabel_' + canvasId,
         afterDatasetsDraw(chart) {
@@ -5152,7 +5152,7 @@ function renderStatDoughnut(canvasId, data, total, label) {
                 const value = dataset.data[index];
                 if (!value || value === 0) return;
                 const pct = (value / dataTotal) * 100;
-                if (pct < 5) return; // 너무 작은 슬라이스는 생략
+                if (pct < 5) return; // ?�무 ?��? ?�라?�스???�략
 
                 const midAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
                 const radius = (arc.innerRadius + arc.outerRadius) / 2;
@@ -5166,7 +5166,7 @@ function renderStatDoughnut(canvasId, data, total, label) {
                 c.font = 'bold 14px sans-serif';
                 c.shadowColor = 'rgba(0,0,0,0.3)';
                 c.shadowBlur = 3;
-                c.fillText(`${value}개`, x, y - 9);
+                c.fillText(`${value}�?, x, y - 9);
                 c.font = '14px sans-serif';
                 c.fillText(`${pct.toFixed(0)}%`, x, y + 9);
                 c.restore();
@@ -5205,7 +5205,7 @@ function renderStatDoughnut(canvasId, data, total, label) {
                             const itemLabel = context.label || '';
                             const value = context.parsed;
                             const percentage = ((value / total) * 100).toFixed(1);
-                            return `${itemLabel}: ${value}개 (${percentage}%)`;
+                            return `${itemLabel}: ${value}�?(${percentage}%)`;
                         }
                     }
                 },
@@ -5224,7 +5224,7 @@ function renderStatDoughnut(canvasId, data, total, label) {
     });
 }
 
-// 바 차트 렌더링 (통계용)
+// �?차트 ?�더�?(?�계??
 function renderStatBar(canvasId, data) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
@@ -5235,9 +5235,9 @@ function renderStatBar(canvasId, data) {
     new Chart(ctx.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: labels.map(l => l + '점'),
+            labels: labels.map(l => l + '??),
             datasets: [{
-                label: '문항 수',
+                label: '문항 ??,
                 data: values,
                 backgroundColor: '#4A90E2'
             }]
@@ -5249,7 +5249,7 @@ function renderStatBar(canvasId, data) {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return `${context.parsed.y}개`;
+                            return `${context.parsed.y}�?;
                         }
                     }
                 },
@@ -5277,8 +5277,8 @@ function renderStatBar(canvasId, data) {
 
 
 
-// --- 문항 뱅크 시스템 (List View) ---
-// [New] 그룹 색상 생성기 (10가지 고정 팔레트)
+// --- 문항 뱅크 ?�스??(List View) ---
+// [New] 그룹 ?�상 ?�성�?(10가지 고정 ?�레??
 function getGroupColor(index) {
     const palette = [
         'bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-yellow-500',
@@ -5288,7 +5288,7 @@ function getGroupColor(index) {
     return palette[index % palette.length];
 }
 
-// [Refactor] 문항 뱅크 렌더링 (Canvas 08)
+// [Refactor] 문항 뱅크 ?�더�?(Canvas 08)
 // [New] Bank Category Change Handler
 function handleBankCategoryChange(catId) {
     curCatId = catId;
@@ -5303,7 +5303,7 @@ async function loadBankQuestions(catId) {
 
     const folderId = extractFolderId(category.targetFolderUrl);
     if (!folderId) {
-        showToast("⚠️ 폴더 ID 오류: 카테고리 설정을 확인하세요.");
+        showToast("?�️ ?�더 ID ?�류: 카테고리 ?�정???�인?�세??");
         return;
     }
 
@@ -5339,13 +5339,13 @@ async function loadBankQuestions(catId) {
         }
 
         if (newQuestions.length === 0) {
-            showToast("⚠️ 문항 데이터가 없습니다.");
+            showToast("?�️ 문항 ?�이?��? ?�습?�다.");
         } else {
             // [Fix] Inject catId mapping since the server response does not contain it directly for independent fetching
             newQuestions = newQuestions.map(q => ({ ...q, catId: catId }));
 
             // Update Global Config
-            // 기존 문항 중 다른 카테고리의 문항은 유지하고 현재 카테고리 문항만 덮어쓰기
+            // 기존 문항 �??�른 카테고리??문항?� ?��??�고 ?�재 카테고리 문항�???��?�기
             if (globalConfig.questions) {
                 const otherCategoryQuestions = globalConfig.questions.filter(q => String(q.catId) !== String(catId));
                 globalConfig.questions = [...otherCategoryQuestions, ...newQuestions];
@@ -5363,12 +5363,12 @@ async function loadBankQuestions(catId) {
 
             save(); // Save to local storage
             renderBankRows();
-            showToast(`✅ 문항 ${newQuestions.length}개 로드 완료`);
+            showToast(`??문항 ${newQuestions.length}�?로드 ?�료`);
         }
 
     } catch (e) {
         console.error(e);
-        showToast("❌ 문항 로드 실패: " + e.message);
+        showToast("??문항 로드 ?�패: " + e.message);
     } finally {
         toggleLoading(false);
     }
@@ -5376,7 +5376,7 @@ async function loadBankQuestions(catId) {
 function renderBank(c) {
     if (!c) c = document.getElementById('dynamic-content');
 
-    // [Fix] 진입 시 app-canvas 레이아웃 완전 복원 (어느 탭에서 와도 정상화)
+    // [Fix] 진입 ??app-canvas ?�이?�웃 ?�전 복원 (?�느 ??��???�???�상??
     const _ac = document.getElementById('app-canvas');
     if (_ac) {
         _ac.style.padding = '';
@@ -5386,8 +5386,8 @@ function renderBank(c) {
     }
     c.className = 'w-full h-full';
 
-    // [Fix] curCatId 유지: 07-2 복귀 등 직전 선택 카테고리가 있으면 그대로 유지
-    // (신규 진입 시에는 curCatId가 이미 "" 이어서 자동으로 placeholder 선택)
+    // [Fix] curCatId ?��?: 07-2 복�? ??직전 ?�택 카테고리가 ?�으�?그�?�??��?
+    // (?�규 진입 ?�에??curCatId가 ?��? "" ?�어???�동?�로 placeholder ?�택)
     if (!globalConfig.categories || globalConfig.categories.length === 0) {
         renderEmptyState(c, 'Question Bank Master');
         return;
@@ -5400,24 +5400,24 @@ function renderBank(c) {
                 <h2 class="fs-32 text-[#013976] leading-none font-black uppercase !border-none !pb-0">Question List</h2>
             </div>
 
-            <!-- 카테고리 선택 -->
+            <!-- 카테고리 ?�택 -->
             <div class="card !py-3.5 !px-6 flex flex-row items-center justify-between shadow-lg relative overflow-hidden flex-none gap-4 flex-nowrap" style="background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%); border: 2px solid rgba(1,57,118,0.15);">
                 <div style="position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, #60a5fa, #6366f1, #a855f7);"></div>
                 <div class="flex items-center gap-4 flex-grow">
-                    <label class="ys-label !mb-0 whitespace-nowrap !text-[#013976] font-bold">📂 시험지 선택</label>
+                    <label class="ys-label !mb-0 whitespace-nowrap !text-[#013976] font-bold">?�� ?�험지 ?�택</label>
                     <select onchange="handleBankCategoryChange(this.value)" 
                             class="ys-field flex-grow !font-normal !text-[#013976] !bg-white !text-[16px]">
-                        <option value="" disabled ${!curCatId ? 'selected' : ''} hidden>시험지를 선택하세요</option>
+                        <option value="" disabled ${!curCatId ? 'selected' : ''} hidden>?�험지�??�택?�세??/option>
                         ${globalConfig.categories.map(cat => `<option value="${cat.id}" ${curCatId === cat.id ? 'selected' : ''} class="text-[#013976] !text-[16px] !font-normal">${cat.name}</option>`).join('')}
                     </select>
                 </div>
                 <button onclick="changeTab('reg')" class="btn-ys !bg-[#013976] !text-white !border-[#013976] hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex-shrink-0 flex items-center gap-2">
-                    ✨ 문항 등록
+                    ??문항 ?�록
                 </button>
             </div>
 
             <div class="flex-grow overflow-hidden bg-white rounded-2xl border border-slate-200 flex flex-col shadow-sm">
-                <!-- 헤더 (Grid Layout) -->
+                <!-- ?�더 (Grid Layout) -->
                 <div class="grid grid-cols-[60px_100px_120px_1fr_80px_80px] bg-slate-100 border-b border-slate-200 p-4 font-bold text-[#013976] text-center fs-16 uppercase tracking-wider sticky top-0 z-10">
                     <div>GRP</div>
                     <div>SEC</div>
@@ -5427,9 +5427,9 @@ function renderBank(c) {
                     <div>EDIT</div>
                 </div>
                 
-                <!-- 리스트 영역 -->
+                <!-- 리스???�역 -->
                 <div id="bank-list-container" class="overflow-y-auto flex-grow p-2 space-y-2 bg-slate-50/50">
-                     <div class="p-20 text-center text-slate-400">👈 카테고리를 선택하세요</div>
+                     <div class="p-20 text-center text-slate-400">?�� 카테고리�??�택?�세??/div>
                 </div>
             </div>
         </div>
@@ -5439,28 +5439,28 @@ function renderBank(c) {
 // [Refactor] Bank Rows Rendering
 function renderBankRows() {
     const container = document.getElementById('bank-list-container');
-    if (!container) return; // 호출 시점에 컨테이너가 없을 수 있음 (e.g. 탭 전환 직후)
+    if (!container) return; // ?�출 ?�점??컨테?�너가 ?�을 ???�음 (e.g. ???�환 직후)
 
     const list = globalConfig.questions.filter(q => q.catId === curCatId);
 
     if (list.length === 0) {
         container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-400 p-10">
-                    <span class="text-4xl mb-4">📭</span>
-                    <p class="fs-18">등록된 문항이 없습니다.</p>
+                    <span class="text-4xl mb-4">?��</span>
+                    <p class="fs-18">?�록??문항???�습?�다.</p>
                 </div>`;
         return;
     }
 
-    // 그룹 인덱스 매핑 (Passage ID + Common Title 기준)
+    // 그룹 ?�덱??매핑 (Passage ID + Common Title 기�?)
     const groupMap = new Map(); // Key: ID -> ColorIdx
     let groupMapCounter = 0;
 
     list.forEach((q, i) => {
-        // 그룹 키: passageId가 있으면 최우선, 없으면 commonTitle (단, commonTitle이 있어야 함)
+        // 그룹 ?? passageId가 ?�으�?최우?? ?�으�?commonTitle (?? commonTitle???�어????
         let key = q.passageId || (q.commonTitle ? `CT_${q.commonTitle}` : null);
         const prev = list[i - 1];
 
-        // 연속성 체크: 이전 항목과 같은 키를 공유하는가?
+        // ?�속??체크: ?�전 ??���?같�? ?��? 공유?�는가?
         const isConnected = prev && (
             (q.passageId && q.passageId === prev.passageId) ||
             (q.commonTitle && q.commonTitle === prev.commonTitle)
@@ -5517,7 +5517,7 @@ function renderBankRows() {
                 
                 <!-- Type -->
                 <div class="text-center fs-16 truncate px-2 font-bold ${
-                    (q.questionType || q.type || '').includes('객관') ? 'text-blue-600' : 'text-rose-600'
+                    (q.questionType || q.type || '').includes('객�?') ? 'text-blue-600' : 'text-rose-600'
                 }">
                     ${q.questionType || q.type || '-'}
                 </div>
@@ -5535,7 +5535,7 @@ function renderBankRows() {
                 <!-- Edit -->
                 <div class="text-center">
                     <button onclick="renderEditForm('${q.id}')" class="btn-ys !bg-white !text-indigo-600 !border-indigo-200 hover:bg-indigo-50 !py-1 !px-3 font-bold text-xs shadow-sm" onmousedown="event.stopPropagation()">
-                        ✏️
+                        ?�️
                     </button>
                 </div>
             </div>
@@ -5545,72 +5545,72 @@ function renderBankRows() {
     container.innerHTML = html;
 }
 
-// 5. [기능] 세부 유형 목록 업데이트 (Universal)
-// 5. [기능] 세부 유형 목록 업데이트
+// 5. [기능] ?��? ?�형 목록 ?�데?�트 (Universal)
+// 5. [기능] ?��? ?�형 목록 ?�데?�트
 function upDet(v) {
     const s = document.getElementById('q-subtype') || document.getElementById('q-det');
     if (!s) return;
 
     if (!v) {
-        s.innerHTML = '<option value="" disabled selected hidden>주 영역을 먼저 선택하세요</option>';
+        s.innerHTML = '<option value="" disabled selected hidden>�??�역??먼�? ?�택?�세??/option>';
         return;
     }
 
     const list = [...(SUB_TYPE_MAP[v] || [])];
     if (list.length === 0) {
-        s.innerHTML = '<option value="" disabled selected hidden>해당 영역에 세부 항목이 없습니다</option>';
+        s.innerHTML = '<option value="" disabled selected hidden>?�당 ?�역???��? ??��???�습?�다</option>';
     } else {
-        s.innerHTML = '<option value="" disabled selected hidden>세부 영역을 선택하세요</option>' + list.map(t => `<option value="${t}">${t}</option>`).join('');
+        s.innerHTML = '<option value="" disabled selected hidden>?��? ?�역???�택?�세??/option>' + list.map(t => `<option value="${t}">${t}</option>`).join('');
     }
 }
 
-// 6. [기능] 객관식 보기 입력창 렌더링 (Dynamic Inputs)
+// 6. [기능] 객�???보기 ?�력�??�더�?(Dynamic Inputs)
 function renderChoiceInputs(n, initialValues = null) {
     const container = document.getElementById('q-choices-container');
     if (!container) return;
 
-    // 기존 값 백업 (값이 있으면 유지)
+    // 기존 �?백업 (값이 ?�으�??��?)
     const oldValues = [];
     const existingInputs = container.querySelectorAll('input');
     existingInputs.forEach(input => oldValues.push(input.value));
 
     let html = '';
     for (let i = 1; i <= n; i++) {
-        // 우선순위: initialValues > 기존 입력값 > 빈 문자열
+        // ?�선?�위: initialValues > 기존 ?�력�?> �?문자??
         let val = '';
         if (initialValues && initialValues[i - 1]) {
             val = initialValues[i - 1]; // "1. Apple"
         } else if (oldValues[i - 1]) {
             val = oldValues[i - 1];
         }
-        // 번호 프리픽스 제거 (Ex: "1. Apple" -> "Apple")
+        // 번호 ?�리?�스 ?�거 (Ex: "1. Apple" -> "Apple")
         val = val.replace(/^\d+\.\s*/, '');
         html += `
                     <div class="flex items-center gap-3 animate-fade-in-safe">
                         <span class="text-slate-400 font-bold text-lg w-6 text-right">${i}.</span>
                         <input type="text" id="q-choice-${i}" class="ys-field !h-12 !text-base bg-white focus:bg-blue-50 transition-colors" 
-                               placeholder="보기 ${i} 내용을 입력하세요 (Option ${i})" value="${val}">
+                               placeholder="보기 ${i} ?�용???�력?�세??(Option ${i})" value="${val}">
                     </div>`;
     }
     container.innerHTML = html;
 }
 
-// --- 문항 등록 폼 (NEW UI) ---
+// --- 문항 ?�록 ??(NEW UI) ---
 // --- REFACTORED REGISTRATION & EDIT FORM (PROTOTYPE SPLIT VIEW) ---
 
-// 공통 Sub-Area 데이터
+// 공통 Sub-Area ?�이??
 const REG_SUB_AREAS = {
-    'Listening': ["계산", "그림 묘사", "목적 파악", "묘사", "받아쓰기", "상황파악", "세부사항", "심리/심경", "응답", "정보 요약", "주제", "단어 입력", "기타"],
-    'Reading': ["글 요약", "내용 일치", "대의 파악", "목적", "문장 연결성", "문장 완성", "문장 의미", "밑줄 추론", "심리/심경", "빈칸추론", "삽입", "세부사항", "순서", "어휘 추론", "어휘 활용", "연결사", "요약/요지", "장문 빈칸", "장문 제목", "제목", "주제", "지칭", "추론", "흐름", "기타"],
-    'Vocabulary': ["레벨1", "레벨2", "레벨3", "레벨4", "레벨5", "레벨6", "레벨7", "레벨8", "레벨9", "숙어", "기타"],
-    'Writing': ["레벨1", "레벨2", "레벨3", "레벨4", "레벨5", "레벨6", "레벨7", "레벨8", "레벨9", "문장 완성", "글 요약", "작문", "기타"],
-    'Grammar': ["가정법", "관계대명사", "관계부사", "관계사", "관계사/의문사", "관계사/접속사", "대명사", "명사", "병렬 구조", "분사", "분사구문", "비교급", "수동태", "수일치", "시제", "일치/화법", "접속사", "조동사", "준동사", "지칭 복합", "특수구문", "형식", "형용사", "형용사/부사", "화법", "to부정사", "to부정사/동명사", "기타"]
+    'Listening': ["계산", "그림 묘사", "목적 ?�악", "묘사", "받아?�기", "?�황?�악", "?��??�항", "?�리/?�경", "?�답", "?�보 ?�약", "주제", "?�어 ?�력", "기�?"],
+    'Reading': ["글 ?�약", "?�용 ?�치", "?�???�악", "목적", "문장 ?�결??, "문장 ?�성", "문장 ?��?", "밑줄 추론", "?�리/?�경", "빈칸추론", "?�입", "?��??�항", "?�서", "?�휘 추론", "?�휘 ?�용", "?�결??, "?�약/?��?", "?�문 빈칸", "?�문 ?�목", "?�목", "주제", "지�?, "추론", "?�름", "기�?"],
+    'Vocabulary': ["?�벨1", "?�벨2", "?�벨3", "?�벨4", "?�벨5", "?�벨6", "?�벨7", "?�벨8", "?�벨9", "?�어", "기�?"],
+    'Writing': ["?�벨1", "?�벨2", "?�벨3", "?�벨4", "?�벨5", "?�벨6", "?�벨7", "?�벨8", "?�벨9", "문장 ?�성", "글 ?�약", "?�문", "기�?"],
+    'Grammar': ["가?�법", "관계�?명사", "관계�???, "관계사", "관계사/?�문??, "관계사/?�속??, "?�명사", "명사", "병렬 구조", "분사", "분사구문", "비교�?, "?�동??, "?�일�?, "?�제", "?�치/?�법", "?�속??, "조동??, "준?�사", "지�?복합", "?�수구문", "?�식", "?�용??, "?�용??부??, "?�법", "to부?�사", "to부?�사/?�명??, "기�?"]
 };
 
-// Canvas 08-1: 문항 등록 (Set Creation, Split View)
+// Canvas 08-1: 문항 ?�록 (Set Creation, Split View)
 // [New] Exit Builder Mode Logic (Back Button & Exit Button)
 function exitBuilderMode(force = false) {
-    if (!force && !confirm("작성 중인 내용은 저장되지 않습니다. 나가시겠습니까?")) {
+    if (!force && !confirm("?�성 중인 ?�용?� ?�?�되지 ?�습?�다. ?��??�겠?�니�?")) {
         // If triggered by back button (popstate), we need to push state back to stay
         history.pushState({ page: 'builder' }, '', '#builder');
         return;
@@ -5654,7 +5654,7 @@ window.exitBuilderMode = exitBuilderMode;
 // [New] BeforeUnload Handler (Shared)
 function handleBeforeUnload(e) {
     e.preventDefault();
-    e.returnValue = '작성 중인 내용이 저장되지 않았습니다. 정말 나가시겠습니까?'; // Chrome/Edge requirement (Text ignored but required to set)
+    e.returnValue = '?�성 중인 ?�용???�?�되지 ?�았?�니?? ?�말 ?��??�겠?�니�?'; // Chrome/Edge requirement (Text ignored but required to set)
     return e.returnValue; // Legacy
 }
 
@@ -5699,17 +5699,17 @@ function renderRegForm() {
                  <!-- Left: Title -->
                  <div class="flex items-center gap-4">
                     <h2 class="font-bold bg-[#013976] text-white px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2" style="font-size: 17px;">
-                        <span class="text-xl">📝</span> Quiz Builder
+                        <span class="text-xl">?��</span> Quiz Builder
                     </h2>
                     
                     <!-- Category Selection (Clean) -->
                     <div class="flex items-center gap-2">
                         <select id="reg-target-cat" class="bg-slate-50 border border-slate-200 rounded px-2 py-1.5 text-sm font-bold text-[#013976] outline-none focus:border-blue-500 min-w-[200px] shadow-sm">
-                            <option value="" disabled selected>카테고리(시험지) 선택</option>
+                            <option value="" disabled selected>카테고리(?�험지) ?�택</option>
                             ${globalConfig.categories ? globalConfig.categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('') : ''}
                         </select>
                         <button onclick="loadQuestionsFromCategory()" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-sm font-bold shadow-md hover:bg-indigo-700 transition-colors flex items-center gap-1">
-                            <span>📂</span> 불러오기
+                            <span>?��</span> 불러?�기
                         </button>
                     </div>
                 </div>
@@ -5717,13 +5717,13 @@ function renderRegForm() {
                  <!-- Center: Toolbar Controls -->
                  <div class="flex items-center gap-2">
                     <button onclick="addComponent('bundle')" class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition-colors font-bold text-sm shadow-sm hover:shadow active:scale-95">
-                        <span>📦</span> 묶음형
+                        <span>?��</span> 묶음??
                     </button>
                     <button onclick="addComponent('obj')" class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors font-bold text-sm shadow-sm hover:shadow active:scale-95">
-                        <span>✅</span> 객관형
+                        <span>??/span> 객�???
                     </button>
                     <button onclick="addComponent('subj')" class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors font-bold text-sm shadow-sm hover:shadow active:scale-95">
-                        <span>✍️</span> 주관형
+                        <span>?�️</span> 주�???
                     </button>
                  </div>
                 
@@ -5731,21 +5731,21 @@ function renderRegForm() {
                 <div class="flex items-center gap-2">
                      <!-- Split View Toggle -->
                      <button onclick="toggleSplitView()" id="btn-split-toggle" class="hidden text-sm font-bold text-slate-500 hover:bg-slate-100 px-3 py-1.5 rounded border border-slate-200 bg-white transition-colors flex items-center gap-1.5">
-                        <span>📖</span> 원문
+                        <span>?��</span> ?�문
                      </button>
 
                      <!-- PDF Upload -->
                      <label class="btn-ys !bg-white !text-slate-600 !border-slate-300 hover:bg-slate-50 flex items-center gap-1.5 cursor-pointer shadow-sm !px-3 !py-1.5 !text-sm !h-auto !rounded shrink-0">
-                        <span>📂</span> PDF
+                        <span>?��</span> PDF
                         <input type="file" class="hidden" accept=".pdf" onchange="handlePdfImport(this)">
                      </label>
 
                     <button onclick="saveRegGroup()" class="btn-ys shadow-md hover:brightness-110 !px-4 !py-1.5 !text-sm !h-auto !rounded shrink-0">
-                        🚀 등록
+                        ?? ?�록
                     </button>
                     
                     <button onclick="exitBuilderMode()" class="btn-ys !bg-slate-100 !text-slate-500 !border-slate-200 hover:bg-slate-200 hover:text-slate-700 shadow-none !px-3 !py-1.5 !text-sm !h-auto !rounded shrink-0">
-                        ✖ 나가기
+                        ???��?�?
                     </button>
                 </div>
             </div>
@@ -5756,10 +5756,10 @@ function renderRegForm() {
                 <!-- [Left] Source Panel -->
                 <div id="source-panel" class="hidden w-[35%] border-r border-slate-200 bg-white flex flex-col transition-all duration-300 ease-in-out relative z-10 h-full">
                     <div class="flex-none p-3 bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-600 flex justify-between items-center">
-                        <span>📄 PDF Analyzed Text</span>
+                        <span>?�� PDF Analyzed Text</span>
                         <button onclick="copySourceText()" class="text-blue-500 hover:text-blue-700">Copy All</button>
                     </div>
-                    <textarea id="source-text-area" class="flex-1 w-full p-4 text-sm font-mono leading-relaxed outline-none resize-none bg-[#fdfdfd] text-slate-700" spellcheck="false" placeholder="PDF 분석 결과가 여기에 표시됩니다."></textarea>
+                    <textarea id="source-text-area" class="flex-1 w-full p-4 text-sm font-mono leading-relaxed outline-none resize-none bg-[#fdfdfd] text-slate-700" spellcheck="false" placeholder="PDF 분석 결과가 ?�기???�시?�니??"></textarea>
                 </div>
 
                 <!-- [Right] Form Builder 3:6:1 Layout -->
@@ -5770,15 +5770,15 @@ function renderRegForm() {
                         <div class="flex flex-col h-full overflow-hidden">
                             <!-- [Refine] Center Header: pt-3 (parent) vs mb-3 (here) = Balanced -->
                             <div class="mb-3 font-bold text-sm flex items-center gap-2 flex-none h-8">
-                                <span class="text-[17px] text-[#013976]">📦 Bundles</span>
-                                <span class="bg-gray-100 text-gray-600 text-[14px] font-bold px-2 py-0.5 rounded shadow-sm" id="count-bundle">총 0개</span>
+                                <span class="text-[17px] text-[#013976]">?�� Bundles</span>
+                                <span class="bg-gray-100 text-gray-600 text-[14px] font-bold px-2 py-0.5 rounded shadow-sm" id="count-bundle">�?0�?/span>
                             </div>
                             <!-- Added h-full and min-h-0 to force scrolling in flex child -->
                             <div id="zone-bundle" class="flex-1 min-h-0 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-xl p-4 space-y-4 scroll-smooth overflow-y-auto">
                                 <!-- Bundle Cards Go Here -->
                                 <div id="placeholder-bundle" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
-                                    <span class="text-3xl mb-2">📦</span>
-                                    <span class="text-[14px]">지문 묶음 추가</span>
+                                    <span class="text-3xl mb-2">?��</span>
+                                    <span class="text-[14px]">지�?묶음 추�?</span>
                                 </div>
                             </div>
                         </div>
@@ -5787,15 +5787,15 @@ function renderRegForm() {
                         <div class="flex flex-col h-full overflow-hidden">
                            <!-- [Refine] Center Header: pt-3 (parent) vs mb-3 (here) = Balanced -->
                            <div class="mb-3 font-bold text-sm flex items-center gap-2 flex-none h-8">
-                                <span class="text-[17px] text-[#013976]">📝 Questions</span>
+                                <span class="text-[17px] text-[#013976]">?�� Questions</span>
                                 <div id="section-stats" class="flex items-center gap-2 ml-2 overflow-x-auto no-scrollbar"></div>
                             </div>
                             <!-- Added h-full and min-h-0 to force scrolling in flex child -->
                             <div id="zone-question" class="flex-1 min-h-0 bg-white border border-slate-200 rounded-xl p-4 space-y-4 shadow-inner relative scroll-smooth overflow-y-auto">
                                 <!-- Question Cards Go Here -->
                                 <div id="placeholder-question" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
-                                    <span class="text-3xl mb-2">📝</span>
-                                    <span class="text-[14px]">문항 카드 추가</span>
+                                    <span class="text-3xl mb-2">?��</span>
+                                    <span class="text-[14px]">문항 카드 추�?</span>
                                 </div>
                             </div>
                         </div>
@@ -5803,7 +5803,7 @@ function renderRegForm() {
                         <!-- Zone C: Navigator (10%) -->
                         <div class="flex flex-col h-full overflow-hidden">
                            <div class="mb-3 font-bold text-sm flex items-center gap-2 flex-none h-8">
-                                <span class="text-[17px] text-[#013976]">🧭 Nav</span>
+                                <span class="text-[17px] text-[#013976]">?�� Nav</span>
                             </div>
                             <!-- Added h-full and min-h-0 to force scrolling in flex child -->
                             <div id="zone-navigator" class="flex-1 min-h-0 bg-slate-100 border border-slate-200 rounded-xl p-2 space-y-2 scroll-smooth overflow-y-auto">
@@ -5829,17 +5829,17 @@ function toggleSplitView(forceState) {
     if (forceState === true || (forceState === undefined && isHidden)) {
         panel.classList.remove('hidden');
         btn.classList.add('bg-indigo-50', 'text-indigo-600', 'border-indigo-200');
-        btn.innerHTML = `<span>📖</span> 원문 숨기기`;
+        btn.innerHTML = `<span>?��</span> ?�문 ?�기�?;
     } else {
         panel.classList.add('hidden');
         btn.classList.remove('bg-indigo-50', 'text-indigo-600', 'border-indigo-200');
-        btn.innerHTML = `<span>📖</span> 원문 대조`;
+        btn.innerHTML = `<span>?��</span> ?�문 ?��?;
     }
 }
 
 function copySourceText() {
     const text = document.getElementById('source-text-area').value;
-    navigator.clipboard.writeText(text).then(() => showToast("📋 Copied to clipboard!"));
+    navigator.clipboard.writeText(text).then(() => showToast("?�� Copied to clipboard!"));
 }
 
 // Toast Notification Helper
@@ -5948,7 +5948,7 @@ function addComponent(type, data = null) {
     const delBtn = div.querySelector('.delete-comp-btn');
     if (delBtn) {
         delBtn.onclick = () => {
-            if (!confirm("정말 삭제하시겠습니까?")) return;
+            if (!confirm("?�말 ??��?�시겠습?�까?")) return;
 
             // [Fix] Cleanup orphaned links if deleting a Bundle
             if (type === 'bundle') {
@@ -5978,8 +5978,8 @@ function addComponent(type, data = null) {
 
     zone.appendChild(div);
 
-    // [Fix v2] 이중 RAF: 첫 로드 시 flex 레이아웃이 완전히 정착된 후 scrollHeight 계산
-    // 단일 RAF는 레이아웃이 아직 미완성 상태일 수 있어 높이가 부정확함
+    // [Fix v2] ?�중 RAF: �?로드 ??flex ?�이?�웃???�전???�착????scrollHeight 계산
+    // ?�일 RAF???�이?�웃???�직 미완???�태?????�어 ?�이가 부?�확??
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             div.querySelectorAll('textarea').forEach(ta => autoResize(ta));
@@ -6025,7 +6025,7 @@ function updateQuestionNumbers() {
     // Update Bundle Count
     const bundleCount = zoneA.querySelectorAll('.builder-item').length;
     const bundleCountEl = document.getElementById('count-bundle');
-    if (bundleCountEl) bundleCountEl.textContent = `총 ${bundleCount}개`;
+    if (bundleCountEl) bundleCountEl.textContent = `�?${bundleCount}�?;
 
     // [New] Render Section Stats (Count & Score)
     const statsContainer = document.getElementById('section-stats');
@@ -6037,7 +6037,7 @@ function updateQuestionNumbers() {
             const scoreInput = q.querySelector('[data-field="score"]');
 
             let sec = secInput ? secInput.value : '';
-            if (!sec) sec = '미분류';
+            if (!sec) sec = '미분�?;
 
             const score = scoreInput ? parseInt(scoreInput.value || 0) : 0;
 
@@ -6057,7 +6057,7 @@ function updateQuestionNumbers() {
         // Render Badges
         const totalBadge = `
              <span class="bg-slate-700 text-white border border-slate-700 px-2 py-0.5 rounded text-[14px] font-bold whitespace-nowrap shadow-sm mr-2">
-                 총 ${totalCount}개 / ${totalScore}점
+                 �?${totalCount}�?/ ${totalScore}??
              </span>
         `;
 
@@ -6065,14 +6065,14 @@ function updateQuestionNumbers() {
         // Let's iterate keys.
         // Let's iterate keys.
         statsContainer.innerHTML = totalBadge + Object.keys(stats).map(sec => {
-            if (sec === '미분류' && stats[sec].count === 0) return '';
-            // [Refine] Abbreviate Section: 독해->[독], 문법->[문]
-            const mapper = { 'Reading': 'R', 'Grammar': 'G', 'Vocabulary': 'V', 'Listening': 'L', 'Writing': 'W', '미분류': '?' };
+            if (sec === '미분�? && stats[sec].count === 0) return '';
+            // [Refine] Abbreviate Section: ?�해->[??, 문법->[�?
+            const mapper = { 'Reading': 'R', 'Grammar': 'G', 'Vocabulary': 'V', 'Listening': 'L', 'Writing': 'W', '미분�?: '?' };
             const shortSec = mapper[sec] || sec[0] || '?'; // fallback to first char if unknown
 
             return `
                 <span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded text-[14px] font-bold whitespace-nowrap shadow-sm">
-                    [${shortSec}] ${stats[sec].count}개 / ${stats[sec].score}점
+                    [${shortSec}] ${stats[sec].count}�?/ ${stats[sec].score}??
                 </span>
             `;
         }).join('');
@@ -6100,8 +6100,8 @@ function renderNavigator(questions) {
     if (questions.length === 0) {
         zoneC.innerHTML = `
             <div class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
-                <span class="text-3xl mb-2">🧭</span>
-                <span class="text-[14px]">문항 카드 추가</span>
+                <span class="text-3xl mb-2">?��</span>
+                <span class="text-[14px]">문항 카드 추�?</span>
             </div>
         `;
         return;
@@ -6115,7 +6115,7 @@ function renderNavigator(questions) {
         const type = q.getAttribute('data-type');
 
         // [Custom Label Logic]
-        const typeLabel = type === 'obj' ? '객' : '주';
+        const typeLabel = type === 'obj' ? '�? : '�?;
         const typeColor = type === 'obj' ? 'bg-blue-100 text-blue-600' : 'bg-rose-100 text-rose-600';
 
         // Retrieve Section & Score
@@ -6124,7 +6124,7 @@ function renderNavigator(questions) {
         const scoreInput = q.querySelector('[data-field="score"]');
         const secVal = secInput ? secInput.value : '';
         const scoreVal = scoreInput ? scoreInput.value : '';
-        const shortSec = secVal ? secVal[0] : ''; // '독', '문' ...
+        const shortSec = secVal ? secVal[0] : ''; // '??, '�? ...
 
         // Check Linked Bundle
         const linkedBundleId = q.getAttribute('data-bundle-id');
@@ -6163,14 +6163,14 @@ function renderNavigator(questions) {
         navItem.addEventListener('drop', handleNavDrop);
         navItem.addEventListener('dragend', handleNavDragEnd);
 
-        // [New] Nav Click → Scroll to Question in Zone B
+        // [New] Nav Click ??Scroll to Question in Zone B
         navItem.addEventListener('click', () => {
             const targetId = navItem.getAttribute('data-target-id');
             const targetEl = document.getElementById(targetId);
             const zoneQ = document.getElementById('zone-question');
             if (targetEl && zoneQ) {
                 targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // 하이라이트 효과
+                // ?�이?�이???�과
                 targetEl.style.outline = '2px solid #3b82f6';
                 targetEl.style.borderRadius = '12px';
                 setTimeout(() => { targetEl.style.outline = ''; }, 1200);
@@ -6450,34 +6450,34 @@ function getComponentHtml(type, id, data) {
             return `
                 <div class="flex items-center justify-between gap-3 mb-4 bg-orange-50 p-3 rounded-xl border border-orange-100" data-group-id="${d.groupId || generateUUID()}">
                     <div class="flex items-center gap-3">
-                        <span class="text-2xl">📦</span>
+                        <span class="text-2xl">?��</span>
                         <div>
                             <h4 class="font-bold text-orange-800 text-[15px]">Group Bundle</h4>
                         </div>
                     </div>
-                    <button class="delete-comp-btn p-1 w-[28px] h-[28px] flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors font-bold text-[15px]" title="삭제" ${isEditMode ? 'style="display:none;"' : ''}>✕</button>
+                    <button class="delete-comp-btn p-1 w-[28px] h-[28px] flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors font-bold text-[15px]" title="??��" ${isEditMode ? 'style="display:none;"' : ''}>??/button>
                 </div>
                 <div class="mb-4">
-                    <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">질문 내용 (Question)</label>
-                    <textarea id="${id}-title" data-field="title" rows="1" oninput="autoResize(this)" class="${inputClass} resize-none overflow-hidden" placeholder="질문을 입력하세요">${d.title || d.text || ''}</textarea>
+                    <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">질문 ?�용 (Question)</label>
+                    <textarea id="${id}-title" data-field="title" rows="1" oninput="autoResize(this)" class="${inputClass} resize-none overflow-hidden" placeholder="질문???�력?�세??>${d.title || d.text || ''}</textarea>
                 </div>
-                <!-- 연결 문항 관련 영역은 수정 모드가 아닐 때만 표시 (수정 모드에서는 새끼 변경 금지) -->
+                <!-- ?�결 문항 관???�역?� ?�정 모드가 ?�닐 ?�만 ?�시 (?�정 모드?�서???�끼 변�?금�?) -->
                 <div class="mb-4" ${isEditMode ? 'style="display:none;"' : ''}>
-                     <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">연결 문항 (Linked Questions)</label>
+                     <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">?�결 문항 (Linked Questions)</label>
                      <div class="flex items-center gap-2 overflow-hidden">
                         <input type="text" id="${id}-link-input" 
                                 class="flex-1 min-w-0 p-2 text-[14px] font-bold text-orange-600 border-2 border-orange-200 rounded-lg outline-none focus:border-orange-400 placeholder:text-orange-300 placeholder:font-normal" 
-                                placeholder="예: 1, 2, 3 (번호 입력)"
+                                placeholder="?? 1, 2, 3 (번호 ?�력)"
                                 onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleBundleLinkInput('${id}', this.value); }"
                                 value="">
                         <div class="flex flex-row gap-1 flex-shrink-0">
                             <button onclick="handleBundleLinkInput('${id}', document.getElementById('${id}-link-input').value)" 
                                     class="btn-ys !bg-orange-600 !text-white !border-orange-600 hover:brightness-110 !px-3 !py-1 !text-[13px] !font-bold rounded shadow-sm whitespace-nowrap">
-                                연결
+                                ?�결
                             </button>
                             <button onclick="handleBundleDisconnect('${id}')" 
                                     class="btn-ys !bg-white !text-red-500 !border-red-200 hover:bg-red-50 !px-3 !py-1 !text-[13px] !font-bold rounded shadow-sm whitespace-nowrap">
-                                해제
+                                ?�제
                             </button>
                         </div>
                      </div>
@@ -6487,17 +6487,17 @@ function getComponentHtml(type, id, data) {
                 <!-- Toggle Controls -->
                 <div class="flex items-center gap-3 mb-4">
                     <button onclick="document.getElementById('${id}-ctx-box').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1.5 py-1 px-2 hover:bg-orange-50 rounded-lg transition-colors">
-                        <span>➕</span> 지문 추가
+                        <span>??/span> 지�?추�?
                     </button>
                     <button onclick="document.getElementById('${id}-img-box').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1.5 py-1 px-2 hover:bg-orange-50 rounded-lg transition-colors">
-                        <span>📷</span> 이미지 추가
+                        <span>?��</span> ?��?지 추�?
                     </button>
                 </div>
 
                 <!-- Context (Hidden by default) -->
                 <div id="${id}-ctx-box" class="mb-4 ${d.html ? '' : 'hidden'}">
                      <div class="flex justify-between items-center mb-1.5">
-                        <label class="text-[14px] font-bold text-slate-600">지문 내용</label>
+                        <label class="text-[14px] font-bold text-slate-600">지�??�용</label>
                         ${renderMiniToolbar(id + '-editor')}
                      </div>
                      <div id="${id}-editor" data-field="html" class="min-h-[40px] p-2 border border-slate-200 rounded-xl outline-none text-[14px] leading-relaxed focus:border-orange-300 transition-colors bg-white shadow-inner" contenteditable="true">
@@ -6517,8 +6517,8 @@ function getComponentHtml(type, id, data) {
         case 'obj':
         case 'subj':
             const isObj = type === 'obj';
-            const icon = isObj ? '✅' : '✍️';
-            const typeName = isObj ? '객관형 (Choice)' : '주관형 (Essay)';
+            const icon = isObj ? '?? : '?�️';
+            const typeName = isObj ? '객�???(Choice)' : '주�???(Essay)';
             const headerBg = isObj ? 'bg-blue-50' : 'bg-rose-50';
             const borderColor = isObj ? 'border-blue-100' : 'border-rose-100';
             const optCount = (d.options && d.options.length >= 2 && d.options.length <= 5) ? d.options.length : 5;
@@ -6540,7 +6540,7 @@ function getComponentHtml(type, id, data) {
                          <select id="${id}-sec" data-field="section" 
                                  onchange="updateSubTypes('${id}', this.value); updateQuestionNumbers(); this.classList.toggle('bg-amber-50', !this.value); this.classList.toggle('bg-white', !!this.value);" 
                                  class="h-[34px] px-1 text-[13px] font-bold border border-slate-300 rounded-lg outline-none focus:border-blue-500 text-rose-700 ${!d.sec ? 'bg-amber-50' : 'bg-white'}">
-                            <option value="" disabled ${!d.sec ? 'selected' : ''}>영역</option>
+                            <option value="" disabled ${!d.sec ? 'selected' : ''}>?�역</option>
                             <option value="Reading" ${d.sec === 'Reading' ? 'selected' : ''}>Reading</option>
                             <option value="Grammar" ${d.sec === 'Grammar' ? 'selected' : ''}>Grammar</option>
                             <option value="Vocabulary" ${d.sec === 'Vocabulary' ? 'selected' : ''}>Vocabulary</option>
@@ -6557,8 +6557,8 @@ function getComponentHtml(type, id, data) {
 
                          <!-- Difficulty -->
                          <select id="${id}-diff" data-field="difficulty" class="h-[34px] px-2 text-[13px] border border-slate-300 rounded-lg outline-none focus:border-blue-500 bg-white cursor-pointer">
-                             ${['최상', '상', '중', '하', '기초'].map(lvl => `
-                                <option value="${lvl}" ${(d.diff === lvl || (!d.diff && lvl === '중')) ? 'selected' : ''}>${lvl}</option>
+                             ${['최상', '??, '�?, '??, '기초'].map(lvl => `
+                                <option value="${lvl}" ${(d.diff === lvl || (!d.diff && lvl === '�?)) ? 'selected' : ''}>${lvl}</option>
                              `).join('')}
                          </select>
 
@@ -6568,7 +6568,7 @@ function getComponentHtml(type, id, data) {
                             <input type="number" id="${id}-score" data-field="score" value="${d.score ?? 0}" min="0" max="99" oninput="if(this.value>99) this.value=99; if(this.value<0) this.value=0; updateQuestionNumbers();" class="w-[40px] h-full text-center text-[14px] font-bold border border-slate-300 rounded-lg outline-none focus:border-blue-500" placeholder="0">
                          </div>
                          <!-- Delete Button (X) -->
-                         <button class="delete-comp-btn p-1 w-[28px] h-[28px] flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors font-bold text-[15px]" title="삭제">✕</button>
+                         <button class="delete-comp-btn p-1 w-[28px] h-[28px] flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors font-bold text-[15px]" title="??��">??/button>
                     </div>
                  </div>
 
@@ -6576,24 +6576,24 @@ function getComponentHtml(type, id, data) {
                  <!-- Question Content -->
                  <div class="space-y-4">
                      <div>
-                        <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">질문 내용 (Question)</label>
-                        <textarea id="${id}-text" data-field="text" rows="1" oninput="autoResize(this)" class="${inputClass} resize-none overflow-hidden" placeholder="질문을 입력하세요">${d.text || d.title || ''}</textarea>
+                        <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">질문 ?�용 (Question)</label>
+                        <textarea id="${id}-text" data-field="text" rows="1" oninput="autoResize(this)" class="${inputClass} resize-none overflow-hidden" placeholder="질문???�력?�세??>${d.text || d.title || ''}</textarea>
                      </div>
 
                      <!-- Toggles -->
                      <div class="flex items-center gap-3">
                         <button onclick="document.getElementById('${id}-inner-ctx').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1.5 py-1 px-2 hover:bg-blue-50 rounded-lg transition-colors">
-                            <span>➕</span> 지문 추가
+                            <span>??/span> 지�?추�?
                         </button>
                         <button onclick="document.getElementById('${id}-img-u').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1.5 py-1 px-2 hover:bg-blue-50 rounded-lg transition-colors">
-                            <span>📷</span> 이미지 추가
+                            <span>?��</span> ?��?지 추�?
                         </button>
                      </div>
 
                      <!-- Inner Context (Hidden) -->
                      <div id="${id}-inner-ctx" class="${d.innerPassage ? '' : 'hidden'}">
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[14px] font-bold text-slate-600">지문 내용</label>
+                            <label class="text-[14px] font-bold text-slate-600">지�??�용</label>
                             ${renderMiniToolbar(id + '-inner-ctx-editor')}
                         </div>
                         <div id="${id}-inner-ctx-editor" data-field="innerPassage" class="min-h-[40px] p-2 border border-slate-200 rounded-xl outline-none text-[14px] leading-relaxed focus:border-blue-300 transition-colors bg-white shadow-inner" contenteditable="true">
@@ -6610,12 +6610,12 @@ function getComponentHtml(type, id, data) {
                  <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 mt-4">
                     ${isObj
                     ? `<div class="flex justify-between items-center mb-3">
-                               <label class="text-[14px] font-bold text-slate-700">보기 및 정답</label>
+                               <label class="text-[14px] font-bold text-slate-700">보기 �??�답</label>
                                <select onchange="renderBuilderChoices('${id}', this.value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500">
-                                    <option value="2" ${optCount === 2 ? 'selected' : ''}>2개</option>
-                                    <option value="3" ${optCount === 3 ? 'selected' : ''}>3개</option>
-                                    <option value="4" ${optCount === 4 ? 'selected' : ''}>4개</option>
-                                    <option value="5" ${optCount === 5 ? 'selected' : ''}>5개</option>
+                                    <option value="2" ${optCount === 2 ? 'selected' : ''}>2�?/option>
+                                    <option value="3" ${optCount === 3 ? 'selected' : ''}>3�?/option>
+                                    <option value="4" ${optCount === 4 ? 'selected' : ''}>4�?/option>
+                                    <option value="5" ${optCount === 5 ? 'selected' : ''}>5�?/option>
                                </select>
                            </div>
                            <div id="${id}-choices" class="grid grid-cols-2 gap-2 mb-4">
@@ -6628,14 +6628,14 @@ function getComponentHtml(type, id, data) {
                                  `).join('')}
                            </div>
                            <div class="flex items-center gap-3">
-                               <label class="text-[14px] font-bold text-blue-600">정답 번호:</label>
+                               <label class="text-[14px] font-bold text-blue-600">?�답 번호:</label>
                                <input type="number" id="${id}-answer" data-field="answer" value="${d.answer || ''}" class="w-20 p-2 text-center text-[14px] font-bold border border-blue-200 rounded-lg">
                            </div>
 `
-                    : `<label class="text-[14px] font-bold text-slate-700 mb-2 block">정답 (채점용 핵심 키워드)</label>
-                           <textarea id="${id}-answer" data-field="answer" rows="1" oninput="autoResize(this)" class="${inputClass} overflow-hidden resize-none mb-4" style="min-height: 42px;" placeholder="키워드 정답을 입력하세요.">${d.answer || ''}</textarea>
-                       <label class="text-[14px] font-bold text-slate-700 mb-2 block">모범 답안 (서술형 전체 풀이)</label>
-                           <textarea id="${id}-modelAnswer" data-field="modelAnswer" rows="1" oninput="autoResize(this)" class="${inputClass} overflow-hidden resize-none" style="min-height: 42px;" placeholder="상세 풀이 및 모범 답안을 입력하세요.">${d.modelAnswer || ''}</textarea>`
+                    : `<label class="text-[14px] font-bold text-slate-700 mb-2 block">?�답 (채점???�심 ?�워??</label>
+                           <textarea id="${id}-answer" data-field="answer" rows="1" oninput="autoResize(this)" class="${inputClass} overflow-hidden resize-none mb-4" style="min-height: 42px;" placeholder="?�워???�답???�력?�세??">${d.answer || ''}</textarea>
+                       <label class="text-[14px] font-bold text-slate-700 mb-2 block">모범 ?�안 (?�술???�체 ?�??</label>
+                           <textarea id="${id}-modelAnswer" data-field="modelAnswer" rows="1" oninput="autoResize(this)" class="${inputClass} overflow-hidden resize-none" style="min-height: 42px;" placeholder="?�세 ?�??�?모범 ?�안???�력?�세??">${d.modelAnswer || ''}</textarea>`
                 }
                  </div>
             `;
@@ -6671,8 +6671,8 @@ function serializeBuilderState() {
             } else if (type === 'obj' || type === 'subj') {
                 val = {
                     sec: block.querySelector('[data-field="section"]')?.value || 'Reading',
-                    sub: block.querySelector('[data-field="subtype"]')?.value || '기타', // SubType Fixed
-                    diff: block.querySelector('[data-field="difficulty"]')?.value || '중',
+                    sub: block.querySelector('[data-field="subtype"]')?.value || '기�?', // SubType Fixed
+                    diff: block.querySelector('[data-field="difficulty"]')?.value || '�?,
                     score: block.querySelector('[data-field="score"]')?.value || 3,
                     text: block.querySelector('[data-field="text"]')?.value || '', // Storing as 'text' directly
                     answer: block.querySelector('[data-field="answer"]')?.value || '',
@@ -6688,7 +6688,7 @@ function serializeBuilderState() {
             }
             // Log found data
             console.log(`Block[${type}]ID: ${id} `, val);
-            if (!val.text && (type === 'obj' || type === 'subj')) console.warn(`⚠️ Empty text for question ${id}`);
+            if (!val.text && (type === 'obj' || type === 'subj')) console.warn(`?�️ Empty text for question ${id}`);
 
             state.push({ type, data: val });
         } catch (e) {
@@ -6728,24 +6728,24 @@ function renderMiniToolbar(targetId) {
              <button onclick="execCmd('bold')" class="p-1 hover:bg-slate-200 rounded text-[14px] font-bold w-6 h-6 flex items-center justify-center">B</button>
              <button onclick="execCmd('underline')" class="p-1 hover:bg-slate-200 rounded text-[14px] underline w-6 h-6 flex items-center justify-center">U</button>
              <div class="w-px h-4 bg-slate-300 mx-1 self-center"></div>
-             <button onclick="insertSymbol('★')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">★</button>
-             <button onclick="insertSymbol('→')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">→</button>
-             <button onclick="insertSymbol('※')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">※</button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
              <div class="w-px h-4 bg-slate-300 mx-1 self-center"></div>
-             <button onclick="insertSymbol('①')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">①</button>
-             <button onclick="insertSymbol('②')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">②</button>
-             <button onclick="insertSymbol('③')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">③</button>
-             <button onclick="insertSymbol('④')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">④</button>
-             <button onclick="insertSymbol('⑤')" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">⑤</button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
+             <button onclick="insertSymbol('??)" class="p-1 hover:bg-slate-200 rounded text-[14px] w-6 h-6 flex items-center justify-center">??/button>
         </div>
                 `;
 }
 
 function renderSubTypeOptions(section, selected) {
     const list = SUB_TYPE_MAP[section] || [];
-    let html = `<option value="" disabled ${!selected ? 'selected' : ''}>세부영역</option>`;
+    let html = `<option value="" disabled ${!selected ? 'selected' : ''}>?��??�역</option>`;
     if (list.length === 0 && !section) return html; // Return just default if no section
-    return html + (list.length ? list : ["기타"]).map(item => `<option value="${item}" ${item === selected ? 'selected' : ''}>${item}</option>`).join('');
+    return html + (list.length ? list : ["기�?"]).map(item => `<option value="${item}" ${item === selected ? 'selected' : ''}>${item}</option>`).join('');
 }
 
 function handleBundleLinkInput(bundleId, value) {
@@ -6764,14 +6764,14 @@ function handleBundleLinkInput(bundleId, value) {
             const existingBundleId = q.getAttribute('data-bundle-id');
             // If linked to a DIFFERENT bundle
             if (existingBundleId && existingBundleId !== bundleId) {
-                alert("이미 연결된 묶음카드가 있습니다.");
+                alert("?��? ?�결??묶음카드가 ?�습?�다.");
                 return; // Abort entirely
             }
         }
     }
 
     if (validCount === 0 && targetNums.length > 0) {
-        alert("문항이 없습니다.");
+        alert("문항???�습?�다.");
         return;
     }
 
@@ -6814,7 +6814,7 @@ function handleBundleLinkInput(bundleId, value) {
 
 // [New] Handle Disconnect
 function handleBundleDisconnect(bundleId) {
-    if (!confirm("이 묶음에 연결된 모든 문항의 연결을 해제하시겠습니까?")) return;
+    if (!confirm("??묶음???�결??모든 문항???�결???�제?�시겠습?�까?")) return;
 
     const zoneB = document.getElementById('zone-question');
     const questions = Array.from(zoneB.querySelectorAll('.builder-item'));
@@ -6846,7 +6846,7 @@ function handleBundleDisconnect(bundleId) {
         // Wait, syncBundles assigns Set # regardless of linking?
         // Yes, "bundles.forEach((bundle, idx) => setNum = idx+1".
         // So the Set # badge on the bundle itself should PERSIST even if empty?
-        // "묶음카드를 지우면 연결된 문항의 Set이 안사라지고..." was the previous issue.
+        // "묶음카드�?지?�면 ?�결??문항??Set???�사?��?�?.." was the previous issue.
         // Now we are just unlinking. The Bundle still exists. So it IS "Set 1". It just has 0 questions.
         // So we do NOT remove the set badge from the bundle title. It stays "Set 1" (Empty).
     }
@@ -6856,7 +6856,7 @@ function handleBundleDisconnect(bundleId) {
     if (input) input.value = '';
 
     updateQuestionNumbers();
-    // alert("연결이 해제되었습니다."); // Removed
+    // alert("?�결???�제?�었?�니??"); // Removed
 }
 
 function updateSubTypes(id, section) {
@@ -6873,24 +6873,24 @@ function renderImageUploader(id, d, size = 'normal') {
     return `
                 <div class="flex flex-col gap-2">
              <label class="flex items-center gap-2 cursor-pointer bg-white border border-dashed border-slate-300 rounded p-2 hover:bg-blue-50 transition-all justify-center">
-                 <span class="text-sm">📂 Upload</span>
+                 <span class="text-sm">?�� Upload</span>
                  <input type="file" id="${id}-file" data-field="file" class="hidden" accept="image/*" onchange="previewBuilderImg(this, '${id}')">
              </label>
              <div id="${id}-preview" data-field="preview" class="${(d.imgUrl && d.imgUrl !== 'undefined' && d.imgUrl !== 'null') ? '' : 'hidden'} relative mt-1 border rounded bg-slate-100 overflow-hidden">
                  <img src="${(d.imgUrl && d.imgUrl !== 'undefined' && d.imgUrl !== 'null') ? fixDriveUrl(d.imgUrl) : ''}" class="${height} object-contain mx-auto" referrerpolicy="no-referrer">
-                 <button onclick="clearBuilderImg('${id}')" class="absolute top-1 right-1 bg-white rounded-full p-1 text-red-500 shadow hover:bg-red-50 text-xs">❌</button>
+                 <button onclick="clearBuilderImg('${id}')" class="absolute top-1 right-1 bg-white rounded-full p-1 text-red-500 shadow hover:bg-red-50 text-xs">??/button>
              </div>
         </div>
                 `;
 }
 
 
-// [Sanitizer] contenteditable innerHTML 저장 시 Tailwind --tw-* CSS 변수 제거
-// 이유: 브라우저가 DOM 요소에 자동 주입하는 --tw-* 변수들이 innerHTML에 포함돼
-//       구글 시트 저장 시 셀이 비대해지는 문제 방지. 사용자 서식(볼드 등)은 보존.
+// [Sanitizer] contenteditable innerHTML ?�????Tailwind --tw-* CSS 변???�거
+// ?�유: 브라?��?가 DOM ?�소???�동 주입?�는 --tw-* 변?�들??innerHTML???�함??
+//       구�? ?�트 ?�?????�??비�??��???문제 방�?. ?�용???�식(볼드 ???� 보존.
 function stripTwStyles(html) {
     if (!html) return html;
-    // 1. style 속성 내 --tw-로 시작하는 선언들만 제거 (다른 인라인 스타일은 보존)
+    // 1. style ?�성 ??--tw-�??�작?�는 ?�언?�만 ?�거 (?�른 ?�라???��??��? 보존)
     let cleaned = html.replace(/style="([^"]*)"/gi, function(match, styleContent) {
         const filtered = styleContent
             .split(';')
@@ -6900,27 +6900,27 @@ function stripTwStyles(html) {
             .trim();
         return filtered ? 'style="' + filtered + '"' : '';
     });
-    // 2. 줄바꿈 제거 (구글 시트에서 셀이 거대해지는 원인)
+    // 2. 줄바�??�거 (구�? ?�트?�서 ?�??거�??��????�인)
     cleaned = cleaned.replace(/\r?\n/g, '');
-    // 3. 선행/후행 빈 태그 제거 (셀 시작 공란 원인: <div></div>, <br>, <p></p> 등)
+    // 3. ?�행/?�행 �??�그 ?�거 (?� ?�작 공�? ?�인: <div></div>, <br>, <p></p> ??
     cleaned = cleaned.replace(/^(\s*<(div|p|span|br)\s*\/?\s*>\s*<\/(div|p|span)>\s*|<br\s*\/?\s*>\s*)+/gi, '');
     cleaned = cleaned.replace(/(\s*<(div|p|span|br)\s*\/?\s*>\s*<\/(div|p|span)>\s*|<br\s*\/?\s*>\s*)+$/gi, '');
     return cleaned.trim();
 }
 // Utility
 function autoResize(el) {
-    // [Fix v3] scroll-behavior:smooth 차단 + 모든 스크롤 부모 일괄 저장/복원
-    // 원인: obj/subj 카드가 zone-question 뷰포트를 초과할 때, height:auto 로 순간 축소 시
-    //       브라우저가 scrollTop을 0으로 클램핑하고, scroll-smooth 로 인해 복귀 애니메이션 발동
-    //       → "위로 갔다가 돌아오는" 현상
-    // 해결: height 변경 전 모든 스크롤 부모의 scrollBehavior를 auto로 즉시 강제 → 즉시 scrollTop 복원
+    // [Fix v3] scroll-behavior:smooth 차단 + 모든 ?�크�?부�??�괄 ?�??복원
+    // ?�인: obj/subj 카드가 zone-question 뷰포?��? 초과???? height:auto �??�간 축소 ??
+    //       브라?��?가 scrollTop??0?�로 ?�램?�하�? scroll-smooth �??�해 복�? ?�니메이??발동
+    //       ??"?�로 갔다가 ?�아?�는" ?�상
+    // ?�결: height 변�???모든 ?�크�?부모의 scrollBehavior�?auto�?즉시 강제 ??즉시 scrollTop 복원
     const scrollParents = [];
     let p = el.parentElement;
     while (p) {
         const ov = getComputedStyle(p).overflowY;
         if (ov === 'auto' || ov === 'scroll') {
             const savedBehavior = p.style.scrollBehavior;
-            p.style.scrollBehavior = 'auto'; // smooth 애니메이션 즉시 차단
+            p.style.scrollBehavior = 'auto'; // smooth ?�니메이??즉시 차단
             scrollParents.push({ el: p, top: p.scrollTop, behavior: savedBehavior });
         }
         p = p.parentElement;
@@ -6929,7 +6929,7 @@ function autoResize(el) {
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
 
-    // scrollTop 즉시 복원 후 scrollBehavior 원상복구
+    // scrollTop 즉시 복원 ??scrollBehavior ?�상복구
     scrollParents.forEach(sp => {
         sp.el.scrollTop = sp.top;
         sp.el.style.scrollBehavior = sp.behavior;
@@ -6941,8 +6941,8 @@ function autoResize(el) {
 function fixDriveUrl(url) {
     if (!url || typeof url !== 'string') return "";
 
-    // [Student View Sync] 썸네일 엔드포인트 사용 (보안 우회)
-    // script.js Line 423 getSafeImageUrl -> convertToDirectLink 로직과 동일화
+    // [Student View Sync] ?�네???�드?�인???�용 (보안 ?�회)
+    // script.js Line 423 getSafeImageUrl -> convertToDirectLink 로직�??�일??
     const patterns = [
         /file\/d\/([a-zA-Z0-9-_]+)/,
         /id=([a-zA-Z0-9-_]+)/,
@@ -6954,7 +6954,7 @@ function fixDriveUrl(url) {
     for (let pattern of patterns) {
         let match = url.match(pattern);
         if (match && match[1]) {
-            // sz=w1000 은 고해상도 요청
+            // sz=w1000 ?� 고해?�도 ?�청
             return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
         }
     }
@@ -6968,10 +6968,10 @@ function previewBuilderImg(input, id) {
         const MAX_MB = 1;
         const MAX_BYTES = MAX_MB * 1024 * 1024;
 
-        // [이미지 용량 제한] 1MB 초과 시 즉시 차단
+        // [?��?지 ?�량 ?�한] 1MB 초과 ??즉시 차단
         if (file.size > MAX_BYTES) {
-            showToast(`⚠️ 이미지 용량 초과! 1MB 이하 파일만 등록 가능합니다.\n(현재 파일: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
-            input.value = ''; // 파일 선택 초기화
+            showToast(`?�️ ?��?지 ?�량 초과! 1MB ?�하 ?�일�??�록 가?�합?�다.\n(?�재 ?�일: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+            input.value = ''; // ?�일 ?�택 초기??
             return;
         }
 
@@ -7001,15 +7001,15 @@ function clearBuilderImg(id) {
 // --- Edit Form Builder (New 07-2) ---
 function renderEditForm(qId) {
     const q = globalConfig.questions.find(item => item.id === qId);
-    if (!q) return showToast("⚠️ 문항 정보를 찾을 수 없습니다.");
+    if (!q) return showToast("?�️ 문항 ?�보�?찾을 ???�습?�다.");
 
-    // [Fix] 직전 카테고리 ID 보존 (Cancel 복귀용)
+    // [Fix] 직전 카테고리 ID 보존 (Cancel 복�???
     window._editReturnCatId = q.catId || curCatId || '';
 
     setCanvasId('08-2');
     const c = document.getElementById('dynamic-content');
 
-    // [Fix] app-canvas 패딩 제거 (07-2 콘텐츠 영역 최대화, 사이드바는 유지)
+    // [Fix] app-canvas ?�딩 ?�거 (07-2 콘텐�??�역 최�??? ?�이?�바???��?)
     const ac = document.getElementById('app-canvas');
     if (ac) ac.style.padding = '0';
     document.getElementById('app-canvas').classList.add('!overflow-hidden');
@@ -7025,7 +7025,7 @@ function renderEditForm(qId) {
                  <!-- Left: Title -->
                  <div class="flex items-center gap-4">
                     <h2 class="font-bold bg-[#013976] text-white px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2" style="font-size: 17px;">
-                        <span class="text-xl">✏️</span> Edit Mode
+                        <span class="text-xl">?�️</span> Edit Mode
                     </h2>
                     <div class="flex items-center gap-2">
                         <span class="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded text-sm font-bold shadow-sm border border-indigo-100">
@@ -7037,18 +7037,18 @@ function renderEditForm(qId) {
                  <!-- Center: Hidden Toolbar -->
                  <div class="flex items-center gap-2 flex-1 justify-center opacity-50 pointer-events-none select-none">
                      <span class="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-                         ℹ️ 수정 모드에서는 해당 문항 및 소속 지문만 수정 가능합니다.
+                         ?�️ ?�정 모드?�서???�당 문항 �??�속 지문만 ?�정 가?�합?�다.
                      </span>
                  </div>
                 
                 <!-- Right: Actions -->
                 <div class="flex items-center gap-2">
                     <button onclick="updateBuilderQuestion('${qId}')" class="btn-ys !bg-teal-600 !text-white shadow-md hover:brightness-110 !px-4 !py-1.5 !text-sm !h-auto !rounded shrink-0 flex items-center gap-2 font-bold">
-                        💾 Update
+                        ?�� Update
                     </button>
                     
                     <button onclick="exitEditMode()" class="btn-ys !bg-slate-100 !text-slate-500 !border-slate-200 hover:bg-slate-200 hover:text-slate-700 shadow-none !px-3 !py-1.5 !text-sm !h-auto !rounded shrink-0">
-                        ✖ Cancel
+                        ??Cancel
                     </button>
                 </div>
             </div>
@@ -7064,12 +7064,12 @@ function renderEditForm(qId) {
                           <!-- Zone A: Bundle (35%) -->
                           <div class="flex flex-col h-full overflow-hidden">
                               <div class="mb-3 font-bold text-sm flex items-center gap-2 flex-none h-8">
-                                  <span class="text-[17px] text-[#013976]">📦 Bundles</span>
+                                  <span class="text-[17px] text-[#013976]">?�� Bundles</span>
                               </div>
                               <div id="zone-bundle" class="flex-1 min-h-0 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-xl p-4 space-y-4 scroll-smooth overflow-y-auto">
                                   <div id="placeholder-bundle" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
-                                      <span class="text-3xl mb-2">📦</span>
-                                      <span class="text-[14px]">연결된 지문이 없습니다</span>
+                                      <span class="text-3xl mb-2">?��</span>
+                                      <span class="text-[14px]">?�결??지문이 ?�습?�다</span>
                                   </div>
                               </div>
                           </div>
@@ -7077,13 +7077,13 @@ function renderEditForm(qId) {
                           <!-- Zone B: Questions (65%) -->
                           <div class="flex flex-col h-full overflow-hidden">
                              <div class="mb-3 font-bold text-sm flex items-center gap-2 flex-none h-8">
-                                  <span class="text-[17px] text-[#013976]">📝 Questions</span>
+                                  <span class="text-[17px] text-[#013976]">?�� Questions</span>
                                   <div id="section-stats" class="flex items-center gap-2 ml-2 overflow-x-auto no-scrollbar"></div>
                               </div>
                               <div id="zone-question" class="flex-1 min-h-0 bg-white border border-slate-200 rounded-xl p-4 space-y-4 shadow-inner relative scroll-smooth overflow-y-auto">
                                   <div id="placeholder-question" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60" style="display:none;">
-                                      <span class="text-3xl mb-2">📝</span>
-                                      <span class="text-[14px]">문항 렌더링 중...</span>
+                                      <span class="text-3xl mb-2">?��</span>
+                                      <span class="text-[14px]">문항 ?�더�?�?..</span>
                                   </div>
                               </div>
                           </div>
@@ -7095,7 +7095,7 @@ function renderEditForm(qId) {
           </div>
       `;
 
-    // [Fix] DOM 렌더링 완료 후 컴포넌트 초기화 (초기 렌더링 지연 방지)
+    // [Fix] DOM ?�더�??�료 ??컴포?�트 초기??(초기 ?�더�?지??방�?)
     setTimeout(() => {
 
     // 1. If part of a Bundle, load Bundle into Zone A
@@ -7103,7 +7103,7 @@ function renderEditForm(qId) {
     if (bundleIdToLoad && bundleIdToLoad !== "") {
         const bundleInfo = (globalConfig.bundles || []).find(b => b.id === bundleIdToLoad);
         if (bundleInfo) {
-            // [Fix] Sanitize Passage (Empty HTML Check) — 07-1과 동일
+            // [Fix] Sanitize Passage (Empty HTML Check) ??07-1�??�일
             let rawHtml = bundleInfo.text || "";
             if (rawHtml.replace(/<[^>]*>/g, '').trim() === '' && !rawHtml.includes('<img')) {
                 rawHtml = "";
@@ -7111,8 +7111,8 @@ function renderEditForm(qId) {
 
             addComponent('bundle', {
                 id: bundleInfo.id,
-                groupId: bundleInfo.id, // [Fix] Preserve Original UUID as Group ID — 07-1과 동일
-                title: bundleInfo.title || '지문 묶음',
+                groupId: bundleInfo.id, // [Fix] Preserve Original UUID as Group ID ??07-1�??�일
+                title: bundleInfo.title || '지�?묶음',
                 html: rawHtml,
                 imgUrl: (bundleInfo.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : ""
             });
@@ -7120,15 +7120,15 @@ function renderEditForm(qId) {
     }
 
     // 2. Load Question into Zone B
-    // [ROOT CAUSE FIX] DB(GET_FULL_DB)가 반환하는 필드: type, choices, title, text, imgUrl
-    // 07-1 패턴: q.type === '객관형' ? 'obj' : 'subj'
+    // [ROOT CAUSE FIX] DB(GET_FULL_DB)가 반환?�는 ?�드: type, choices, title, text, imgUrl
+    // 07-1 ?�턴: q.type === '객�??? ? 'obj' : 'subj'
     const qType = q.type || q.questionType || '';
-    let type = (qType.includes('객관') || qType === 'obj') ? 'obj' : 'subj';
-    // fallback: choices 존재 시 무조건 obj
+    let type = (qType.includes('객�?') || qType === 'obj') ? 'obj' : 'subj';
+    // fallback: choices 존재 ??무조�?obj
     if (type === 'subj' && q.choices && Array.isArray(q.choices) && q.choices.length > 0) {
         type = 'obj';
     }
-    console.log('[07-2 Debug] q.type:', q.type, '→ resolved:', type);
+    console.log('[07-2 Debug] q.type:', q.type, '??resolved:', type);
 
     addComponent(type, {
         id: q.id,
@@ -7136,30 +7136,30 @@ function renderEditForm(qId) {
         sub: q.subType,
         diff: q.difficulty,
         score: q.score,
-        text: q.title,  // 07-1과 동일: DB의 title이 발문
-        // [Fix] Sanitize Inner Passage — 07-1과 동일
+        text: q.title,  // 07-1�??�일: DB??title??발문
+        // [Fix] Sanitize Inner Passage ??07-1�??�일
         innerPassage: (q.text && q.text.replace(/<[^>]*>/g, '').trim() === '' && !q.text.includes('<img')) ? "" : q.text,
         answer: q.answer,
         modelAnswer: q.modelAnswer,
-        options: q.choices,  // 07-1과 동일: DB의 choices가 보기 배열
+        options: q.choices,  // 07-1�??�일: DB??choices가 보기 배열
         imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : "",
         isLinked: bundleIdToLoad ? true : false,
         linkedGroupId: bundleIdToLoad || ''
     });
 
-    // Link in DOM (07-1과 동일)
+    // Link in DOM (07-1�??�일)
     if (bundleIdToLoad) {
         const qEl = document.getElementById(q.id);
         if (qEl) qEl.setAttribute('data-bundle-id', bundleIdToLoad);
     }
 
-    }, 100); // DOM 안정화 대기
+    }, 100); // DOM ?�정???��?
 }
 
-// [New] Exit Edit Mode → Return to previous bank view with category selected
+// [New] Exit Edit Mode ??Return to previous bank view with category selected
 function exitEditMode(skipConfirm = false) {
-    // [Fix] 저장 완료 후 호출 시(skipConfirm=true)에는 확인 팝업 생략
-    if (!skipConfirm && !confirm("작성 중인 내용은 저장되지 않습니다. 나가시겠습니까?")) return;
+    // [Fix] ?�???�료 ???�출 ??skipConfirm=true)?�는 ?�인 ?�업 ?�략
+    if (!skipConfirm && !confirm("?�성 중인 ?�용?� ?�?�되지 ?�습?�다. ?��??�겠?�니�?")) return;
 
     // Restore app-canvas padding
     const ac = document.getElementById('app-canvas');
@@ -7184,28 +7184,28 @@ function exitEditMode(skipConfirm = false) {
     }
 }
 
-// [SAFE] Partial Update Logic — Only modifies the specific row in the sheet
+// [SAFE] Partial Update Logic ??Only modifies the specific row in the sheet
 async function updateBuilderQuestion(originalId) {
     try {
-        if (!originalId) throw new Error("수정할 문항 ID가 없습니다.");
+        if (!originalId) throw new Error("?�정??문항 ID가 ?�습?�다.");
 
         const result = await collectBuilderData(); // From UI
-        if (!result.groups || result.groups.length === 0) throw new Error("수정 내용을 읽어올 수 없습니다.");
+        if (!result.groups || result.groups.length === 0) throw new Error("?�정 ?�용???�어?????�습?�다.");
 
         const firstGroup = result.groups[0];
-        if (!firstGroup || firstGroup.questions.length === 0) throw new Error("문항이 존재하지 않습니다.");
+        if (!firstGroup || firstGroup.questions.length === 0) throw new Error("문항??존재?��? ?�습?�다.");
 
-        // [Fix] origQ를 targetBundleId보다 먼저 선언 (순서 보장)
+        // [Fix] origQ�?targetBundleId보다 먼�? ?�언 (?�서 보장)
         const origQ = globalConfig.questions.find(q => q.id === originalId);
-        if (!origQ) throw new Error("원본 문항을 로컬 저장소에서 찾을 수 없습니다.");
+        if (!origQ) throw new Error("?�본 문항??로컬 ?�?�소?�서 찾을 ???�습?�다.");
 
         const qInput = firstGroup.questions[0];
         const passageData = firstGroup.passage;
         const isGeneral = passageData.title === 'General';
-        // [Fix] 07-1 setId 직접 참조 방식과 동일하게: origQ.setId(DB 원본 UUID) 우선 사용
+        // [Fix] 07-1 setId 직접 참조 방식�??�일?�게: origQ.setId(DB ?�본 UUID) ?�선 ?�용
         const targetBundleId = isGeneral ? "" : (origQ.setId || passageData.id || "");
 
-        // [New] 변경사항 감지: 수정된 내용이 없으면 저장 불필요
+        // [New] 변경사??감�?: ?�정???�용???�으�??�??불필??
         const choicesChanged = JSON.stringify(origQ.choices || []) !== JSON.stringify(qInput.choices || []);
         const questionChanged =
             String(origQ.section || '') !== String(qInput.sec || '') ||
@@ -7217,7 +7217,7 @@ async function updateBuilderQuestion(originalId) {
             (origQ.modelAnswer || '') !== (qInput.modelAnswer || '') ||
             choicesChanged;
 
-        // 번들이 있는 경우 지문 변경사항도 확인
+        // 번들???�는 경우 지�?변경사??�� ?�인
         let bundleChanged = false;
         if (!isGeneral && targetBundleId) {
             const existingBundle = (globalConfig.bundles || []).find(b => b.id === targetBundleId);
@@ -7229,30 +7229,30 @@ async function updateBuilderQuestion(originalId) {
         }
 
         if (!questionChanged && !bundleChanged) {
-            showToast("⚠️ 수정된 사항이 없습니다.");
+            showToast("?�️ ?�정???�항???�습?�다.");
             return;
         }
 
-        if (!confirm("수정 내용을 저장하시겠습니까?")) return;
+        if (!confirm("?�정 ?�용???�?�하?�겠?�니�?")) return;
 
         toggleLoading(true);
 
         const category = globalConfig.categories.find(c => c.id === result.catId);
-        if (!category) throw new Error("카테고리를 찾을 수 없습니다.");
+        if (!category) throw new Error("카테고리�?찾을 ???�습?�다.");
         const parentFolderId = extractFolderId(category.targetFolderUrl);
         const categoryName = category.name;
 
         // --- Build question row data (same format as SAVE_FULL_TEST_DATA) ---
         const questionData = {
-            no: origQ.no,           // 문항번호 (행 식별자)
-            id: originalId,         // 프론트 ID (행 식별자 백업)
+            no: origQ.no,           // 문항번호 (???�별??
+            id: originalId,         // ?�론??ID (???�별??백업)
             section: qInput.sec || '',
             subType: qInput.sub || '',
-            type: qInput.type || '객관식',
-            difficulty: qInput.diff || '중',
+            type: qInput.type || '객�???,
+            difficulty: qInput.diff || '�?,
             score: qInput.score || 0,
-            title: qInput.title || '',       // 질문 내용
-            text: qInput.innerPassage || '', // 지문 내용
+            title: qInput.title || '',       // 질문 ?�용
+            text: qInput.innerPassage || '', // 지�??�용
             answer: qInput.answer || '',
             modelAnswer: qInput.modelAnswer || '',
             choices: qInput.choices || [],
@@ -7275,14 +7275,14 @@ async function updateBuilderQuestion(originalId) {
                 text: stripTwStyles(passageData.text || '')
             };
             if (passageData.imgData && passageData.imgData.base64) {
-                // 새 이미지 업로드된 경우
+                // ???��?지 ?�로?�된 경우
                 bundleData.imgData = passageData.imgData;
             } else if (passageData.img) {
-                // UI 미리보기에서 기존 URL 읽어온 경우
+                // UI 미리보기?�서 기존 URL ?�어??경우
                 bundleData.imgUrl = passageData.img;
             } else {
-                // [Fix] UI에서 이미지 읽기 실패하더라도 로컬 캐시에서 기존 번들 이미지 URL 보존
-                // (07-1 방식: setId로 번들을 찾아 데이터 보존)
+                // [Fix] UI?�서 ?��?지 ?�기 ?�패?�더?�도 로컬 캐시?�서 기존 번들 ?��?지 URL 보존
+                // (07-1 방식: setId�?번들??찾아 ?�이??보존)
                 const existingBundle = (globalConfig.bundles || []).find(b => b.id === targetBundleId);
                 if (existingBundle && existingBundle.imgUrl) {
                     bundleData.imgUrl = existingBundle.imgUrl;
@@ -7312,15 +7312,15 @@ async function updateBuilderQuestion(originalId) {
             globalConfig.bundles = (globalConfig.bundles || []).filter(b => b.catId !== result.catId);
             save();
 
-            showToast("✅ 해당 문항만 안전하게 수정 완료! (다른 데이터 영향 없음)");
-            exitEditMode(true); // [Fix] 저장 완료 후이므로 확인 팝업 생략
+            showToast("???�당 문항�??�전?�게 ?�정 ?�료! (?�른 ?�이???�향 ?�음)");
+            exitEditMode(true); // [Fix] ?�???�료 ?�이므�??�인 ?�업 ?�략
         } else {
-            throw new Error(resData.message || "서버 부분 업데이트 실패");
+            throw new Error(resData.message || "?�버 부�??�데?�트 ?�패");
         }
 
     } catch (e) {
         console.error(e);
-        showToast("❌ 수정 실패: " + e.message);
+        showToast("???�정 ?�패: " + e.message);
     } finally {
         toggleLoading(false);
     }
@@ -7335,11 +7335,11 @@ async function loadQuestionsFromCategory(catId) {
     }
 
     if (!catId) {
-        showToast("⚠️ 불러올 시험지(카테고리)를 선택해주세요.");
+        showToast("?�️ 불러???�험지(카테고리)�??�택?�주?�요.");
         return;
     }
 
-    if (!confirm("⚠️ 새로운 시험지를 불러오면 현재 작성 중인 내용은 초기화됩니다. 계속하시겠습니까?")) {
+    if (!confirm("?�️ ?�로???�험지�?불러?�면 ?�재 ?�성 중인 ?�용?� 초기?�됩?�다. 계속?�시겠습?�까?")) {
         return;
     }
 
@@ -7380,13 +7380,13 @@ async function loadQuestionsFromCategory(catId) {
         const zoneB = document.getElementById('zone-question');
         const zoneA = document.getElementById('zone-bundle');
         const zoneC = document.getElementById('zone-navigator');
-        if (zoneB) zoneB.innerHTML = '<div id="placeholder-question" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60"><span class="text-3xl mb-2">📝</span><span class="text-[14px]">문항 카드 추가</span></div>';
-        if (zoneA) zoneA.innerHTML = '<div id="placeholder-bundle" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60"><span class="text-3xl mb-2">📦</span><span class="text-[14px]">지문 묶음 추가</span></div>';
+        if (zoneB) zoneB.innerHTML = '<div id="placeholder-question" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60"><span class="text-3xl mb-2">?��</span><span class="text-[14px]">문항 카드 추�?</span></div>';
+        if (zoneA) zoneA.innerHTML = '<div id="placeholder-bundle" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60"><span class="text-3xl mb-2">?��</span><span class="text-[14px]">지�?묶음 추�?</span></div>';
         if (zoneC) zoneC.innerHTML = '';
 
         // 4. Render
         if (fetchedQuestions.length === 0) {
-            showToast("📭 해당 카테고리에 저장된 문항이 없습니다.");
+            showToast("?�� ?�당 카테고리???�?�된 문항???�습?�다.");
             return;
         }
 
@@ -7404,7 +7404,7 @@ async function loadQuestionsFromCategory(catId) {
                     const bundleInfo = fetchedBundles.find(b => b.id === q.setId);
 
                     // [Fix] Sanitize Passage (Empty HTML Check)
-                    // [Fix] imgUrl이 HTML이면 text로 교정 (컬럼 오염 복구)
+                    // [Fix] imgUrl??HTML?�면 text�?교정 (컬럼 ?�염 복구)
                     if (bundleInfo?.imgUrl && bundleInfo.imgUrl.trim().startsWith('<')) {
                         if (!bundleInfo.text) bundleInfo = { ...bundleInfo, text: bundleInfo.imgUrl };
                         bundleInfo = { ...bundleInfo, imgUrl: '' };
@@ -7417,7 +7417,7 @@ async function loadQuestionsFromCategory(catId) {
 
                     bundleMap.set(q.setId, {
                         id: q.setId,
-                        title: bundleInfo?.title || "지문 묶음",
+                        title: bundleInfo?.title || "지�?묶음",
                         html: rawHtml,
                         imgUrl: (bundleInfo?.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : "",
                         questions: []
@@ -7429,7 +7429,7 @@ async function loadQuestionsFromCategory(catId) {
             }
         });
 
-        // [Fix] DOM 안정화 후 컴포넌트 렌더링 (에디터 초기화 지연 방지)
+        // [Fix] DOM ?�정????컴포?�트 ?�더�?(?�디??초기??지??방�?)
         setTimeout(() => {
         // Render Bundles & Linked Questions
         bundleMap.forEach((bundleData, setId) => {
@@ -7444,7 +7444,7 @@ async function loadQuestionsFromCategory(catId) {
 
             // Zone B: Questions
             bundleData.questions.forEach(q => {
-                const type = q.type === '객관형' ? 'obj' : 'subj';
+                const type = q.type === '객�??? ? 'obj' : 'subj';
                 addComponent(type, {
                     id: q.id,
                     sec: q.section,
@@ -7469,7 +7469,7 @@ async function loadQuestionsFromCategory(catId) {
 
         // Render Orphans
         orphans.forEach(q => {
-            const type = q.type === '객관형' ? 'obj' : 'subj';
+            const type = q.type === '객�??? ? 'obj' : 'subj';
             addComponent(type, {
                 id: q.id,
                 sec: q.section,
@@ -7507,13 +7507,13 @@ async function loadQuestionsFromCategory(catId) {
         const allQs = Array.from(document.querySelectorAll('#zone-question .builder-item'));
         syncBundles(allQs);
 
-        showToast(`✅ ${fetchedQuestions.length}개 문항을 불러왔습니다.`);
+        showToast(`??${fetchedQuestions.length}�?문항??불러?�습?�다.`);
 
-        }, 100); // setTimeout end (DOM 안정화 대기)
+        }, 100); // setTimeout end (DOM ?�정???��?
 
     } catch (e) {
         console.error(e);
-        showToast("❌ 불러오기 실패: " + e.message);
+        showToast("??불러?�기 ?�패: " + e.message);
     } finally {
         toggleLoading(false);
     }
@@ -7526,7 +7526,7 @@ async function loadQuestionsFromCategory(catId) {
 async function saveRegGroup() {
     try {
         const result = await collectBuilderData(); // Returns { catId, groups: [{passage, questions}, ...] }
-        if (!result.catId) throw new Error("카테고리가 선택되지 않았습니다.");
+        if (!result.catId) throw new Error("카테고리가 ?�택?��? ?�았?�니??");
 
         // 1. Prepare Data for Save
         // We will OVERWRITE the Global Config for this Category with the Builder State
@@ -7549,7 +7549,7 @@ async function saveRegGroup() {
                 setId = group.passage.id; // Use existing ID if available (passed from load)
                 if (!setId || setId.length < 5) setId = generateUUID();
 
-                // 연결 문항 번호 계산 (qCounter + 1부터 시작)
+                // ?�결 문항 번호 계산 (qCounter + 1부???�작)
                 const linkedNums = group.questions.map((_, i) => qCounter + i + 1).join(', ');
 
                 newBundles.push({
@@ -7572,7 +7572,7 @@ async function saveRegGroup() {
                     section: q.sec,
                     subType: q.sub,
                     type: q.type, // Fixed
-                    difficulty: q.diff || '중',
+                    difficulty: q.diff || '�?,
                     score: q.score,
                     title: q.title, // Fixed: GS Use 'title' column
                     text: q.passageText || "", // Fixed: Passage content for Q from Q card
@@ -7591,13 +7591,13 @@ async function saveRegGroup() {
             });
         });
 
-        if (newQuestions.length === 0) throw new Error("저장할 문항이 없습니다.");
+        if (newQuestions.length === 0) throw new Error("?�?�할 문항???�습?�다.");
 
         const category = globalConfig.categories.find(c => c.id === result.catId);
 
         // [User Request] 2-Step Confirmation
-        if (!confirm(`${category.name} 시험지에 저장이 맞습니까 ? `)) return;
-        if (!confirm("기존 DB가 모두 삭제되고, 현 DB로 덮어쓰기가 됩니다. 또한 저장 완료 후 문항등록 화면이 초기화 됩니다.")) return;
+        if (!confirm(`${category.name} ?�험지???�?�이 맞습?�까 ? `)) return;
+        if (!confirm("기존 DB가 모두 ??��?�고, ??DB�???��?�기가 ?�니?? ?�한 ?�???�료 ??문항?�록 ?�면??초기???�니??")) return;
 
         toggleLoading(true);
 
@@ -7618,7 +7618,7 @@ async function saveRegGroup() {
         const resData = await response.json();
 
         if (resData.status === "Success") {
-            showToast("✅ 성공적으로 저장되었습니다!");
+            showToast("???�공?�으�??�?�되?�습?�다!");
 
             // [Fix] Do NOT update Global Config with strictly local data (missing URLs)
             // Just clear cache for this category so next load fetches fresh
@@ -7633,12 +7633,12 @@ async function saveRegGroup() {
             window.removeEventListener('beforeunload', handleBeforeUnload);
             renderRegForm();
         } else {
-            throw new Error(resData.message || "저장 실패");
+            throw new Error(resData.message || "?�???�패");
         }
 
     } catch (e) {
         console.error(e);
-        showToast("❌ 저장 중 오류: " + e.message);
+        showToast("???�??�??�류: " + e.message);
     } finally {
         toggleLoading(false);
     }
@@ -7652,10 +7652,10 @@ async function saveRegGroup() {
 async function collectBuilderData() {
     // 1st Pass: Scope Scanned to relevant Area
     const container = document.getElementById('builder-main-area') || document.getElementById('reg-canvas');
-    if (!container) throw new Error("빌더 영역을 찾을 수 없습니다.");
+    if (!container) throw new Error("빌더 ?�역??찾을 ???�습?�다.");
 
     const blocks = container.querySelectorAll('.builder-item');
-    if (blocks.length === 0) throw new Error("문항이 없습니다. PDF를 가져오거나 추가하세요.");
+    if (blocks.length === 0) throw new Error("문항???�습?�다. PDF�?가?�오거나 추�??�세??");
 
     let catId = '';
     let commonTitle = '';
@@ -7669,19 +7669,19 @@ async function collectBuilderData() {
         if (catInput) catId = catInput.value;
     }
 
-    if (!catId) throw new Error("⚠️ 시험지(카테고리)를 상단 메뉴에서 선택해주세요.");
+    if (!catId) throw new Error("?�️ ?�험지(카테고리)�??�단 메뉴?�서 ?�택?�주?�요.");
 
     let groups = [];
 
-    // Helper to Extract Image Data (Base64) [1MB 초과 이중 방어]
+    // Helper to Extract Image Data (Base64) [1MB 초과 ?�중 방어]
     async function extractImg(fileInput, imgPreviewEl) {
         if (fileInput && fileInput.files[0]) {
             const file = fileInput.files[0];
             const MAX_BYTES = 1 * 1024 * 1024; // 1MB
 
-            // [안전망] 선택 단계에서 차단되었어야 하지만 혹시 모를 경우 대비
+            // [?�전�? ?�택 ?�계?�서 차단?�었?�야 ?��?�??�시 모�? 경우 ?��?
             if (file.size > MAX_BYTES) {
-                throw new Error(`이미지 용량 초과! 1MB 이하 파일만 등록 가능합니다. (현재: ${(file.size/1024/1024).toFixed(1)}MB)`);
+                throw new Error(`?��?지 ?�량 초과! 1MB ?�하 ?�일�??�록 가?�합?�다. (?�재: ${(file.size/1024/1024).toFixed(1)}MB)`);
             }
 
             const base64 = await new Promise(r => {
@@ -7696,7 +7696,7 @@ async function collectBuilderData() {
         const currentImgUrl = (imgPreviewEl && !imgPreviewEl.classList.contains('hidden')) ? imgPreviewEl.querySelector('img')?.src : '';
         // [Fix] Prevent saving of "undefined" string
         if (currentImgUrl === 'undefined' || currentImgUrl === 'null') return null;
-        // [Fix] HTML 내용이 이미지 URL로 오인되는 것 방지
+        // [Fix] HTML ?�용???��?지 URL�??�인?�는 �?방�?
         if (currentImgUrl && currentImgUrl.trim().startsWith('<')) return null;
         return currentImgUrl ? { url: currentImgUrl } : null;
     }
@@ -7826,10 +7826,10 @@ async function collectBuilderData() {
         const q = {
             linkedBundleId: block.getAttribute('data-bundle-id'), // Capture manual link
             id: generateUUID(),
-            sec: secInput ? secInput.value : '기타',
-            sub: subInput ? subInput.value : '기타', // Use subInput value
-            diff: diffInput ? diffInput.value : '중',
-            type: type === 'obj' ? '객관형' : '주관형',
+            sec: secInput ? secInput.value : '기�?',
+            sub: subInput ? subInput.value : '기�?', // Use subInput value
+            diff: diffInput ? diffInput.value : '�?,
+            type: type === 'obj' ? '객�??? : '주�???,
             title: titleInput ? titleInput.value : '',
             passageText: contentInput ? stripTwStyles(contentInput.innerHTML) : '', // Collect Passage
             score: scoreInput ? scoreInput.value : 3,
@@ -7872,7 +7872,7 @@ function startGroupLinking(sourceId) {
     const sourceGroup = document.getElementById(sourceId);
     const groupId = sourceGroup.getAttribute('data-group-id');
 
-    showToast("🔗 연결 모드: 연결할 문항들을 클릭하세요. (ESC to Finish)");
+    showToast("?�� ?�결 모드: ?�결??문항?�을 ?�릭?�세?? (ESC to Finish)");
 
     // Visual Indicators
     sourceGroup.classList.add('ring-4', 'ring-orange-400', 'bg-orange-50');
@@ -7894,7 +7894,7 @@ function startGroupLinking(sourceId) {
     // Create Floating Button
     const btn = document.createElement('button');
     btn.id = 'finish-link-btn';
-    btn.innerText = "✅ Linking Done";
+    btn.innerText = "??Linking Done";
     btn.className = "fixed bottom-10 right-10 bg-orange-600 text-white px-6 py-3 rounded-full shadow-lg font-bold animate-bounce z-50 hover:bg-orange-700 transition-colors";
     btn.onclick = () => exitLinkingMode();
     document.body.appendChild(btn);
@@ -7919,11 +7919,11 @@ function handleLinkClick(e) {
         const header = item.querySelector('h4').parentNode;
         const badgeHtml = document.createElement('span');
         badgeHtml.className = "linked-badge text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded border border-orange-200 ml-2 animate-fade-in";
-        badgeHtml.innerText = "🔗 Linked";
+        badgeHtml.innerText = "?�� Linked";
         header.appendChild(badgeHtml);
     } else {
         // If already linked, maybe flash it
-        badge.innerText = "🔗 Linked (Updated)";
+        badge.innerText = "?�� Linked (Updated)";
     }
 
     // Flash Item
@@ -7950,7 +7950,7 @@ function exitLinkingMode(e) {
     if (btn) btn.remove();
 
     document.removeEventListener('keydown', exitLinkingMode);
-    showToast("✅ 연결 모드 종료");
+    showToast("???�결 모드 종료");
 }
 
 // [Legacy saveRegGroup Removed - Replaced by Integrated Save]
@@ -7967,7 +7967,7 @@ async function handlePdfImport(input) {
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
 
-    if (!confirm(`"${file.name}" 파일을 분석하여 시험지를 생성하시겠습니까 ?\n(시간이 다소 소요될 수 있습니다)`)) { // Reset input
+    if (!confirm(`"${file.name}" ?�일??분석?�여 ?�험지�??�성?�시겠습?�까 ?\n(?�간???�소 ?�요?????�습?�다)`)) { // Reset input
         input.value = '';
         return;
     }
@@ -7987,7 +7987,7 @@ async function handlePdfImport(input) {
             fileName: file.name,
             mimeType: file.type,
             fileData: base64,
-            timeout: 300000 // [Modified] 5분(300초)으로 대폭 증가 (서버 타임아웃 방지)
+            timeout: 300000 // [Modified] 5�?300�??�로 ?�??증�? (?�버 ?�?�아??방�?)
         };
 
         // Use standard fetch here since reliable request might be optimized for DB ops
@@ -8006,14 +8006,14 @@ async function handlePdfImport(input) {
             }
 
             parseAndPopulateBuilder(response.text);
-            showToast("✅ PDF 분석 완료!");
+            showToast("??PDF 분석 ?�료!");
         } else {
             throw new Error(response.message || "Unknown Error");
         }
 
     } catch (e) {
         console.error(e);
-        showToast("❌ PDF 변환 실패: " + e.message);
+        showToast("??PDF 변???�패: " + e.message);
     } finally {
         toggleLoading(false);
         input.value = ''; // Reset
@@ -8033,8 +8033,8 @@ function parseAndPopulateBuilder(text) {
     // Pattern: "1.", "Q1", "문항 1"
     const qStartRegex = /^(?:Q|Question|문항)?\s*(\d{1,3})[\.\)]\s*(.*)/i;
 
-    // Pattern: Choices start with (1), ①, [A], 1)
-    const choiceRegex = /^[\(\[①②③④⑤ⓐⓑⓒⓓⓔ]\s*(\d+|[A-E])?[\)\]\.]?\s+|^\d+[\)]\s+/;
+    // Pattern: Choices start with (1), ?? [A], 1)
+    const choiceRegex = /^[\(\[?�②?�④?�ⓐ?�ⓒ?�ⓔ]\s*(\d+|[A-E])?[\)\]\.]?\s+|^\d+[\)]\s+/;
 
     function flushBlock() {
         if (!currentBlock) return;
@@ -8068,7 +8068,7 @@ function parseAndPopulateBuilder(text) {
         }
 
         // [B] Choices Start (Transition to state 3)
-        if (state >= 1 && (choiceRegex.test(trLine) || trLine.includes('①'))) {
+        if (state >= 1 && (choiceRegex.test(trLine) || trLine.includes('??))) {
             state = 3;
             currentBlock.rawChoices.push(trLine);
             return;
@@ -8112,21 +8112,21 @@ function parseAndPopulateBuilder(text) {
             const data = {
                 title: b.title,
                 innerPassage: b.innerLines.join('\n'), // New Field
-                score: 3, diff: '중',
+                score: 3, diff: '�?,
                 options: options
             };
             addComponent(isObj ? 'obj' : 'subj', data);
         }
     });
 
-    if (processCount === 0) showToast("⚠️ 문제를 찾지 못했습니다. 텍스트 형식을 확인하세요.");
+    if (processCount === 0) showToast("?�️ 문제�?찾�? 못했?�니?? ?�스???�식???�인?�세??");
 }
 
 function parseChoicesSmart(text) {
     let clean = text;
     // Replace markers with delimiter
-    clean = clean.replace(/[\(①②③④⑤ⓐⓑⓒⓓⓔ\d]+[\)\.]?/g, (match) => {
-        if (match.match(/^[①-⑤]/)) return "|||";
+    clean = clean.replace(/[\(?�②?�④?�ⓐ?�ⓒ?�ⓔ\d]+[\)\.]?/g, (match) => {
+        if (match.match(/^[????/)) return "|||";
         if (match.match(/^\(\d+\)/)) return "|||";
         if (match.match(/^\d+\)/)) return "|||";
         return match;
@@ -8138,23 +8138,23 @@ function parseChoicesSmart(text) {
 
 
 function mapChoices(rawLines) {
-    // rawLines might be ["① Apple", "② Banana"] 
-    // or ["① Apple ② Banana ..."] mixed?
+    // rawLines might be ["??Apple", "??Banana"] 
+    // or ["??Apple ??Banana ..."] mixed?
     // Current parser loop pushed line-by-line.
     // If multiple choices on one line, we missed splitting them.
     // MVP: Just take first 5 if exists.
 
-    // Normalize: remove ① etc.
-    return rawLines.slice(0, 5).map(l => l.replace(/^[①②③④⑤\(\)\d\.]+\s*/, ''));
+    // Normalize: remove ??etc.
+    return rawLines.slice(0, 5).map(l => l.replace(/^[?�②?�④??(\)\d\.]+\s*/, ''));
 }
 
 
 
 // --- Global Error Handler ---
 // --- GLOBAL INITIALIZATION ---
-// 앱이 로드되면 실행됨
-// 1. 설정 로드 (옵션)
-// 2. 초기 모드 설정 (학생 모드)
+// ?�이 로드?�면 ?�행??
+// 1. ?�정 로드 (?�션)
+// 2. 초기 모드 ?�정 (?�생 모드)
 
 
 // --- Rich Text & Image Helpers (Shared) ---
@@ -8259,7 +8259,7 @@ function clearTestImg() {
 
 
 function confirmRegCancel() {
-    if (confirm("작성 중인 내용은 저장되지 않습니다. 나가시겠습니까?")) {
+    if (confirm("?�성 중인 ?�용?� ?�?�되지 ?�습?�다. ?��??�겠?�니�?")) {
         document.getElementById('app-canvas').classList.remove('!overflow-hidden');
         renderBank();
     }
@@ -8267,33 +8267,33 @@ function confirmRegCancel() {
 
 
 // ============================================================================
-// 페이지 로드 시 초기화 및 클라우드 동기화
+// ?�이지 로드 ??초기??�??�라?�드 ?�기??
 // ============================================================================
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log('🚀 Application Initializing...');
+    console.log('?? Application Initializing...');
 
-    // 1. 클라우드 설정 동기화 시도 (silent mode)
+    // 1. ?�라?�드 ?�정 ?�기???�도 (silent mode)
     if (globalConfig.masterUrl) {
-        console.log('☁️ Attempting cloud sync from:', globalConfig.masterUrl);
+        console.log('?�️ Attempting cloud sync from:', globalConfig.masterUrl);
         try {
             const syncSuccess = await loadConfigFromCloud(true);
             if (syncSuccess) {
-                console.log('✅ Cloud sync successful');
-                applyBranding(); // 로고 적용
+                console.log('??Cloud sync successful');
+                applyBranding(); // 로고 ?�용
             } else {
-                console.log('⚠️ Cloud sync failed, using local config');
+                console.log('?�️ Cloud sync failed, using local config');
             }
         } catch (error) {
-            console.error('❌ Cloud sync error:', error);
+            console.error('??Cloud sync error:', error);
         }
     } else {
-        console.log('⚠️ Master URL not set, skipping cloud sync');
+        console.log('?�️ Master URL not set, skipping cloud sync');
     }
 
-    // 2. 초기 화면 렌더링
+    // 2. 초기 ?�면 ?�더�?
     changeMode('initial');
 
-    console.log('✅ Application Ready');
+    console.log('??Application Ready');
 });
 
 
@@ -8301,91 +8301,91 @@ document.addEventListener('DOMContentLoaded', async function () {
 async function renderStudentLogin() {
     const c = document.getElementById('dynamic-content');
 
-    // UI에 진입하자마자 로딩 표시 후 서버에서 최신 설정(카테고리 목록 등) 자동 동기화
+    // UI??진입?�자마자 로딩 ?�시 ???�버?�서 최신 ?�정(카테고리 목록 ?? ?�동 ?�기??
     toggleLoading(true);
     await loadConfigFromCloud(true);
     toggleLoading(false);
 
-    // [Fix] 로딩 완료 후 사이드바 제거 (changeMode에서 즉시 제거 시 레이아웃 깨짐 방지)
+    // [Fix] 로딩 ?�료 ???�이?�바 ?�거 (changeMode?�서 즉시 ?�거 ???�이?�웃 깨짐 방�?)
     document.body.classList.remove('has-sidebar');
 
     setCanvasId('02');
 
     // [Debug] Student Mode Exam List
-    console.log("📝 Student Mode Init. Categories:", globalConfig.categories);
+    console.log("?�� Student Mode Init. Categories:", globalConfig.categories);
 
-    // 카테고리가 없어도 화면은 렌더링하되, 선택박스에 안내 표시
+    // 카테고리가 ?�어???�면?� ?�더링하?? ?�택박스???�내 ?�시
     const catOptions = (globalConfig.categories && globalConfig.categories.length > 0)
         ? globalConfig.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')
-        : `<option value="" disabled selected>⚠️ 등록된 시험지가 없습니다 (${globalConfig.categories ? globalConfig.categories.length : '0'}개)</option>`;
+        : `<option value="" disabled selected>?�️ ?�록???�험지가 ?�습?�다 (${globalConfig.categories ? globalConfig.categories.length : '0'}�?</option>`;
 
     c.innerHTML = `
         <div class="animate-fade-in-safe flex flex-col items-center pb-10 mt-5">
             <div class="canvas-premium-box !max-w-3xl w-full">
                 <div class="flex flex-row items-start gap-10">
 
-                    <!-- 좌측: 아이콘 + 제목 -->
+                    <!-- 좌측: ?�이�?+ ?�목 -->
                     <div class="flex flex-col items-center gap-4 flex-shrink-0 w-40 border-r border-slate-200 pr-10">
                         <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl shadow-inner relative z-10 unified-animate">
-                            📝
+                            ?��
                             <div class="absolute inset-0 bg-blue-100/30 rounded-full blur-2xl opacity-50 scale-150 -z-10"></div>
                         </div>
                         <h2 class="fs-18 text-[#013976] uppercase text-center font-black tracking-tight leading-tight">STUDENT LOGIN</h2>
                     </div>
 
-                    <!-- 우측: 폼 -->
+                    <!-- ?�측: ??-->
                     <div class="flex-1 space-y-4 text-left">
-                        <!-- [1] 시험지 선택 -->
+                        <!-- [1] ?�험지 ?�택 -->
                         <div>
-                            <label class="ys-label font-bold !mb-0">📂 시험지 선택</label>
+                            <label class="ys-label font-bold !mb-0">?�� ?�험지 ?�택</label>
                             <select id="sci" class="ys-field mt-1.5 !bg-slate-50/50 hover:border-blue-400 focus:bg-white transition-all shadow-sm" onchange="handleCategorySelect()">
-                                <option value="" disabled selected hidden>시험지를 선택하세요</option>
+                                <option value="" disabled selected hidden>?�험지�??�택?�세??/option>
                                 ${catOptions}
                             </select>
                         </div>
 
-                        <!-- [2] 학생명 + 학년 -->
+                        <!-- [2] ?�생�?+ ?�년 -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="ys-label font-bold !mb-0">📝 학생명</label>
-                                <input type="text" id="snm" autocomplete="off" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="이름을 입력하세요">
+                                <label class="ys-label font-bold !mb-0">?�� ?�생�?/label>
+                                <input type="text" id="snm" autocomplete="off" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="?�름???�력?�세??>
                             </div>
                             <div>
-                                <label class="ys-label font-bold !mb-0">🎓 학년</label>
+                                <label class="ys-label font-bold !mb-0">?�� ?�년</label>
                                 <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm">
-                                    <option value="" disabled selected hidden>학년을 선택하세요</option>
-                                    <option value="초1">초등 1학년</option>
-                                    <option value="초2">초등 2학년</option>
-                                    <option value="초3">초등 3학년</option>
-                                    <option value="초4">초등 4학년</option>
-                                    <option value="초5">초등 5학년</option>
-                                    <option value="초6">초등 6학년</option>
-                                    <option value="중1">중등 1학년</option>
-                                    <option value="중2">중등 2학년</option>
-                                    <option value="중3">중등 3학년</option>
-                                    <option value="고1">고등 1학년</option>
-                                    <option value="고2">고등 2학년</option>
-                                    <option value="고3">고등 3학년</option>
+                                    <option value="" disabled selected hidden>?�년???�택?�세??/option>
+                                    <option value="�?">초등 1?�년</option>
+                                    <option value="�?">초등 2?�년</option>
+                                    <option value="�?">초등 3?�년</option>
+                                    <option value="�?">초등 4?�년</option>
+                                    <option value="�?">초등 5?�년</option>
+                                    <option value="�?">초등 6?�년</option>
+                                    <option value="�?">중등 1?�년</option>
+                                    <option value="�?">중등 2?�년</option>
+                                    <option value="�?">중등 3?�년</option>
+                                    <option value="�?">고등 1?�년</option>
+                                    <option value="�?">고등 2?�년</option>
+                                    <option value="�?">고등 3?�년</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- [3] 응시일 + 시험시간 -->
+                        <!-- [3] ?�시??+ ?�험?�간 -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="ys-label font-bold !mb-0">📅 응시일</label>
-                                <input type="text" id="sdt" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="날짜 선택">
+                                <label class="ys-label font-bold !mb-0">?�� ?�시??/label>
+                                <input type="text" id="sdt" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="?�짜 ?�택">
                             </div>
                             <div>
-                                <label class="ys-label font-bold !mb-0">⏱️ 시험 시간 (분)</label>
-                                <input type="number" id="stm" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="0 = 무제한" value="0" min="0">
+                                <label class="ys-label font-bold !mb-0">?�️ ?�험 ?�간 (�?</label>
+                                <input type="number" id="stm" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="0 = 무제?? value="0" min="0">
                             </div>
                         </div>
 
                         <!-- [4] 버튼 -->
                         <div>
                             <button onclick="startExamSequence()" class="btn-ys w-full !py-4 fs-16 font-bold transition-all active:scale-95 shadow-lg mt-1">
-                                🚀 START ASSESSMENT NOW
+                                ?? START ASSESSMENT NOW
                             </button>
                             <button onclick="goHome()" class="w-full mt-3 text-slate-400 fs-14 underline hover:text-red-500 transition-all font-medium text-center">
                                 CANCEL &amp; RETURN
@@ -8399,7 +8399,7 @@ async function renderStudentLogin() {
     `;
     setTimeout(() => {
         document.getElementById('snm')?.focus();
-        // Flatpickr 적용
+        // Flatpickr ?�용
         if (typeof flatpickr !== 'undefined') {
             const updateYearDropdown = (instance) => {
                 const yearInput = instance.yearElements[0];
@@ -8420,7 +8420,7 @@ async function renderStudentLogin() {
                     });
                     yearInput.parentNode.replaceChild(yearSelect, yearInput);
                 } else if (yearInput && yearInput.tagName === 'SELECT') {
-                    // 이미 셀렉트박스인 경우 값만 업데이트
+                    // ?��? ?�?�트박스??경우 값만 ?�데?�트
                     yearInput.value = instance.currentYear;
                 }
             };
@@ -8450,7 +8450,7 @@ async function renderStudentLogin() {
     }, 100);
 }
 
-// [Added] 카테고리 선택 시 권장 학년 및 평가 시간 자동완성
+// [Added] 카테고리 ?�택 ??권장 ?�년 �??��? ?�간 ?�동?�성
 function handleCategorySelect() {
     const sciSelect = document.getElementById('sci');
     if (!sciSelect) return;
@@ -8459,13 +8459,13 @@ function handleCategorySelect() {
     const cat = globalConfig.categories.find(c => c.id === selectedId);
 
     if (cat) {
-        // 권장 평가 학년 덮어쓰기
+        // 권장 ?��? ?�년 ??��?�기
         if (cat.targetGrade) {
             const sgrSelect = document.getElementById('sgr');
             if (sgrSelect) sgrSelect.value = cat.targetGrade;
         }
 
-        // 권장 평가 시간 덮어쓰기
+        // 권장 ?��? ?�간 ??��?�기
         if (typeof cat.timeLimit !== 'undefined' && cat.timeLimit !== '') {
             const stmInput = document.getElementById('stm');
             if (stmInput) stmInput.value = cat.timeLimit;
@@ -8481,9 +8481,9 @@ async function startExamSequence() {
     const date = document.getElementById('sdt').value || new Date().toISOString().split('T')[0];
     const timeLimit = parseInt(document.getElementById('stm').value) || 0;
 
-    if (!name) return showToast("⚠️ 학생 이름을 입력해주세요.");
-    if (!catId) return showToast("⚠️ 시험지를 선택해주세요.");
-    if (!grade) return showToast("⚠️ 학년들을 선택해주세요.");
+    if (!name) return showToast("?�️ ?�생 ?�름???�력?�주?�요.");
+    if (!catId) return showToast("?�️ ?�험지�??�택?�주?�요.");
+    if (!grade) return showToast("?�️ ?�년?�을 ?�택?�주?�요.");
 
     // [Debug & Fix] Data Source Dual Check (globalConfig vs globalData)
     let sourceQuestions = [];
@@ -8504,15 +8504,15 @@ async function startExamSequence() {
         selectedSource: sourceName
     });
 
-    // [Auto-Fetch] 로컬에 문항 데이터가 없으면 클라우드 빈 데이터이거나 캐시 삭제 상태이므로 자동 복구를 시도
+    // [Auto-Fetch] 로컬??문항 ?�이?��? ?�으�??�라?�드 �??�이?�이거나 캐시 ??�� ?�태?��?�??�동 복구�??�도
     let catQuestions = sourceQuestions.filter(q => String(q.catId) === String(catId));
 
     if (sourceQuestions.length === 0 || catQuestions.length === 0) {
-        console.log("🔄 문항이 비어있어 클라우드에서 자동 로딩 시작...");
-        showToast("🔄 시험 문항을 불러오는 중입니다...");
-        await loadBankQuestions(catId); // 해당 카테고리의 문항만 서버에서 로드
+        console.log("?�� 문항??비어?�어 ?�라?�드?�서 ?�동 로딩 ?�작...");
+        showToast("?�� ?�험 문항??불러?�는 중입?�다...");
+        await loadBankQuestions(catId); // ?�당 카테고리??문항�??�버?�서 로드
 
-        // 새로 받아온 로컬 데이터 갱신
+        // ?�로 받아??로컬 ?�이??갱신
         if (globalConfig.questions && globalConfig.questions.length > 0) {
             sourceQuestions = globalConfig.questions;
             sourceName = "globalConfig";
@@ -8520,9 +8520,9 @@ async function startExamSequence() {
         }
     }
 
-    // Final Check (여전히 없으면 실제 비어있는 시험지로 간주)
+    // Final Check (?�전???�으�??�제 비어?�는 ?�험지�?간주)
     if (catQuestions.length === 0) {
-        alert("🚨 문항 데이터가 비어있습니다.\n\n관리자 모드에서 문항(Question Bank Master)을 먼저 등록해 주세요.");
+        alert("?�� 문항 ?�이?��? 비어?�습?�다.\n\n관리자 모드?�서 문항(Question Bank Master)??먼�? ?�록??주세??");
         return;
     }
 
@@ -8600,7 +8600,7 @@ async function startExamSequence() {
         if (mappedQuestions.length === 0) {
             toggleLoading(false);
             const catName = globalConfig.categories.find(c => String(c.id) === String(catId))?.name || catId;
-            alert(`⚠️ '${catName}' 시험지에 등록된 문항이 없습니다.\n(선택한 ID: ${catId})\n\n관리자 페이지에서 해당 시험지에 문항이 등록되었는지 확인해주세요.`);
+            alert(`?�️ '${catName}' ?�험지???�록??문항???�습?�다.\n(?�택??ID: ${catId})\n\n관리자 ?�이지?�서 ?�당 ?�험지??문항???�록?�었?��? ?�인?�주?�요.`);
             return;
         }
 
@@ -8611,8 +8611,8 @@ async function startExamSequence() {
 
     } catch (e) {
         console.error(e);
-        showToast("❌ 시험 시작 중 오류 발생");
-        alert("오류 상세: " + e.message);
+        showToast("???�험 ?�작 �??�류 발생");
+        alert("?�류 ?�세: " + e.message);
     } finally {
         toggleLoading(false);
     }
@@ -8644,7 +8644,7 @@ function renderExamPaper(list) {
     examSession.currentPage = 0;
 
     // Grouping Logic
-    // Step 1: 원본 유닛 생성 (bundle/single)
+    // Step 1: ?�본 ?�닛 ?�성 (bundle/single)
     const rawUnits = [];
     let currentGroup = [];
     let globalDisplayIdx = 1;
@@ -8673,11 +8673,11 @@ function renderExamPaper(list) {
         else rawUnits.push({ type: 'bundle', data: currentGroup });
     }
 
-    // Step 2: 페이지 유닛으로 재구성 (2분할 고정)
+    // Step 2: ?�이지 ?�닛?�로 ?�구??(2분할 고정)
     const pageUnits = [];
     let singleBuffer = [];
 
-    // 문항이 "큰" 문항인지 판별 (이미지 있음 or 발문 1000자 이상)
+    // 문항??"?? 문항?��? ?�별 (?��?지 ?�음 or 발문 1000???�상)
     function isLargeQuestion(q) {
         if (q.imgUrl && q.imgUrl !== "" && q.imgUrl !== "undefined" && q.imgUrl !== "null") return true;
         const textLen = (q.text || "").length + (q.passage1 || "").length;
@@ -8689,19 +8689,19 @@ function renderExamPaper(list) {
         while (singleBuffer.length > 0) {
             const first = singleBuffer[0];
             if (isLargeQuestion(first)) {
-                // 큰 문항 → 무조건 혼자 1열 사용
+                // ??문항 ??무조�??�자 1???�용
                 pageUnits.push({ type: 'solo', data: singleBuffer.shift() });
             } else if (singleBuffer.length >= 2) {
                 const second = singleBuffer[1];
                 if (isLargeQuestion(second)) {
-                    // 다음 문항이 큰 문항이면 현재 문항도 solo
+                    // ?�음 문항????문항?�면 ?�재 문항??solo
                     pageUnits.push({ type: 'solo', data: singleBuffer.shift() });
                 } else {
-                    // 둘 다 작은 문항 → pair
+                    // ?????��? 문항 ??pair
                     pageUnits.push({ type: 'pair', data: [singleBuffer.shift(), singleBuffer.shift()] });
                 }
             } else {
-                // 1개만 남음 → solo
+                // 1개만 ?�음 ??solo
                 pageUnits.push({ type: 'solo', data: singleBuffer.shift() });
             }
         }
@@ -8710,7 +8710,7 @@ function renderExamPaper(list) {
     rawUnits.forEach(unit => {
         if (unit.type === 'bundle') {
             flushSingles();
-            pageUnits.push(unit); // 번들은 1페이지 전체 사용
+            pageUnits.push(unit); // 번들?� 1?�이지 ?�체 ?�용
         } else {
             singleBuffer.push(unit.data);
         }
@@ -8742,7 +8742,7 @@ function renderExamPaper(list) {
 // [New] Render Bundle in Split Column (Top: Passage, Bottom: Questions)
 // (Consolidated into the function below)
 // [New] Render Bundle in Split Column (Top: Passage, Bottom: Questions)
-// [Refactored] 번들 좌측 (지문+이미지) 렌더링
+// [Refactored] 번들 좌측 (지�??��?지) ?�더�?
 function renderBundleLeft(data) {
     const group = Array.isArray(data) ? data : [data];
     const first = group[0];
@@ -8771,13 +8771,13 @@ function renderBundleLeft(data) {
     `;
 }
 
-// [Refactored] 번들 우측 (문항들) 렌더링
+// [Refactored] 번들 ?�측 (문항?? ?�더�?
 function renderBundleRight(data) {
     const group = Array.isArray(data) ? data : [data];
     return group.map(q => renderSubQuestion(q)).join('<hr class="border-t border-slate-200 my-8" />');
 }
 
-// [Backward Compat] renderSplitBundle — 기존 호출 호환용
+// [Backward Compat] renderSplitBundle ??기존 ?�출 ?�환??
 function renderSplitBundle(data) {
     return `<div class="flex h-full w-full bg-white"><div class="w-1/2 h-full overflow-y-auto p-6 border-r border-black">${renderBundleLeft(data)}</div><div class="w-1/2 h-full overflow-y-auto p-6">${renderBundleRight(data)}</div></div>`;
 }
@@ -8822,7 +8822,7 @@ function renderSubQuestion(q) {
 
 // [Refactor] Input HTML (Compact & Grid Choices)
 function getInputHtml(q) {
-    if (q.type === '객관형') {
+    if (q.type === '객�???) {
         const choices = [q.choice1, q.choice2, q.choice3, q.choice4, q.choice5].filter(c => c && c.trim() !== "");
         return renderChoices(q, choices);
     } else {
@@ -8834,7 +8834,7 @@ function getInputHtml(q) {
                     oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'; saveAnswer('${q.id}', this.value)"
                     class="w-full p-2 bg-white border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-serif text-[14px] leading-relaxed resize-none overflow-hidden min-h-[40px]"
                     rows="1"
-                    placeholder="답안을 입력하세요">${saved}</textarea>
+                    placeholder="?�안???�력?�세??>${saved}</textarea>
             </div>
         `;
     }
@@ -8869,7 +8869,7 @@ function renderChoices(q, choices) {
     `;
 }
 
-// [Refactored] updateExamGrid — 항상 2분할 고정
+// [Refactored] updateExamGrid ????�� 2분할 고정
 function updateExamGrid(cols) {
     currentExamGridCols = 2;
     examPageSize = 1; // 1 page unit per page
@@ -8963,7 +8963,7 @@ function setupScrollArrows() {
     });
 }
 
-// [Removed] fixDriveUrl 중복 정의 삭제 — 6737줄의 원본이 최종 적용됨
+// [Removed] fixDriveUrl 중복 ?�의 ??�� ??6737줄의 ?�본??최종 ?�용??
 
 
 // [Restored] renderQuestionCard (Required for renderExamContent)
@@ -8971,7 +8971,7 @@ function renderQuestionCard(q) {
     return renderSubQuestion(q);
 }
 
-// [Merged] renderExamResult → line 3240 참조 (중복 제거)
+// [Merged] renderExamResult ??line 3240 참조 (중복 ?�거)
 
 
 
