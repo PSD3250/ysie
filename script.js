@@ -4110,22 +4110,24 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                 <p class="fs-18 text-slate-600 mt-2">${sGrade}학년 | 응시일: ${sDate}</p>
             </div>
             <!-- 우상단: 등록권장 학급 + 총점 -->
-            <div class="flex items-stretch gap-3">
+            <div class="flex items-stretch gap-6">
 
                 <!-- 등록권장 학급 -->
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-4">
                     <!-- 라벨 -->
                     <div class="flex items-center">
                         <div class="text-slate-700 font-bold leading-tight text-center" style="font-size:17px;font-weight:700">
                             등록<br>권장<br>학급
                         </div>
                     </div>
+                    <!-- 콜론 -->
+                    <div style="font-size:20px;font-weight:900;color:#013976;">:</div>
                     <!-- 드롭다운 -->
                     <select id="report-student-class"
-                        style="border:2px solid #013976;border-radius:1rem;width:120px;height:80px;font-size:24px;font-weight:900;color:#013976;background:white;text-align:center;cursor:pointer;-webkit-appearance:none;">
-                        <option value="">선택</option>
+                        style="border:2px solid #013976;border-radius:1rem;width:120px;height:80px;font-size:20px;font-weight:900;color:#013976;background:white;text-align:center;cursor:pointer;-webkit-appearance:none;">
+                        <option value="" style="font-size:16px;">선택</option>
                         ${(getClassesForGrade(record['학년']||record.grade||'') || []).map(c =>
-                            `<option value="${c}" ${(record.studentClass||record['등록학급']||'')===c?'selected':''}>${c}</option>`
+                            `<option value="${c}" style="font-size:16px;" ${(record.studentClass||record['등록학급']||'')===c?'selected':''}>${c}</option>`
                         ).join('')}
                     </select>
                 </div>
@@ -4134,7 +4136,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                 <div style="width:1px;background:#cbd5e1;align-self:stretch;margin:0 2px;"></div>
 
                 <!-- 총점 -->
-                <div style="background:linear-gradient(135deg,#013976 0%,#1a5276 100%);border-radius:1rem;width:120px;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;" class="shadow-lg">
+                <div style="background:linear-gradient(135deg,#013976 0%,#1a5276 100%);border-radius:1rem;width:160px;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;" class="shadow-lg">
                     <div style="font-size:24px;font-weight:900;line-height:1;">${sTotal}</div>
                     <div style="font-size:14px;opacity:0.75;margin-top:5px;">/ ${sMax}점 (${sRate}%)</div>
                 </div>
