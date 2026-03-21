@@ -471,7 +471,10 @@ function changeMode(mode) {
         const c = document.getElementById('dynamic-content');
 
         // Reset layout state
-        body.classList.remove('has-sidebar');
+        // [Fix] student 모드는 로딩 완료 후 사이드바 제거 (renderStudentLogin 내부에서 처리)
+        if (mode !== 'student') {
+            body.classList.remove('has-sidebar');
+        }
 
         if (mode === 'initial') {
             renderInitialScreen(); // Draw Initial Splash Screen (No Banner, No Start Button)
@@ -8252,6 +8255,9 @@ async function renderStudentLogin() {
     toggleLoading(true);
     await loadConfigFromCloud(true);
     toggleLoading(false);
+
+    // [Fix] 로딩 완료 후 사이드바 제거 (changeMode에서 즉시 제거 시 레이아웃 깨짐 방지)
+    document.body.classList.remove('has-sidebar');
 
     setCanvasId('02');
 
