@@ -4612,6 +4612,13 @@ function printReport() {
 <html><head>
 <meta charset="UTF-8">
 <title>성적표 인쇄</title>
+<script>
+(function(){
+  const _f=a=>a[0]&&typeof a[0]==='string'&&a[0].includes('cdn.tailwindcss.com');
+  const _w=console.warn;console.warn=function(...a){if(_f(a))return;_w.apply(console,a);};
+  const _l=console.log;console.log=function(...a){if(_f(a))return;_l.apply(console,a);};
+})();
+<\/script>
 <script src="https://cdn.tailwindcss.com"><\/script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap">
 <style>
