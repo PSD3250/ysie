@@ -4489,7 +4489,14 @@ function printReport() {
         return;
     }
 
-    // 참고: 등록권장 학급은 인쇄 화면에 텍스트로 표시됨 (서버 저장 불필요)
+    // [Fix] AI 종합 분석 코멘트가 없으면 경고 팝업
+    const aiCommentEl = document.getElementById('report-display')?.querySelector('[id^="ai-summary"], [id^="ai-comment"]');
+    const aiSectionTexts = Array.from(document.getElementById('report-display')?.querySelectorAll('p') || []).filter(p => p.textContent.includes('분석 대기 중') || p.textContent.includes('로딩 중'));
+    if (aiSectionTexts.length > 0) {
+        if (!confirm('⚠️ AI 분석 코멘트가 아직 생성되지 않았습니다.\n\n코멘트 없이 인쇄하시겠습니까?\n("취소"를 눌러 코멘트를 먼저 생성하세요)')) {
+            return;
+        }
+    }
 
     const display = document.getElementById('report-display');
     if (!display) return;
@@ -4528,13 +4535,28 @@ function printReport() {
         }
     });
 
-    // 3b. 인쇄 불필요 요소 제거 (체크박스만 제거, 문항별 상세 표는 강제 표시)
+    // 3b. 인쇄 불필요 요소 제거
+    // [Fix] 문항별 상세보기: 체크박스 상태에 따라 표시/숨김
+    const isDetailChecked = document.getElementById('chk-qdetail')?.checked || false;
     const chkEl = clone.querySelector('#chk-qdetail');
-    if (chkEl?.parentElement) chkEl.parentElement.remove();
-    // [Fix] 문항별 상세 표는 인쇄 시 강제 표시 (hidden 클래스 제거)
+    if (chkEl?.parentElement) chkEl.parentElement.remove(); // 체크박스 UI 자체는 제거
     clone.querySelectorAll('[id^="qdetail-"]').forEach(el => {
-        el.classList.remove('hidden');
-        el.style.display = '';
+        if (isDetailChecked) {
+            el.classList.remove('hidden');
+            el.style.display = '';
+        } else {
+            el.remove(); // 체크 안 되어 있으면 완전 제거
+        }
+    });
+
+    // [Fix] "분석 대기 중...", "로딩 중..." 등 로딩 상태 텍스트 제거
+    clone.querySelectorAll('p').forEach(p => {
+        const txt = p.textContent.trim();
+        if (txt === '분석 대기 중...' || txt === '로딩 중...' || txt === '분석 중...') {
+            const parent = p.closest('div');
+            if (parent) parent.remove();
+            else p.remove();
+        }
     });
 
     // 3b-2. 등록권장 학급 <select> → 텍스트 span으로 교체 (select는 클론 시 JS 선택값 소실)
