@@ -4112,15 +4112,15 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
             <!-- 우상단: 등록권장 학급 + 총점 -->
             <div class="flex items-stretch gap-6">
 
-                <!-- 등록권장 학급 (통합 박스) -->
-                <div style="border:2px solid #013976;border-radius:1rem;height:80px;display:flex;align-items:center;padding:0 16px;gap:10px;background:white;">
-                    <!-- 라벨 -->
-                    <div class="text-slate-700 font-bold leading-tight text-center" style="font-size:15px;font-weight:700;white-space:nowrap;">
-                        등록<br>권장<br>학급
+                <!-- 권장학급 (통합 박스: 배경색 구분) -->
+                <div style="border:2px solid #013976;border-radius:1rem;height:80px;display:flex;align-items:stretch;overflow:hidden;">
+                    <!-- 라벨 (네이비 배경) -->
+                    <div style="background:#013976;color:white;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 14px;white-space:nowrap;letter-spacing:0.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+                        권장<br>학급
                     </div>
-                    <!-- 드롭다운 -->
+                    <!-- 드롭다운 (흰 배경) -->
                     <select id="report-student-class"
-                        style="border:none;outline:none;font-size:20px;font-weight:900;color:#013976;background:transparent;text-align:center;cursor:pointer;-webkit-appearance:none;min-width:70px;">
+                        style="border:none;outline:none;font-size:20px;font-weight:900;color:#013976;background:white;text-align:center;cursor:pointer;-webkit-appearance:none;min-width:80px;padding:0 12px;">
                         <option value="" style="font-size:16px;">선택</option>
                         ${(getClassesForGrade(record['학년']||record.grade||'') || []).map(c =>
                             `<option value="${c}" style="font-size:16px;" ${(record.studentClass||record['등록학급']||'')===c?'selected':''}>${c}</option>`
