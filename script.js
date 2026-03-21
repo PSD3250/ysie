@@ -4418,15 +4418,15 @@ function renderTotalChart(record, averages, sTotal, sMax) {
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            scales: { y: { beginAtZero:true, max:sMax, ticks:{font:{size:16}} }, x:{ticks:{font:{size:16}}} },
+            scales: { y: { beginAtZero:true, max:sMax, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)} }, x:{ticks:{font:{size:16}}} },
             plugins: {
                 legend: { position: 'right', labels:{font:{size:16}} },
-                tooltip: { bodyFont:{size:16}, titleFont:{size:16} },
+                tooltip: { bodyFont:{size:16}, titleFont:{size:16}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
                 datalabels: DL ? {
                     anchor: 'center', align: 'center',
                     font: { size: 16, weight: 'bold' },
                     color: 'white',
-                    formatter: (v) => v > 0 ? v : ''
+                    formatter: (v) => v > 0 ? parseFloat(v).toFixed(1) : ''
                 } : false
             }
         }
@@ -4456,15 +4456,15 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            scales: { y:{beginAtZero:true, ticks:{font:{size:16}}}, x:{ticks:{font:{size:16}}} },
+            scales: { y:{beginAtZero:true, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)}}, x:{ticks:{font:{size:16}}} },
             plugins: {
                 legend: { position: 'right', labels:{font:{size:16}} },
-                tooltip: { bodyFont:{size:16}, titleFont:{size:16} },
+                tooltip: { bodyFont:{size:16}, titleFont:{size:16}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
                 datalabels: DL ? {
                     anchor: 'center', align: 'center',
                     font: { size: 16, weight: 'bold' },
                     color: 'white',
-                    formatter: (v) => v > 0 ? v : ''
+                    formatter: (v) => v > 0 ? parseFloat(v).toFixed(1) : ''
                 } : false
             }
         }
@@ -4688,7 +4688,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
                             const ds = ctx.datasetIndex;
                             const raw = ds === 0 ? rawPersonal[i] : rawAvg[i];
                             const mx  = maxScores[i];
-                            return ` ${ctx.dataset.label}: ${ctx.raw}% (${raw}/${mx}점)`;
+                            return ` ${ctx.dataset.label}: ${parseFloat(ctx.raw).toFixed(1)}% (${parseFloat(raw).toFixed(1)}/${mx}점)`;
                         }
                     }
                 }
