@@ -4532,10 +4532,14 @@ function printReport() {
         }
     });
 
-    // 3b. 인쇄 불필요 요소 제거 (문항별 상세보기 체크박스 + qdetail 영역)
+    // 3b. 인쇄 불필요 요소 제거 (체크박스만 제거, 문항별 상세 표는 강제 표시)
     const chkEl = clone.querySelector('#chk-qdetail');
     if (chkEl?.parentElement) chkEl.parentElement.remove();
-    clone.querySelectorAll('[id^="qdetail-"]').forEach(el => el.remove());
+    // [Fix] 문항별 상세 표는 인쇄 시 강제 표시 (hidden 클래스 제거)
+    clone.querySelectorAll('[id^="qdetail-"]').forEach(el => {
+        el.classList.remove('hidden');
+        el.style.display = '';
+    });
 
     // 3b-2. 등록권장 학급 <select> → 텍스트 span으로 교체 (select는 클론 시 JS 선택값 소실)
     const _clsSel = clone.querySelector('#report-student-class');
