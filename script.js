@@ -4158,7 +4158,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         </div>
 
         <!-- 4. 영역별 코멘트 -->
-        <div class="flex items-center gap-3 py-3 px-4 bg-slate-100 rounded-2xl border">
+        <div id="qdetail-checkbox-row" class="flex items-center gap-3 py-3 px-4 bg-slate-100 rounded-2xl border">
             <input type="checkbox" id="chk-qdetail" onchange="toggleAllQuestionDetail(this.checked)"
                 class="w-5 h-5 cursor-pointer accent-[#013976]">
             <label for="chk-qdetail" class="cursor-pointer font-bold text-[#013976] fs-16 select-none">문항별 상세 보기</label>
@@ -4538,8 +4538,9 @@ function printReport() {
     // 3b. 인쇄 불필요 요소 제거
     // [Fix] 문항별 상세보기: 체크박스 상태에 따라 표시/숨김
     const isDetailChecked = document.getElementById('chk-qdetail')?.checked || false;
-    const chkEl = clone.querySelector('#chk-qdetail');
-    if (chkEl?.parentElement) chkEl.parentElement.remove(); // 체크박스 UI 자체는 제거
+    // [Fix] 체크박스 행 전체를 확실히 제거 (id로 직접 지정)
+    const chkRow = clone.querySelector('#qdetail-checkbox-row');
+    if (chkRow) chkRow.remove();
     clone.querySelectorAll('[id^="qdetail-"]').forEach(el => {
         if (isDetailChecked) {
             el.classList.remove('hidden');
