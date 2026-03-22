@@ -4715,20 +4715,24 @@ function editComment(type, section) {
         if (!el) return;
         const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
         const wrap = document.getElementById('overall-comment-wrap');
-        wrap.innerHTML = `<textarea id="overall-comment-edit" class="w-full ys-field !bg-white resize-none fs-15" rows="5">${cur}</textarea>
-            <div class="flex gap-2 mt-2 no-print">
-                <button onclick="saveCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
-                <button onclick="cancelCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
+        wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
+                <div class="flex flex-col gap-2 flex-shrink-0">
+                    <button onclick="saveCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
+                    <button onclick="cancelCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
+                </div>
+                <textarea id="overall-comment-edit" class="flex-1 ys-field !bg-white resize-none fs-15" rows="5">${cur}</textarea>
             </div>`;
     } else if (type === 'section' && section) {
         const el = document.getElementById('sec-comment-text-' + section);
         if (!el) return;
         const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
         const wrap = document.getElementById('sec-comment-wrap-' + section);
-        wrap.innerHTML = `<textarea id="sec-comment-edit-${section}" class="w-full ys-field !bg-white resize-none fs-15" rows="4">${cur}</textarea>
-            <div class="flex gap-2 mt-2 no-print">
-                <button onclick="saveCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
-                <button onclick="cancelCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
+        wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
+                <div class="flex flex-col gap-2 flex-shrink-0">
+                    <button onclick="saveCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
+                    <button onclick="cancelCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
+                </div>
+                <textarea id="sec-comment-edit-${section}" class="flex-1 ys-field !bg-white resize-none fs-15" rows="4">${cur}</textarea>
             </div>`;
     }
 }
