@@ -2523,7 +2523,7 @@ function renderScoreInput(c) {
                             <label class="ys-label font-bold">&#x1F4C5; &#xC751;&#xC2DC;&#xC77C;</label>
                             <input type="text" id="input-test-date" class="ys-field" placeholder="YYYY-MM-DD" autocomplete="off">
                         </div>
-                        <div class="md:col-span-2">
+                        <div>
                             <label class="ys-label font-bold" style="color:#6366f1;">&#x1F3EB; &#xB4F1;&#xB85D;&#xD559;&#xAE09;</label>
                             <select id="input-student-class" class="ys-field" style="border-color:#a5b4fc;background:#f5f3ff;color:#4338ca;">
                                 <option value="">&#xC120;&#xD0DD;</option>
