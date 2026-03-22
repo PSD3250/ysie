@@ -1844,11 +1844,15 @@ function recommendClassByScore(totalScore, grade) {
         classMap[cls].sum += total;
         classMap[cls].cnt++;
     });
-    let bestClass = null, bestDiff = Infinity;
+    let bestClass = null, bestDiff = Infinity, minAvg = Infinity;
     Object.entries(classMap).forEach(([cls, data]) => {
-        const diff = Math.abs(totalScore - data.sum / data.cnt);
+        const avg = data.sum / data.cnt;
+        const diff = Math.abs(totalScore - avg);
         if (diff < bestDiff) { bestDiff = diff; bestClass = cls; }
+        if (avg < minAvg) minAvg = avg;
     });
+    // 최하반 평균의 60% 미만이면 미달 추천
+    if (minAvg < Infinity && totalScore < minAvg * 0.6) return '달성미달';
     return bestClass;
 }
 
@@ -2934,7 +2938,8 @@ function updateClassDropdown06(grade) {
     const list = getClassesForGrade(grade);
     sel.innerHTML = '<option value="">' + (list.length ? '점수입력 시 자동 추천' : '등록된 학급 없음') + '</option>'
         + '<option value="__RECOMMEND__" style="font-weight:bold;color:#6366f1;">⭐ 추천</option>'
-        + list.map(function(n) { return '<option value="' + n + '">' + n + '</option>'; }).join('');
+        + list.map(function(n) { return '<option value="' + n + '">' + n + '</option>'; }).join('')
+        + '<option value="달성미달" style="color:#ef4444;font-weight:bold;">⛔ 달성미달</option>';
     sel.dataset.recommendedClass = '';
     sel.dataset.autoSelected = '0';
     sel.onchange = function() {
