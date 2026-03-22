@@ -3815,7 +3815,7 @@ ${sectionSummary}
 2) 부족한 영역과 코멘트를 바탕으로 실질적 학습 방향 (1~2문장)
 3) 전체적 격려 메시지 (1문장)
 
-실제 총점/만점을 반드시 언급하세요. 호칭이 필요한 경우 "${sName} 학생은" 형식으로 실명을 사용하세요. "우리 OO 학생" 같은 가상 호칭은 절대 사용하지 마세요. 학원명, 교재명, 브랜드명은 절대 언급하지 마세요. 모든 답변은 순수 한국어로만 작성하세요.`;
+실제 총점/만점을 반드시 언급하세요. 호칭이 필요한 경우 "${sName} 학생은" 형식으로 실명을 사용하세요. "우리 OO 학생" 같은 가상 호칭은 절대 사용하지 마세요. 학원명, 교재명, 브랜드명은 절대 언급하지 마세요. 모든 답변은 순수 한국어로만 작성하세요. 인사말(안녕하세요, 반갑습니다 등)로 시작하지 마세요. 바로 내용으로 시작하세요.`;
 
     return await callGeminiAPI(prompt);
 }
@@ -4048,7 +4048,7 @@ async function generateSectionComments(record, averages, activeSections) {
 2) 미흡한 점 또는 약점 (1문장)
 3) 구체적 학습 방향 제시 (1문장)
 
-실제 점수와 만점을 반드시 언급하세요. 호칭이 필요한 경우 "${sName} 학생은" 형식으로 실명을 사용하세요. "우리 OO 학생" 같은 가상 호칭은 절대 사용하지 마세요. 학원명, 교재명, 브랜드명은 절대 언급하지 마세요. 모든 답변은 순수 한국어바탕으로 하세요.`;
+실제 점수와 만점을 반드시 언급하세요. 호칭이 필요한 경우 "${sName} 학생은" 형식으로 실명을 사용하세요. "우리 OO 학생" 같은 가상 호칭은 절대 사용하지 마세요. 학원명, 교재명, 브랜드명은 절대 언급하지 마세요. 모든 답변은 순수 한국어바탕으로 하세요. 인사말(안녕하세요, 반갑습니다 등)로 시작하지 마세요. 바로 내용으로 시작하세요.`;
 
         comments[section] = await callGeminiAPI(prompt);
     }
@@ -4201,7 +4201,9 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                         <button onclick="regenerateSectionComment('${section}')" class="no-print text-xl px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all" title="이 영역 코멘트 재생성">🔄</button>
                     </div>
                     ${comment
-                        ? `<div class="px-6 pb-4 border-t border-slate-200 pt-3"><p class="fs-15 text-slate-600 leading-relaxed">${comment.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p></div>`
+                        ? `<div class="px-6 pb-4 border-t border-slate-200 pt-3" id="sec-comment-wrap-${section}">
+                            <p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${comment.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p>
+                           </div>`
                         : `<div class="px-6 pb-4 border-t border-slate-200 pt-3"><p class="text-slate-400 fs-14 italic text-center py-2">분석 대기 중...</p></div>`
                     }
                     <div id="qdetail-${section}" class="hidden px-6 pb-6 border-t border-slate-100">
@@ -4213,14 +4215,33 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
 
         <!-- 5. 종합분석 코멘트 -->
         <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-3xl border-2 border-blue-200">
-            <h4 class="ys-label text-blue-700 mb-3">🤖 종합분석 코멘트</h4>
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="ys-label text-blue-700 !mb-0">🤖 종합분석 코멘트</h4>
+                <button onclick="regenerateOverallComment()" class="no-print text-xl px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-500 transition-all border border-slate-200" title="종합 코멘트 재생성">🔄</button>
+            </div>
             ${overallComment
-                ? `<div class="text-slate-700 leading-relaxed fs-15">${overallComment.split(/\n+/).map(l=>l.trim()).filter(l=>l).map(l=>`<p class="mb-2">${l}</p>`).join('')}</div>`
+                ? `<div id="overall-comment-wrap">
+                    <p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${overallComment.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>
+                   </div>`
                 : `<div class="text-center py-4">
                     <p class="text-slate-500 mb-4 fs-15">AI 심층 분석을 통해 학생의 강점과 약점을 파악해보세요.</p>
                     <button onclick="triggerAIAnalysis()" class="btn-ys !bg-[#013976] !text-white !py-3 !px-8 shadow-lg hover:scale-105 transition-all fs-16 font-bold flex items-center gap-2 mx-auto">✨ AI 분석 생성하기</button>
                   </div>`
             }
+        </div>
+
+        <!-- 6. 기타(비고) -->
+        <div id="notes-section">
+            <div class="no-print mt-2 text-right">
+                <button onclick="toggleNotesBox()" class="text-sm text-slate-400 hover:text-slate-600 underline" id="notes-toggle-btn">+ 기타(비고) 추가</button>
+            </div>
+            <div id="notes-box" class="hidden mt-3 bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="ys-label text-amber-700 !mb-0">📝 기타 / 비고</h4>
+                    <button onclick="toggleNotesBox()" class="no-print text-slate-400 hover:text-red-400 text-sm px-2" title="비고란 닫기">✕ 제거</button>
+                </div>
+                <textarea id="notes-textarea" class="w-full ys-field !bg-white resize-none fs-15" rows="3" placeholder="담당 교사 메모, 특이사항 등 자유롭게 입력하세요."></textarea>
+            </div>
         </div>
 
         <!-- Logo -->
@@ -4633,6 +4654,86 @@ async function regenerateSectionComment(section) {
         showToast('❌ 재생성 실패: ' + e.message);
         if (btn) { btn.disabled = false; btn.textContent = '🔄 재생성'; }
     }
+}
+
+// AI 코멘트 인라인 편집
+function editComment(type, section) {
+    if (type === 'overall') {
+        const el = document.getElementById('overall-comment-text');
+        if (!el) return;
+        const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
+        const wrap = document.getElementById('overall-comment-wrap');
+        wrap.innerHTML = `<textarea id="overall-comment-edit" class="w-full ys-field !bg-white resize-none fs-15" rows="5">${cur}</textarea>
+            <div class="flex gap-2 mt-2 no-print">
+                <button onclick="saveCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
+                <button onclick="cancelCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
+            </div>`;
+    } else if (type === 'section' && section) {
+        const el = document.getElementById('sec-comment-text-' + section);
+        if (!el) return;
+        const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
+        const wrap = document.getElementById('sec-comment-wrap-' + section);
+        wrap.innerHTML = `<textarea id="sec-comment-edit-${section}" class="w-full ys-field !bg-white resize-none fs-15" rows="4">${cur}</textarea>
+            <div class="flex gap-2 mt-2 no-print">
+                <button onclick="saveCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
+                <button onclick="cancelCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
+            </div>`;
+    }
+}
+function saveCommentEdit(type, section) {
+    if (type === 'overall') {
+        const ta = document.getElementById('overall-comment-edit');
+        if (!ta) return;
+        const newText = ta.value.trim();
+        if (window.currentReportData) window.currentReportData.overallComment = newText;
+        const wrap = document.getElementById('overall-comment-wrap');
+        wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${newText.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+    } else if (type === 'section' && section) {
+        const ta = document.getElementById('sec-comment-edit-' + section);
+        if (!ta) return;
+        const newText = ta.value.trim();
+        if (window.currentReportData && window.currentReportData.sectionComments) window.currentReportData.sectionComments[section] = newText;
+        const wrap = document.getElementById('sec-comment-wrap-' + section);
+        wrap.innerHTML = `<p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${newText.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+    }
+    showToast('✅ 코멘트가 수정되었습니다.');
+}
+function cancelCommentEdit(type, section) {
+    if (type === 'overall') {
+        const txt = window.currentReportData && window.currentReportData.overallComment || '';
+        const wrap = document.getElementById('overall-comment-wrap');
+        if (wrap) wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${txt.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+    } else if (type === 'section' && section) {
+        const txt = (window.currentReportData && window.currentReportData.sectionComments && window.currentReportData.sectionComments[section]) || '';
+        const wrap = document.getElementById('sec-comment-wrap-' + section);
+        if (wrap) wrap.innerHTML = `<p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${txt.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+    }
+}
+
+// 종합 코멘트 재생성
+async function regenerateOverallComment() {
+    if (!window.currentReportData) { showToast('⚠️ 성적 데이터가 없습니다.'); return; }
+    const { record, averages, activeSections, sectionComments } = window.currentReportData;
+    const btn = document.querySelector('button[onclick="regenerateOverallComment()"]');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+    try {
+        const newComment = await generateOverallComment(record, averages, activeSections, sectionComments || {});
+        window.currentReportData.overallComment = newComment;
+        const wrap = document.getElementById('overall-comment-wrap');
+        if (wrap) wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${(newComment||'').split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+        showToast('✅ 종합 코멘트가 재생성되었습니다.');
+    } catch(e) { showToast('❌ 재생성 실패: ' + e.message); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = '🔄'; } }
+}
+
+// 비고란 토글
+function toggleNotesBox() {
+    const box = document.getElementById('notes-box');
+    const btn = document.getElementById('notes-toggle-btn');
+    if (!box) return;
+    const isHidden = box.classList.contains('hidden');
+    box.classList.toggle('hidden', !isHidden);
+    if (btn) btn.textContent = isHidden ? '− 기타(비고) 제거' : '+ 기타(비고) 추가';
 }
 
 async function triggerAIAnalysis() {
