@@ -4991,14 +4991,6 @@ function renderStats(c) {
                             <button id="btn-q-stats" onclick="switchStatsMode('question')" class="btn-ys !bg-[#013976] !text-white hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex items-center gap-2">📊 문항 통계</button>
                             <button id="btn-s-stats" onclick="switchStatsMode('student')" class="btn-ys !bg-white !text-slate-500 !border-2 !border-slate-300 hover:!border-purple-500 hover:!text-purple-700 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl whitespace-nowrap flex items-center gap-2">👥 학생 통계</button>
                         </div>
-                        <!-- 학생 통계 년도 필터 (hidden by default) -->
-                        <div id="year-filter-wrap" class="hidden w-full flex items-center gap-3 pt-2 border-t border-slate-200 mt-1">
-                            <span style="font-size:17px;font-weight:700;color:#64748b;white-space:nowrap;">📅 년도</span>
-                            <select id="stats-year" onchange="loadStudentStats()" class="ys-field !w-36">
-                                <option value="">전체</option>
-                                ${Array.from({length: 5}, (_, i) => new Date().getFullYear() - i).map(y => `<option value="${y}">${y}년</option>`).join('')}
-                            </select>
-                        </div>
                     </div>
 
                     <!-- 통계 표시 영역 -->
@@ -5016,12 +5008,10 @@ function switchStatsMode(mode) {
     window._statsMode = mode;
     const qBtn = document.getElementById('btn-q-stats');
     const sBtn = document.getElementById('btn-s-stats');
-    const yearWrap = document.getElementById('year-filter-wrap');
     const ON  = 'px-4 py-2 rounded-xl fs-14 font-bold border-2 border-[#013976] bg-[#013976] text-white transition-all';
     const OFF = 'px-4 py-2 rounded-xl fs-14 font-bold border-2 border-slate-300 text-slate-500 hover:border-purple-500 hover:text-purple-700 transition-all';
     if (qBtn) qBtn.className = mode === 'question' ? ON : OFF;
     if (sBtn) sBtn.className = mode === 'student'  ? ON : OFF;
-    if (yearWrap) yearWrap.classList.toggle('hidden', mode !== 'student');
     if (mode === 'question') loadQuestionStats();
     else loadStudentStats();
 }
@@ -5038,7 +5028,6 @@ async function loadStudentStats() {
     const category = globalConfig.categories.find(c => c.id === categoryId);
     if (!category) return;
     const folderId = extractFolderId(category.targetFolderUrl);
-    const selectedYear = document.getElementById('stats-year')?.value || '';
 
     toggleLoading(true);
     try {
@@ -5047,26 +5036,29 @@ async function loadStudentStats() {
             parentFolderId: folderId,
             categoryName: category.name
         });
-        let students = result.data || [];
-        // 년도 필터
-        if (selectedYear) {
-            students = students.filter(s => {
-                const d = String(s['응시일'] || s.testDate || s.date || '');
-                return d.startsWith(selectedYear);
-            });
-        }
-        renderStudentStatsUI(students, selectedYear);
+        window._allStudentStatsData = result.data || [];
+        renderStudentStatsUI(window._allStudentStatsData, '');
     } catch(e) {
         document.getElementById('stats-display').innerHTML =
             `<div class="card text-center text-red-400">오류: ${e.message}</div>`;
     } finally { toggleLoading(false); }
 }
 
+// 년도 필터 변경 시 로컬 재필터링
+function onStudentStatsYearChange(sel) {
+    const year = sel.value;
+    const all  = window._allStudentStatsData || [];
+    const filtered = year ? all.filter(s => dateToYear(s['응시일']||s.testDate||s.date||'') === year) : all;
+    renderStudentStatsUI(filtered, year);
+    const newSel = document.getElementById('stats-year-inline');
+    if (newSel) newSel.value = year;
+}
+
 function renderStudentStatsUI(students, yearLabel) {
     const display = document.getElementById('stats-display');
     const SECTIONS = ['Grammar', 'Writing', 'Reading', 'Listening', 'Vocabulary'];
     const scoreKey = { Grammar:'grammarScore', Writing:'writingScore', Reading:'readingScore', Listening:'listeningScore', Vocabulary:'vocabScore' };
-    const maxKey =   { Grammar:'grammarMax',   Writing:'writingMax',   Reading:'readingMax',   Listening:'listeningMax',  Vocabulary:'vocabMax' };
+    const maxKey   = { Grammar:'grammarMax',   Writing:'writingMax',   Reading:'readingMax',   Listening:'listeningMax',  Vocabulary:'vocabMax' };
 
     const calcAvg = (list, sec) => {
         const vals = list.map(s => {
@@ -5075,23 +5067,53 @@ function renderStudentStatsUI(students, yearLabel) {
         }).filter(v => v !== null);
         return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '-';
     };
-    const calcMaxAvg = (list, sec) => {
+    const calcMax = (list, sec) => {
         const vals = list.map(s => {
             const v = parseFloat(s[maxKey[sec]] ?? s[sec+'_만점'] ?? '');
             return isNaN(v) ? null : v;
-        }).filter(v => v !== null);
-        return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '-';
+        }).filter(v => v !== null && v > 0);
+        if (!vals.length) return '-';
+        // 최빈값(가장 많이 나오는 만점)
+        const freq = {}; vals.forEach(v => freq[v] = (freq[v]||0)+1);
+        return String(Object.entries(freq).sort((a,b)=>b[1]-a[1])[0][0]);
     };
 
-    const sectionHeader = SECTIONS.map(s=>`<th class="px-3 py-2 text-center">${s}</th>`).join('');
+    // 년도 목록 (실제 데이터 기반)
+    const allStudents = window._allStudentStatsData || students;
+    const years = [...new Set(allStudents.map(s => dateToYear(s['응시일']||s.testDate||s.date||'')).filter(y => /^\d{4}$/.test(y)))].sort((a,b)=>b-a);
+    const yearFilterHtml = `
+        <div class="flex items-center gap-3 mb-5 pb-3 border-b border-slate-200">
+            <span style="font-size:15px;font-weight:700;color:#64748b;white-space:nowrap;">📅 년도</span>
+            <select id="stats-year-inline" onchange="onStudentStatsYearChange(this)" class="ys-field !w-36" style="font-size:14px;">
+                <option value="">전체</option>
+                ${years.map(y => `<option value="${y}"${yearLabel===y?' selected':''}>${y}년</option>`).join('')}
+            </select>
+            <span style="font-size:14px;color:#94a3b8;">· 총 ${students.length}명</span>
+        </div>`;
+
+    // 영역별 만점 헤더 + 첫 행
+    const sectionHeader = SECTIONS.map(s => {
+        const mx = calcMax(students, s);
+        const mxStr = mx !== '-' ? `<br><span style="font-size:12px;font-weight:400;opacity:0.8;">/${mx}점</span>` : '';
+        return `<th class="px-3 py-2.5 text-center" style="font-size:14px;">${s}${mxStr}</th>`;
+    }).join('');
+
+    // 만점 첫 행 (bg 연횟)
+    const maxRow = `<tr class="bg-yellow-50/60 border-b-2 border-yellow-200">
+        <td class="px-4 py-2.5 font-bold text-yellow-700" style="font-size:14px;">만점</td>
+        <td class="px-4 py-2.5 text-center text-slate-400" style="font-size:14px;">-</td>
+        ${SECTIONS.map(s => {
+            const mx = calcMax(students, s);
+            return `<td class="px-3 py-2.5 text-center font-bold text-yellow-700" style="font-size:14px;">${mx !== '-' ? mx : '<span class="text-slate-300">-</span>'}</td>`;
+        }).join('')}
+    </tr>`;
     const totalRow = (label, count, list, extraClass='') =>
         `<tr class="${extraClass} border-b border-slate-100">
-            <td class="px-4 py-3 font-bold">${label}</td>
-            <td class="px-4 py-3 text-center font-bold text-[#013976]">${count}</td>
-            ${SECTIONS.map(s=>{
+            <td class="px-4 py-3 font-bold" style="font-size:14px;">${label}</td>
+            <td class="px-4 py-3 text-center font-bold text-[#013976]" style="font-size:14px;">${count}</td>
+            ${SECTIONS.map(s => {
                 const avg = calcAvg(list, s);
-                const maxAvg = calcMaxAvg(list, s);
-                return `<td class="px-3 py-3 text-center">${avg === '-' ? '<span class="text-slate-300">-</span>' : `<span class="font-bold">${avg}</span><br><span class="text-slate-400 fs-12">/${maxAvg}</span>`}</td>`;
+                return `<td class="px-3 py-3 text-center" style="font-size:14px;">${avg === '-' ? '<span class="text-slate-300">-</span>' : `<span class="font-bold">${avg}</span>`}</td>`;
             }).join('')}
         </tr>`;
 
@@ -5110,21 +5132,21 @@ function renderStudentStatsUI(students, yearLabel) {
             i % 2 === 0 ? 'bg-purple-50/30' : ''
         )).join('');
 
-    const yearStr = yearLabel ? `${yearLabel}년` : '전체';
-
     display.innerHTML = `
         <div class="space-y-6 animate-fade-in">
+            ${yearFilterHtml}
             <div class="card">
-                <h3 class="fs-18 font-black text-[#013976] mb-4">📊 전체 통계 <span class="fs-14 text-slate-400 font-normal ml-2">${yearStr} · 총 ${students.length}명</span></h3>
-                ${students.length === 0 ? '<p class="text-slate-400 text-center py-6">해당 조건의 학생 데이터가 없습니다.</p>' : `
+                <h3 class="fs-18 font-black text-[#013976] mb-4">📊 전체 통계</h3>
+                ${students.length === 0 ? '<p class="text-slate-400 text-center py-6" style="font-size:14px;">해당 조건의 학생 데이터가 없습니다.</p>' : `
                 <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-[14px]">
+                    <table class="w-full" style="font-size:14px;">
                         <thead class="bg-[#013976] text-white"><tr>
-                            <th class="px-4 py-2.5 text-left">구분</th>
-                            <th class="px-4 py-2.5 text-center">응시자수</th>
+                            <th class="px-4 py-2.5 text-left" style="font-size:14px;">구분</th>
+                            <th class="px-4 py-2.5 text-center" style="font-size:14px;">응시자수</th>
                             ${sectionHeader}
                         </tr></thead>
                         <tbody>
+                            ${maxRow}
                             ${totalRow('전체 평균', students.length, students, 'bg-blue-50/40')}
                         </tbody>
                     </table>
@@ -5132,16 +5154,16 @@ function renderStudentStatsUI(students, yearLabel) {
             </div>
 
             <div class="card">
-                <h3 class="fs-18 font-black text-[#013976] mb-4">🏫 학급별 통계 <span class="fs-14 text-slate-400 font-normal ml-2">${yearStr}</span></h3>
-                ${Object.keys(groups).length === 0 ? '<p class="text-slate-400 text-center py-6">등록학급 정보가 없습니다.</p>' : `
+                <h3 class="fs-18 font-black text-[#013976] mb-4">🏫 학급별 통계</h3>
+                ${Object.keys(groups).length === 0 ? '<p class="text-slate-400 text-center py-6" style="font-size:14px;">등록학급 정보가 없습니다.</p>' : `
                 <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-[14px]">
+                    <table class="w-full" style="font-size:14px;">
                         <thead class="bg-purple-700 text-white"><tr>
-                            <th class="px-4 py-2.5 text-left">학급</th>
-                            <th class="px-4 py-2.5 text-center">응시자수</th>
+                            <th class="px-4 py-2.5 text-left" style="font-size:14px;">학급</th>
+                            <th class="px-4 py-2.5 text-center" style="font-size:14px;">응시자수</th>
                             ${sectionHeader}
                         </tr></thead>
-                        <tbody>${groupRows}</tbody>
+                        <tbody>${maxRow}${groupRows}</tbody>
                     </table>
                 </div>`}
             </div>
