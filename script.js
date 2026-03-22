@@ -4622,11 +4622,24 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
                 const dx = px - cx, dy = py - cy;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < 1) return;
-                const ux = dx/dist, uy = dy/dist;
-                // 선 시작: 데이터 포인트에서 6px 바깥
-                const x1 = px + ux*6, y1 = py + uy*6;
-                // 선 끝: 추가 20px
-                const x2 = px + ux*20, y2 = py + uy*20;
+                
+                // 기존 중심에서의 직선 각도
+                const theta = Math.atan2(dy, dx);
+                // N각형 구조 (3각형~5각형)
+                const N = chart.data.labels.length || 3;
+                // N등분 파이 조각의 약 15%만큼 시계방향으로 각도를 비틀어서 회색 라벨 텍스트를 피함
+                const angleOffset = (Math.PI * 2 / N) * 0.15; 
+                const offsetTheta = theta + angleOffset;
+                
+                // 틀어진 각도로 새로운 벡터(방향) 설정
+                const ux2 = Math.cos(offsetTheta);
+                const uy2 = Math.sin(offsetTheta);
+                
+                // 선 시작: 데이터 포인트에서 6px 바깥 (뻗어 나갈 방향)
+                const x1 = px + ux2*6, y1 = py + uy2*6;
+                // 선 끝: 추가 22px
+                const x2 = px + ux2*22, y2 = py + uy2*22;
+                
                 // 선 그리기
                 ctx2.beginPath();
                 ctx2.moveTo(x1, y1);
@@ -4634,13 +4647,13 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
                 ctx2.strokeStyle = '#e74c3c';
                 ctx2.lineWidth = 1.5;
                 ctx2.stroke();
-                // 텍스트
+                // 텍스트 위치도 새로운 벡터 기준으로 정렬 및 배치
                 const val = pctPersonal[i];
                 ctx2.font = 'bold 15px sans-serif';
                 ctx2.fillStyle = '#e74c3c';
-                ctx2.textAlign = ux > 0.1 ? 'left' : ux < -0.1 ? 'right' : 'center';
-                ctx2.textBaseline = uy > 0.1 ? 'top' : uy < -0.1 ? 'bottom' : 'middle';
-                ctx2.fillText(val + '%', x2 + ux*4, y2 + uy*4);
+                ctx2.textAlign = ux2 > 0.1 ? 'left' : ux2 < -0.1 ? 'right' : 'center';
+                ctx2.textBaseline = uy2 > 0.1 ? 'top' : uy2 < -0.1 ? 'bottom' : 'middle';
+                ctx2.fillText(val + '%', x2 + ux2*4, y2 + uy2*4);
             });
             ctx2.restore();
         }
