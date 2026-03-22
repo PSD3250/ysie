@@ -2496,7 +2496,7 @@ function renderScoreInput(c) {
 
                 <!-- Student Info -->
                 <div class="card space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="grid grid-cols-5 gap-4">
                         <div>
                             <label class="ys-label font-bold">&#x1F4DD; &#xD559;&#xC0DD;&#xBA85;</label>
                             <input type="text" id="input-student-name" class="ys-field" placeholder="&#xC774;&#xB984; &#xC785;&#xB825;" autocomplete="off">
