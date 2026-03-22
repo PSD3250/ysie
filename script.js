@@ -4266,7 +4266,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
     let sRate    = getVal(record, ['정답률(%)','정답률','rate']);
     if (!sRate && sMax) sRate = ((sTotal / sMax) * 100).toFixed(1);
     const recCls05 = recommendClassByScore(sTotal, sGrade);
-    const defaultCls05 = recCls05 || record.studentClass || record['등록학급'] || '';
+    const defaultCls05 = record.studentClass || record['등록학급'] || recCls05 || '';
 
     const secMap = { Grammar:'grammarScore', Writing:'writingScore', Reading:'readingScore', Listening:'listeningScore', Vocabulary:'vocabScore' };
     const maxMap  = { Grammar:'grammarMax',   Writing:'writingMax',   Reading:'readingMax',   Listening:'listeningMax',  Vocabulary:'vocabMax'   };
