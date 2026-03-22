@@ -4144,7 +4144,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                     </div>
                     <!-- 드롭다운 (흰 배경) -->
                     <select id="report-student-class"
-                        style="border:none;outline:none;font-size:20px;font-weight:900;color:#013976;background:white;text-align:center;cursor:pointer;-webkit-appearance:none;min-width:70px;padding:0 12px;">
+                        style="flex: 1; border:none;outline:none;font-size:20px;font-weight:900;color:#013976;background:white;text-align:center;text-align-last:center;cursor:pointer;-webkit-appearance:none;min-width:70px;padding:0 12px;">
                         <option value="" style="font-size:16px;">선택</option>
                         ${(getClassesForGrade(record['학년']||record.grade||'') || []).map(c =>
                             `<option value="${c}" style="font-size:16px;" ${(record.studentClass||record['등록학급']||'')===c?'selected':''}>${c}</option>`
