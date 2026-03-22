@@ -1826,6 +1826,33 @@ function getClassesForGrade(grade) {
         .map(c => c.name);
 }
 
+// 등록된 학급이 있는 학년만 반환 (순서: 초1~고3)
+function getRegisteredGrades() {
+    const ORDER = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3'];
+    if (!globalConfig.classes || !globalConfig.classes.length) return ORDER; // 미등록 시 전체 표시
+    const registered = new Set(
+        (globalConfig.classes)
+            .filter(c => typeof c === 'object' && c.grade)
+            .map(c => c.grade)
+    );
+    return ORDER.filter(g => registered.has(g));
+}
+
+// 학년 select 요소를 등록 학년으로 채우기
+function populateGradeSelect(selectEl, opts = {}) {
+    if (!selectEl) return;
+    const { placeholder = '학년 선택', includeAll = false, labelFn = null } = opts;
+    const grades = getRegisteredGrades();
+    const placeholderOpt = includeAll
+        ? `<option value="전체">전체</option>`
+        : `<option value="" disabled selected hidden>${placeholder}</option>`;
+    selectEl.innerHTML = placeholderOpt + grades.map(g => {
+        const label = labelFn ? labelFn(g) : g;
+        return `<option value="${g}">${label}</option>`;
+    }).join('');
+    selectEl.disabled = false;
+}
+
 function addClassItem() {
     const gradeEl = document.getElementById('new-class-grade');
     const inp = document.getElementById('new-class-input');
@@ -2505,18 +2532,6 @@ function renderScoreInput(c) {
                             <label class="ys-label font-bold">&#x1F393; &#xD559;&#xB144;</label>
                             <select id="input-grade" class="ys-field" onchange="updateClassDropdown06(this.value)">
                                 <option value="" disabled selected hidden>&#xD559;&#xB144; &#xC120;&#xD0DD;</option>
-                                <option value="&#xCD08;1">&#xCD08;1</option>
-                                <option value="&#xCD08;2">&#xCD08;2</option>
-                                <option value="&#xCD08;3">&#xCD08;3</option>
-                                <option value="&#xCD08;4">&#xCD08;4</option>
-                                <option value="&#xCD08;5">&#xCD08;5</option>
-                                <option value="&#xCD08;6">&#xCD08;6</option>
-                                <option value="&#xC911;1">&#xC911;1</option>
-                                <option value="&#xC911;2">&#xC911;2</option>
-                                <option value="&#xC911;3">&#xC911;3</option>
-                                <option value="&#xACE0;1">&#xACE0;1</option>
-                                <option value="&#xACE0;2">&#xACE0;2</option>
-                                <option value="&#xACE0;3">&#xACE0;3</option>
                             </select>
                         </div>
                         <div>
@@ -2603,6 +2618,8 @@ function renderScoreInput(c) {
 
         </div>
     `;
+    // 등록된 학년만 학년 드롭박스에 채우기
+    populateGradeSelect(document.getElementById('input-grade'), { placeholder: '학년 선택' });
 }
 
 async function handleScoreCategoryChange(catId) {
@@ -8239,18 +8256,6 @@ async function renderStudentLogin() {
                                 <label class="ys-label font-bold !mb-0">🎓 학년</label>
                                 <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm">
                                     <option value="" disabled selected hidden>학년을 선택하세요</option>
-                                    <option value="초1">초등 1학년</option>
-                                    <option value="초2">초등 2학년</option>
-                                    <option value="초3">초등 3학년</option>
-                                    <option value="초4">초등 4학년</option>
-                                    <option value="초5">초등 5학년</option>
-                                    <option value="초6">초등 6학년</option>
-                                    <option value="중1">중등 1학년</option>
-                                    <option value="중2">중등 2학년</option>
-                                    <option value="중3">중등 3학년</option>
-                                    <option value="고1">고등 1학년</option>
-                                    <option value="고2">고등 2학년</option>
-                                    <option value="고3">고등 3학년</option>
                                 </select>
                             </div>
                         </div>
@@ -8333,6 +8338,9 @@ async function renderStudentLogin() {
             });
         }
     }, 100);
+    // 등록된 학년만 학생 로그인 학년 드롭박스에 채우기
+    const gradeLabels = { '초1':'초등 1학년','초2':'초등 2학년','초3':'초등 3학년','초4':'초등 4학년','초5':'초등 5학년','초6':'초등 6학년','중1':'중등 1학년','중2':'중등 2학년','중3':'중등 3학년','고1':'고등 1학년','고2':'고등 2학년','고3':'고등 3학년' };
+    populateGradeSelect(document.getElementById('sgr'), { placeholder: '학년을 선택하세요', labelFn: g => gradeLabels[g] || g });
 }
 
 // [Added] 카테고리 선택 시 권장 학년 및 평가 시간 자동완성
