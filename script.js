@@ -4347,7 +4347,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
             <!-- 차트+범례+요약표가 단일 캔버스로 중앙 배치 -->
             <div class="flex justify-center" style="width:100%;margin-bottom:4px;">
                 <div style="width:100%;height:340px;position:relative;">
-                    <canvas id="chart-radar" style="width:100%;height:100%;"></canvas>
+                    <canvas id="chart-radar" style="width:100%;height:340px;display:block;"></canvas>
                 </div>
             </div>
         </div>
