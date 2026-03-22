@@ -4177,10 +4177,10 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
 
         <!-- 3. 레이더 차트 -->
         <div id="radar-section">
-            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">🕸 영역별 균형도</h4>
+            <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:0.4rem;">🕸 영역별 균형도</h4>
             <!-- 차트+범례+요약표가 단일 캔버스로 중앙 배치 -->
             <div class="flex justify-center" style="width:100%;margin-bottom:4px;">
-                <div style="width:900px;max-width:100%;height:400px;position:relative;">
+                <div style="width:900px;max-width:100%;height:320px;position:relative;">
                     <canvas id="chart-radar" style="width:100%;height:100%;"></canvas>
                 </div>
             </div>
