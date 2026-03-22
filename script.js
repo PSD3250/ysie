@@ -1941,7 +1941,7 @@ async function showStudentDBViewer(catId, catName) {
         _sdbCache.records = rawList;
 
         // 필터 드롭다운 채우기
-        const years  = [...new Set(rawList.map(r => String(r['응시일']||r.date||'').substring(0,4)).filter(y => /^\d{4}$/.test(y)))].sort((a,b) => b.localeCompare(a));
+        const years  = [...new Set(rawList.map(r => dateToYear(r['응시일']||r.date||'')).filter(y => /^\d{4}$/.test(y)))].sort((a,b) => b.localeCompare(a));
         const grades = [...new Set(rawList.map(r => String(r['학년']||r.grade||'')).filter(g => g))].sort((a,b) => a.localeCompare(b,'ko'));
         const ySel = document.getElementById('sdb-year');
         const gSel = document.getElementById('sdb-grade');
@@ -1955,12 +1955,19 @@ async function showStudentDBViewer(catId, catName) {
     } finally { toggleLoading(false); }
 }
 
-// 필터 적용 후 테이블 재렌더링
+// [Fix] UTC ISO 날짜 → 로컬(KST) 기준 연도 추출 (2024-01-01T15:00:00Z → 2024)
+function dateToYear(raw) {
+    const s = String(raw || '');
+    if (!s) return '';
+    if (s.includes('T')) return String(new Date(s).getFullYear());
+    return s.substring(0, 4);
+}
+
 function applyStudentDBFilters() {
     const year  = document.getElementById('sdb-year')?.value  || '전체';
     const grade = document.getElementById('sdb-grade')?.value || '전체';
     let list = (_sdbCache.records || []).slice();
-    if (year  !== '전체') list = list.filter(r => String(r['응시일']||r.date||'').substring(0,4) === year);
+    if (year  !== '전체') list = list.filter(r => dateToYear(r['응시일']||r.date||'') === year);
     if (grade !== '전체') list = list.filter(r => String(r['학년']||r.grade||'') === grade);
     _sdbList = list;
     _renderStudentDBTable();
@@ -3677,7 +3684,7 @@ function populateYearDropdown(records) {
     const yearSel = document.getElementById('report-year');
     if (!yearSel) return;
     const years = [...new Set(
-        records.map(r => String(r['응시일'] || r.date || '').substring(0, 4))
+        records.map(r => dateToYear(r['응시일'] || r.date || ''))
                .filter(y => /^\d{4}$/.test(y))
     )].sort((a, b) => b.localeCompare(a)); // 최신년도 먼저
     yearSel.innerHTML = '<option value="전체">전체</option>' +
@@ -3692,7 +3699,7 @@ function onReportYearChange() {
     const year    = document.getElementById('report-year')?.value;
     const records = window.cachedStudentRecords || [];
     const filtered = (!year || year === '전체') ? records
-        : records.filter(r => String(r['응시일'] || r.date || '').substring(0, 4) === year);
+        : records.filter(r => dateToYear(r['응시일'] || r.date || '') === year);
 
     const gradeSel = document.getElementById('report-grade');
     const stuSel   = document.getElementById('report-student');
@@ -3720,7 +3727,7 @@ function onReportGradeChange() {
     const records = window.cachedStudentRecords || [];
 
     let filtered = records;
-    if (year  && year  !== '전체') filtered = filtered.filter(r => String(r['응시일'] || r.date || '').substring(0, 4) === year);
+    if (year  && year  !== '전체') filtered = filtered.filter(r => dateToYear(r['응시일'] || r.date || '') === year);
     if (grade && grade !== '전체') filtered = filtered.filter(r => String(r['학년'] || r.grade || '') === grade);
 
     const stuSel = document.getElementById('report-student');
