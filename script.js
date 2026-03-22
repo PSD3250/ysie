@@ -4611,49 +4611,56 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
     const outerLabelPlugin = {
         id: 'radarOuterLabel',
         afterDraw(chart) {
-            const meta = chart.getDatasetMeta(0); // 개인 정답률
-            if (!meta || !meta.data) return;
             const scale = chart.scales.r;
             const cx = scale.xCenter, cy = scale.yCenter;
             const ctx2 = chart.ctx;
+            const N = chart.data.labels.length || 3;
+            // N등분 파이 조각의 약 15% 
+            const baseAngleOffset = (Math.PI * 2 / N) * 0.15;
+
             ctx2.save();
-            meta.data.forEach((pt, i) => {
-                const px = pt.x, py = pt.y;
-                const dx = px - cx, dy = py - cy;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 1) return;
+            
+            // 0: 개인 정답률(빨강), 1: 평균 정답률(스틸블루/회색)
+            [0, 1].forEach(dsIndex => {
+                const meta = chart.getDatasetMeta(dsIndex);
+                if (!meta || !meta.data) return;
                 
-                // 기존 중심에서의 직선 각도
-                const theta = Math.atan2(dy, dx);
-                // N각형 구조 (3각형~5각형)
-                const N = chart.data.labels.length || 3;
-                // N등분 파이 조각의 약 15%만큼 시계방향으로 각도를 비틀어서 회색 라벨 텍스트를 피함
-                const angleOffset = (Math.PI * 2 / N) * 0.15; 
-                const offsetTheta = theta + angleOffset;
-                
-                // 틀어진 각도로 새로운 벡터(방향) 설정
-                const ux2 = Math.cos(offsetTheta);
-                const uy2 = Math.sin(offsetTheta);
-                
-                // 선 시작: 데이터 포인트에서 6px 바깥 (뻗어 나갈 방향)
-                const x1 = px + ux2*6, y1 = py + uy2*6;
-                // 선 끝: 추가 22px
-                const x2 = px + ux2*22, y2 = py + uy2*22;
-                
-                // 선 그리기
-                ctx2.beginPath();
-                ctx2.moveTo(x1, y1);
-                ctx2.lineTo(x2, y2);
-                ctx2.strokeStyle = '#e74c3c';
-                ctx2.lineWidth = 1.5;
-                ctx2.stroke();
-                // 텍스트 위치도 새로운 벡터 기준으로 정렬 및 배치
-                const val = pctPersonal[i];
-                ctx2.font = 'bold 15px sans-serif';
-                ctx2.fillStyle = '#e74c3c';
-                ctx2.textAlign = ux2 > 0.1 ? 'left' : ux2 < -0.1 ? 'right' : 'center';
-                ctx2.textBaseline = uy2 > 0.1 ? 'top' : uy2 < -0.1 ? 'bottom' : 'middle';
-                ctx2.fillText(val + '%', x2 + ux2*4, y2 + uy2*4);
+                const isPersonal = (dsIndex === 0);
+                const color = isPersonal ? '#e74c3c' : '#64748b'; // 빨강 or 슬레이트
+                const dataArr = isPersonal ? pctPersonal : pctAvg;
+                // 개인은 시계방향(+), 평균은 반시계방향(-)으로 찢기 (V자 형태)
+                const angleOffset = isPersonal ? baseAngleOffset : -baseAngleOffset;
+
+                meta.data.forEach((pt, i) => {
+                    const px = pt.x, py = pt.y;
+                    const dx = px - cx, dy = py - cy;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 1) return; // 중심점(0점)인 경우 선 안그림
+                    
+                    const theta = Math.atan2(dy, dx);
+                    const offsetTheta = theta + angleOffset;
+                    
+                    const ux2 = Math.cos(offsetTheta);
+                    const uy2 = Math.sin(offsetTheta);
+                    
+                    const x1 = px + ux2*6, y1 = py + uy2*6;
+                    const x2 = px + ux2*25, y2 = py + uy2*25; // 평균 라벨까지 고려해 선 길이를 조금 더 길게
+                    
+                    ctx2.beginPath();
+                    ctx2.moveTo(x1, y1);
+                    ctx2.lineTo(x2, y2);
+                    ctx2.strokeStyle = color;
+                    ctx2.lineWidth = 1.5;
+                    ctx2.setLineDash(isPersonal ? [] : [3, 3]); // 평균선은 점선 처리
+                    ctx2.stroke();
+
+                    const val = dataArr[i];
+                    ctx2.font = isPersonal ? 'bold 15px sans-serif' : '14px sans-serif';
+                    ctx2.fillStyle = color;
+                    ctx2.textAlign = ux2 > 0.1 ? 'left' : ux2 < -0.1 ? 'right' : 'center';
+                    ctx2.textBaseline = uy2 > 0.1 ? 'top' : uy2 < -0.1 ? 'bottom' : 'middle';
+                    ctx2.fillText(val + '%', x2 + ux2*4, y2 + uy2*4);
+                });
             });
             ctx2.restore();
         }
