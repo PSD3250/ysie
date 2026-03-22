@@ -2654,7 +2654,7 @@ async function handleScoreCategoryChange(catId) {
         const el = document.getElementById(spanId);
         if (!el) return;
         if (val > 0) { el.textContent = '만점 ' + val + '점'; el.style.color = ''; }
-        else { el.textContent = '없음'; el.style.color = '#94a3b8'; }
+        else { el.textContent = '영역 없음'; el.style.color = '#94a3b8'; }
         // 연결된 input의 max 속성도 갱신
         const inp = document.querySelector(`[data-max-id="${spanId}"]`);
         if (inp) inp.max = val > 0 ? val : 9999;
@@ -2790,9 +2790,7 @@ function clampQScore(input) {
 }
 
 function clampAccordionScore(input) {
-    const maxId = input.dataset.maxId;
-    const maxEl = maxId ? document.getElementById(maxId) : null;
-    const maxVal = maxEl ? parseInt(maxEl.textContent) : NaN;
+    const maxVal = parseInt(input.max);
     let val = parseInt(input.value);
     if (isNaN(val) || val < 0) { input.value = ''; return; }
     if (!isNaN(maxVal) && maxVal > 0 && val > maxVal) { input.value = maxVal; }
