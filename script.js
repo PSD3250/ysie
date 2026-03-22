@@ -2912,12 +2912,9 @@ function updateClassBadge06(rec) {
 function calcAndRecommendClass06() {
     const grade = document.getElementById('input-grade') ? document.getElementById('input-grade').value : '';
     if (!grade) return;
-    let total = 0, hasScore = false;
-    document.querySelectorAll('[id^="q-score-"]').forEach(function(inp) {
-        const sc = parseInt(inp.value);
-        if (!isNaN(sc) && sc >= 0) { total += sc; hasScore = true; }
-    });
-    if (!hasScore) { updateClassBadge06(); return; }
+    const dispEl = document.getElementById('score-total-display');
+    const total = parseInt(dispEl ? dispEl.textContent : '0') || 0;
+    if (!total) { updateClassBadge06(); return; }
     const rec = recommendClassByScore(total, grade);
     const sel = document.getElementById('input-student-class');
     if (!sel) return;
