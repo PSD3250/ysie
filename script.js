@@ -4594,38 +4594,66 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
     const DL = window.ChartDataLabels;
     if (DL && !Chart._dlRegistered) { Chart.register(DL); Chart._dlRegistered = true; }
 
+    // 꼭짓점 바깥 레이블 표시 커스텀 플러그인
+    const outerLabelPlugin = {
+        id: 'radarOuterLabel',
+        afterDraw(chart) {
+            const meta = chart.getDatasetMeta(0); // 개인 정답률
+            if (!meta || !meta.data) return;
+            const scale = chart.scales.r;
+            const cx = scale.xCenter, cy = scale.yCenter;
+            const ctx2 = chart.ctx;
+            ctx2.save();
+            meta.data.forEach((pt, i) => {
+                const px = pt.x, py = pt.y;
+                const dx = px - cx, dy = py - cy;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 1) return;
+                const ux = dx/dist, uy = dy/dist;
+                // 선 시작: 데이터 포인트에서 8px 바깥
+                const x1 = px + ux*8, y1 = py + uy*8;
+                // 선 끝: 추가 20px
+                const x2 = px + ux*28, y2 = py + uy*28;
+                // 선 그리기
+                ctx2.beginPath();
+                ctx2.moveTo(x1, y1);
+                ctx2.lineTo(x2, y2);
+                ctx2.strokeStyle = '#e74c3c';
+                ctx2.lineWidth = 1.5;
+                ctx2.stroke();
+                // 텍스트
+                const val = pctPersonal[i];
+                ctx2.font = 'bold 15px sans-serif';
+                ctx2.fillStyle = '#e74c3c';
+                ctx2.textAlign = ux > 0.1 ? 'left' : ux < -0.1 ? 'right' : 'center';
+                ctx2.textBaseline = uy > 0.1 ? 'top' : uy < -0.1 ? 'bottom' : 'middle';
+                ctx2.fillText(val + '%', x2 + ux*4, y2 + uy*4);
+            });
+            ctx2.restore();
+        }
+    };
+
     ctx._chartInstance = new Chart(ctx.getContext('2d'), {
         type: 'radar',
-        plugins: DL ? [DL] : [],
+        plugins: [outerLabelPlugin],
         data: {
             labels: activeSections,
             datasets: [
                 {
                     label:'개인 정답률(%)', data:pctPersonal,
                     borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,0.15)',
-                    borderWidth:2.5, pointBackgroundColor:'#e74c3c', pointBorderColor:'#fff', pointRadius:5,
-                    datalabels: DL ? {
-                        display: true,
-                        color: '#e74c3c',
-                        font: { size: 16, weight: 'bold' },
-                        formatter: (v) => v + '%',
-                        anchor: 'end',
-                        align: 'end',
-                        offset: 8,
-                        clip: false
-                    } : { display: false }
+                    borderWidth:2.5, pointBackgroundColor:'#e74c3c', pointBorderColor:'#fff', pointRadius:5
                 },
                 {
                     label:'평균 정답률(%)', data:pctAvg,
                     borderColor:'#94a3b8', backgroundColor:'rgba(148,163,184,0.1)',
-                    borderWidth:2, pointBackgroundColor:'#94a3b8',
-                    datalabels: { display: false }
+                    borderWidth:2, pointBackgroundColor:'#94a3b8'
                 }
             ]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            layout: { padding: 30 },
+            layout: { padding: 40 },
             scales: {
                 r: {
                     min: 0, max: 100,
@@ -4646,8 +4674,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
                             return ` ${ctx.dataset.label}: ${parseFloat(ctx.raw).toFixed(1)}% (${parseFloat(raw).toFixed(1)}/${mx}점)`;
                         }
                     }
-                },
-                datalabels: DL ? {} : { display: false }
+                }
             }
         }
     });
