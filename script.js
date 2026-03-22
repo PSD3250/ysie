@@ -4887,7 +4887,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
             },
             plugins: {
                 datalabels: { display: false },
-                legend: { position: 'right', labels: { font:{size:16}, padding:4 } },
+                legend: { position: 'right', labels: { font:{size:16}, padding:15 } },
                 tooltip: {
                     bodyFont:{size:16}, titleFont:{size:16},
                     callbacks: {
