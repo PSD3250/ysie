@@ -4377,7 +4377,7 @@ function renderTotalChart(record, averages, sTotal, sMax) {
         options: {
             responsive: true, maintainAspectRatio: false,
             clip: false,
-            layout: { padding: { top: 30 } },
+            layout: { padding: { top: 50 } },
             scales: { y: { beginAtZero:true, max:sMax, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)} }, x:{ticks:{font:{size:16}}} },
             plugins: {
                 legend: { position: 'right', labels:{font:{size:16}, padding:15} },
@@ -4385,6 +4385,7 @@ function renderTotalChart(record, averages, sTotal, sMax) {
                 datalabels: DL ? {
                     anchor: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'end' : 'center',
                     align:  (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'top'  : 'center',
+                    offset: (ctx) => { const r = ctx.raw / (ctx.chart.scales.y.max||1); return r < 0.02 ? 50 : r < 0.12 ? 10 : 0; },
                     font: { size: 15, weight: 'bold' },
                     color: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? '#013976' : 'white',
                     clamp: false,
@@ -4419,7 +4420,7 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
         options: {
             responsive: true, maintainAspectRatio: false,
             clip: false,
-            layout: { padding: { top: 28 } },
+            layout: { padding: { top: 50 } },
             scales: { y:{beginAtZero:true, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)}}, x:{ticks:{font:{size:16}}} },
             plugins: {
                 legend: { position: 'right', labels:{font:{size:16}, padding:15} },
@@ -4427,6 +4428,7 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
                 datalabels: DL ? {
                     anchor: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'end' : 'center',
                     align:  (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'top'  : 'center',
+                    offset: (ctx) => { const r = ctx.raw / (ctx.chart.scales.y.max||1); return r < 0.02 ? 50 : r < 0.12 ? 10 : 0; },
                     font: { size: 15, weight: 'bold' },
                     color: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? '#013976' : 'white',
                     clamp: false,
@@ -5158,7 +5160,7 @@ function renderStudentStatsUI(students, _unused) {
                     ${yearSelect('stats-year-overall', "document.getElementById('stats-overall-body').innerHTML=window._renderOverall(this.value); window._drawStudentChart(this.value);")}
                 </div>
                 <div id="stats-overall-body">${renderOverall('')}</div>
-                <div class="mt-4" style="height:84px;"><canvas id="student-bar-chart"></canvas></div>
+                <div class="mt-4" style="height:180px;"><canvas id="student-bar-chart"></canvas></div>
             </div>
             <div class="card">
                 <div class="flex items-center mb-1">
@@ -5202,13 +5204,14 @@ function renderStudentStatsUI(students, _unused) {
                 responsive: true,
                 maintainAspectRatio: false,
                 clip: false,
-                layout: { padding: { top: 28 } },
+                layout: { padding: { top: 50 } },
                 plugins: {
                     legend: { display: false },
                     datalabels: {
                         display: true,
                         anchor: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'end' : 'center',
                         align:  (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'top'  : 'center',
+                        offset: (ctx) => { const r = ctx.raw / (ctx.chart.scales.y.max||1); return r < 0.02 ? 50 : r < 0.12 ? 30 : 0; },
                         color: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? '#013976' : 'white',
                         clamp: false,
                         font: { size: 14, weight: 'bold' },
@@ -5258,11 +5261,11 @@ function renderStudentStatsUI(students, _unused) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="card">
                         <h3 class="ys-label mb-0">📊 학급별 평균 점수</h3>
-                        <div style="height:210px;"><canvas id="${barId}"></canvas></div>
+                        <div style="height:300px;"><canvas id="${barId}"></canvas></div>
                     </div>
                     <div class="card">
                         <h3 class="ys-label mb-0">👥 학생수 비율</h3>
-                        <div style="height:210px;"><canvas id="${dntId}"></canvas></div>
+                        <div style="height:300px;"><canvas id="${dntId}"></canvas></div>
                     </div>
                 </div>
             </div>`;
@@ -5322,7 +5325,7 @@ function renderStudentStatsUI(students, _unused) {
                 // 도닛 (학생수)
                 const countObj = {};
                 clsInGrade.forEach(cls => { countObj[cls] = groups[cls].length; });
-                renderStatDoughnut(dntId, countObj, clsInGrade.reduce((s,c)=>s+groups[c].length,0), '학급');
+                renderStatDoughnut(dntId, countObj, clsInGrade.reduce((s,c)=>s+groups[c].length,0), '학급', '명');
             });
         }, 80);
     };
@@ -5499,7 +5502,8 @@ function renderStatsCharts(stats) {
 }
 
 // 도넛 차트 렌더링 (통계용)
-function renderStatDoughnut(canvasId, data, total, label) {
+function renderStatDoughnut(canvasId, data, total, label, unit) {
+    unit = unit || '개';
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
 
@@ -5533,7 +5537,7 @@ function renderStatDoughnut(canvasId, data, total, label) {
                 c.font = 'bold 14px sans-serif';
                 c.shadowColor = 'rgba(0,0,0,0.3)';
                 c.shadowBlur = 3;
-                c.fillText(`${value}명`, x, y - 9);
+                c.fillText(`${value}${unit}`, x, y - 9);
                 c.font = '14px sans-serif';
                 c.fillText(`${pct.toFixed(0)}%`, x, y + 9);
                 c.restore();
