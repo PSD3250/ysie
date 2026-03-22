@@ -4182,10 +4182,18 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         </div>
 
         <!-- 4. 영역별 코멘트 -->
-        <div id="qdetail-checkbox-row" class="flex items-center gap-3 py-3 px-4 bg-slate-100 rounded-2xl border">
-            <input type="checkbox" id="chk-qdetail" onchange="toggleAllQuestionDetail(this.checked)"
-                class="w-5 h-5 cursor-pointer accent-[#013976]">
-            <label for="chk-qdetail" class="cursor-pointer font-bold text-[#013976] fs-16 select-none">문항별 상세 보기</label>
+        <div id="qdetail-checkbox-row" class="flex items-center gap-6 py-3 px-4 bg-slate-100 rounded-2xl border -mt-6 relative z-10 w-fit">
+            <div class="flex items-center gap-3">
+                <input type="checkbox" id="chk-qdetail" onchange="toggleAllQuestionDetail(this.checked)"
+                    class="w-5 h-5 cursor-pointer accent-[#013976]">
+                <label for="chk-qdetail" class="cursor-pointer font-bold text-[#013976] fs-16 select-none">문항별 상세 보기</label>
+            </div>
+            <div class="w-px h-6 bg-slate-300 no-print"></div>
+            <div class="flex items-center gap-3 no-print">
+                <input type="checkbox" id="chk-notes-toggle" onchange="toggleNotesBox(this.checked)"
+                    class="w-5 h-5 cursor-pointer accent-amber-600" ${notes ? 'checked' : ''}>
+                <label for="chk-notes-toggle" class="cursor-pointer font-bold text-amber-700 fs-16 select-none">기타사항 추가</label>
+            </div>
         </div>
         <div class="space-y-4" id="sections-container">
             ${activeSections.map(section => {
@@ -4233,10 +4241,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
 
         <!-- 6. 기타사항 -->
         <div id="notes-section">
-            <div class="no-print mt-2 text-right">
-                <button onclick="toggleNotesBox()" class="text-sm text-slate-400 hover:text-slate-600 underline" id="notes-toggle-btn">+ 기타사항 추가</button>
-            </div>
-            <div id="notes-box" class="hidden mt-3 bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
+            <div id="notes-box" class="${notes ? '' : 'hidden '}bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 mt-4">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="ys-label text-amber-700 !mb-0">📝 기타사항</h4>
                     <button onclick="toggleNotesBox()" class="no-print text-slate-400 hover:text-red-400 text-sm px-2" title="기타사항 닫기">✕ 제거</button>
@@ -4837,13 +4842,18 @@ async function regenerateOverallComment() {
 }
 
 // 기타사항 토글
-function toggleNotesBox() {
+function toggleNotesBox(checked) {
     const box = document.getElementById('notes-box');
-    const btn = document.getElementById('notes-toggle-btn');
+    const chk = document.getElementById('chk-notes-toggle');
     if (!box) return;
-    const isHidden = box.classList.contains('hidden');
-    box.classList.toggle('hidden', !isHidden);
-    if (btn) btn.textContent = isHidden ? '− 기타사항 제거' : '+ 기타사항 추가';
+
+    if (typeof checked === 'boolean') {
+        box.classList.toggle('hidden', !checked);
+    } else {
+        const isHidden = box.classList.contains('hidden');
+        box.classList.toggle('hidden', !isHidden);
+        if (chk) chk.checked = isHidden;
+    }
 }
 
 async function triggerAIAnalysis() {
