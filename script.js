@@ -4998,9 +4998,9 @@ function renderStats(c) {
                 </div>
             `;
 
-    // 기본은 문항 통계 모드
-    window._statsMode = 'question';
-    loadQuestionStats();
+    // 기본 상태: 아무것도 로드 안 함 (버튼 클릭 시 로드)
+    window._statsMode = null;
+    document.getElementById('stats-display').innerHTML = '<p class="text-slate-400 text-center py-10" style="font-size:15px;">📊 버튼을 눌러 통계를 확인하세요</p>';
 }
 
 // ===================== 통계 모드 전환 =====================
@@ -5008,8 +5008,9 @@ function switchStatsMode(mode) {
     window._statsMode = mode;
     const qBtn = document.getElementById('btn-q-stats');
     const sBtn = document.getElementById('btn-s-stats');
-    const ON  = 'px-4 py-2 rounded-xl fs-14 font-bold border-2 border-[#013976] bg-[#013976] text-white transition-all';
-    const OFF = 'px-4 py-2 rounded-xl fs-14 font-bold border-2 border-slate-300 text-slate-500 hover:border-purple-500 hover:text-purple-700 transition-all';
+    // 원래 크기(btn-ys !px-5 !py-2.5 !text-[15px])를 유지한 채 색상만 변경
+    const ON  = 'btn-ys !bg-[#013976] !text-white hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex items-center gap-2';
+    const OFF = 'btn-ys !bg-white !text-slate-500 !border-2 !border-slate-300 hover:!border-purple-500 hover:!text-purple-700 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl whitespace-nowrap flex items-center gap-2';
     if (qBtn) qBtn.className = mode === 'question' ? ON : OFF;
     if (sBtn) sBtn.className = mode === 'student'  ? ON : OFF;
     if (mode === 'question') loadQuestionStats();
@@ -5017,8 +5018,8 @@ function switchStatsMode(mode) {
 }
 
 function onStatsCategoryChange() {
-    if (window._statsMode === 'student') loadStudentStats();
-    else loadQuestionStats();
+    // 시험지 변경 시 화면 초기화만 — 버튼 클릭 시 로드
+    document.getElementById('stats-display').innerHTML = '<p class="text-slate-400 text-center py-10" style="font-size:15px;">📊 버튼을 눌러 통계를 확인하세요</p>';
 }
 
 // ===================== 학생 통계 =====================
