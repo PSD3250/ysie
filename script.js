@@ -4179,7 +4179,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         <div id="radar-section">
             <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:1rem;">🕸 영역별 균형도</h4>
             <!-- 차트+범례+요약표가 단일 캔버스로 중앙 배치 -->
-            <div class="flex justify-center" style="width:100%;">
+            <div class="flex justify-center" style="width:100%;margin-bottom:4px;">
                 <div style="width:700px;max-width:100%;height:342px;position:relative;">
                     <canvas id="chart-radar" style="width:100%;height:100%;"></canvas>
                 </div>
@@ -4685,20 +4685,20 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
             datasets: [
                 {
                     label:'개인 정답률(%)', data:pctPersonal,
-                    borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,0.15)',
+                    borderColor:'#e74c3c', backgroundColor:'transparent',
                     borderWidth:2.5, pointBackgroundColor:'#e74c3c', pointBorderColor:'#fff', pointRadius:5
                 },
                 {
                     label:'평균 정답률(%)', data:pctAvg,
-                    borderColor:'#94a3b8', backgroundColor:'rgba(148,163,184,0.1)',
+                    borderColor:'#94a3b8', backgroundColor:'transparent',
                     borderWidth:2, pointBackgroundColor:'#94a3b8'
                 }
             ]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            // 우측 200px: Chart.js 범례 + 요약표 영역
-            layout: { padding: { right: 200, left: 10, top: 10, bottom: 10 } },
+            // padding.top:2 제목과 차트 간격 최소화 / right:280 범례-표 간격 확보 / bottom:2 이하 간격 최소화
+            layout: { padding: { right: 280, left: 10, top: 2, bottom: 2 } },
             scales: {
                 r: {
                     min: 0, max: 100,
@@ -4708,7 +4708,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
             },
             plugins: {
                 datalabels: { display: false },
-                legend: { position: 'right', labels: { font:{size:16}, boxWidth:24, padding:4 } },
+                legend: { position: 'right', labels: { font:{size:16}, padding:4 } },
                 tooltip: {
                     bodyFont:{size:16}, titleFont:{size:16},
                     callbacks: {
