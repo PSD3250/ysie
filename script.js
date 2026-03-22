@@ -5173,14 +5173,13 @@ function renderStudentStatsUI(students, _unused) {
         const filtered = yrVal ? all.filter(s => dateToYear(s['응시일']||s.testDate||s.date||'') === yrVal) : all;
         // 데이터 있는 영역만
         const validSecs = SECTIONS.filter(s => calcMax(filtered, s) !== '-');
-        const labels  = ['\uc8fc\uc810', ...validSecs];
-        const avgs    = validSecs.map(s => { const v = parseFloat(calcAvg(filtered, s)); return isNaN(v) ? 0 : v; });
-        const maxes   = validSecs.map(s => parseFloat(calcMax(filtered, s)));
+        const avgs     = validSecs.map(s => { const v = parseFloat(calcAvg(filtered, s)); return isNaN(v) ? 0 : v; });
+        const maxes    = validSecs.map(s => parseFloat(calcMax(filtered, s)));
         const totalAvg = avgs.reduce((a,b)=>a+b, 0);
         const totalMax2 = maxes.reduce((a,b)=>a+b, 0);
-        const allLabels  = ['\uc8fc\uc810 (\ud569\uc0b0)', ...validSecs];
-        const allAvgs    = [totalAvg.toFixed(1), ...avgs];
-        const allMaxes   = [totalMax2, ...maxes];
+        const allLabels = ['\uc8fc\uc810 (\ud569\uc0b0)', ...validSecs];
+        const allAvgs   = [totalAvg, ...avgs].map(Number);
+        const allMaxes  = [totalMax2, ...maxes].map(Number);
         const ctx = document.getElementById('student-bar-chart');
         if (!ctx) return;
         if (ctx._chartInstance) ctx._chartInstance.destroy();
@@ -5189,16 +5188,18 @@ function renderStudentStatsUI(students, _unused) {
             data: {
                 labels: allLabels,
                 datasets: [
-                    { label: '\ud3c9\uade0 \uc810\uc218', data: allAvgs.map(Number), backgroundColor: 'rgba(1,57,118,0.80)', borderRadius: 6 },
-                    { label: '\ub9cc\uc810', data: allMaxes.map(Number), backgroundColor: 'rgba(203,213,225,0.45)', borderRadius: 6 }
+                    { label: '\ud3c9\uade0 \uc810\uc218', data: allAvgs, backgroundColor: allLabels.map((_,i)=>i===0?'rgba(1,57,118,0.9)':'rgba(1,57,118,0.65)'), borderRadius: 6 }
                 ]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { labels: { font: { size: 14 } } } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { afterLabel: (ctx) => `만점: ${allMaxes[ctx.dataIndex]}점` } }
+                },
                 scales: {
                     x: { ticks: { font: { size: 14 } } },
-                    y: { beginAtZero: true, ticks: { font: { size: 14 } } }
+                    y: { beginAtZero: true, max: totalMax2 || undefined, ticks: { font: { size: 14 } } }
                 }
             }
         });
@@ -5240,8 +5241,6 @@ function renderStudentStatsUI(students, _unused) {
         const ctxDnt = document.getElementById('student-class-doughnut');
         if (ctxDnt) {
             if (ctxDnt._chartInstance) ctxDnt._chartInstance.destroy();
-            const DL = Chart.registry?.plugins?.get('datalabels') || (typeof ChartDataLabels !== 'undefined' ? ChartDataLabels : null);
-            if (DL && !Chart._dlRegistered) { Chart.register(DL); Chart._dlRegistered = true; }
             ctxDnt._chartInstance = new Chart(ctxDnt.getContext('2d'), {
                 type: 'doughnut',
                 data: {
@@ -5252,7 +5251,8 @@ function renderStudentStatsUI(students, _unused) {
                     responsive: true,
                     plugins: {
                         legend: { position: 'bottom', labels: { font: { size: 13 }, boxWidth: 14 } },
-                        datalabels: DL ? { color:'#fff', font:{ size:12, weight:'bold' }, formatter:(v,ctx2)=>{ const total=ctx2.dataset.data.reduce((a,b)=>a+b,0); return total>0?Math.round(v/total*100)+'%':''; } } : undefined
+                        datalabels: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => { const total = ctx.dataset.data.reduce((a,b)=>a+b,0); const pct = total>0?Math.round(ctx.parsed/total*100):0; return ` ${ctx.label}: ${ctx.parsed}명 (${pct}%)`; } } }
                     }
                 }
             });
