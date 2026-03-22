@@ -5158,7 +5158,7 @@ function renderStudentStatsUI(students, _unused) {
                     ${yearSelect('stats-year-overall', "document.getElementById('stats-overall-body').innerHTML=window._renderOverall(this.value); window._drawStudentChart(this.value);")}
                 </div>
                 <div id="stats-overall-body">${renderOverall('')}</div>
-                <div class="mt-4"><canvas id="student-bar-chart" height="84"></canvas></div>
+                <div class="mt-4" style="height:84px;"><canvas id="student-bar-chart"></canvas></div>
             </div>
             <div class="card">
                 <div class="flex items-center mb-1">
@@ -5200,6 +5200,7 @@ function renderStudentStatsUI(students, _unused) {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 clip: false,
                 layout: { padding: { top: 28 } },
                 plugins: {
