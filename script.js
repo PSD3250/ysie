@@ -4205,7 +4205,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         </div>
 
         <!-- 4. 영역별 코멘트 -->
-        <div id="qdetail-checkbox-row" class="flex items-center gap-6 py-3 px-4 bg-slate-100 rounded-2xl border -mt-6 relative z-10 w-fit">
+        <div id="qdetail-checkbox-row" class="flex items-center gap-6 py-3 px-4 bg-slate-100 rounded-2xl border !mt-4 relative z-10 w-fit">
             <div class="flex items-center gap-3">
                 <input type="checkbox" id="chk-qdetail" onchange="toggleAllQuestionDetail(this.checked)"
                     class="w-5 h-5 cursor-pointer accent-[#013976]">
@@ -4218,7 +4218,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                 <label for="chk-notes-toggle" class="cursor-pointer font-bold text-amber-700 fs-16 select-none">기타사항 추가</label>
             </div>
         </div>
-        <div class="space-y-4 w-full">
+        <div class="space-y-4 w-full !mt-4">
             <div class="space-y-4" id="sections-container">
             ${activeSections.map(section => {
                 const sScore = parseFloat(record[section+'_점수'] || record[secMap[section]] || 0);
@@ -4649,7 +4649,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            layout: { padding: 40 },
+            layout: { padding: 5 },
             scales: {
                 r: {
                     min: 0, max: 100,
@@ -4661,7 +4661,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
             plugins: {
                 // 전역 데이터 라벨은 비활성화하여 차트 위에 검은색 숫자가 나타나지 않게 함
                 datalabels: { display: false },
-                legend: { position: 'right', labels: { font:{size:16} } },
+                legend: { position: 'bottom', labels: { font:{size:16} } },
                 tooltip: {
                     bodyFont:{size:16}, titleFont:{size:16},
                     callbacks: {
