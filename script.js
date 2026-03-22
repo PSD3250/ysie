@@ -4852,27 +4852,6 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
                 c2.fillText(pct, pX+pW-14, cy);
                 cy += rowH;
             });
-            // ===== DEBUG 영역 사각형 =====
-            c2.save(); c2.lineWidth=2; c2.font='bold 11px sans-serif'; c2.setLineDash([]);
-            // 녹: 레이더 마제 영역 (chart.chartArea)
-            const ca = chart.chartArea;
-            c2.strokeStyle='rgba(0,180,0,0.9)'; c2.fillStyle='rgba(0,180,0,0.12)';
-            c2.fillRect(ca.left,ca.top,ca.right-ca.left,ca.bottom-ca.top);
-            c2.strokeRect(ca.left,ca.top,ca.right-ca.left,ca.bottom-ca.top);
-            c2.fillStyle='rgba(0,180,0,0.9)'; c2.fillText('무=레이더',ca.left+4,ca.top+14);
-            // 주황: 범례 영역 (chart.legend)
-            const lg = chart.legend;
-            if(lg && lg.left!=null){
-              c2.strokeStyle='rgba(234,88,12,0.9)'; c2.fillStyle='rgba(234,88,12,0.08)';
-              c2.fillRect(lg.left,lg.top,lg.width,lg.height);
-              c2.strokeRect(lg.left,lg.top,lg.width,lg.height);
-              c2.fillStyle='rgba(234,88,12,0.9)'; c2.fillText('주=범례',lg.left+4,lg.top+14);
-            }
-            // 파란: 테이블 영역 (pX,pY,pW,pH)
-            c2.strokeStyle='rgba(37,99,235,0.9)'; c2.fillStyle='rgba(37,99,235,0.08)';
-            c2.fillRect(pX,pY,pW,pH); c2.strokeRect(pX,pY,pW,pH);
-            c2.fillStyle='rgba(37,99,235,0.9)'; c2.fillText('파=테이블',pX+4,pY+14);
-            c2.restore();
             c2.restore();
         }
     };
