@@ -4592,18 +4592,17 @@ window.onload = function() { setTimeout(function(){ window.print(); }, 800); };
 </body></html>`);
     win.document.close();
 
-    // [추가] 인쇄 시 선택된 등록학급을 DB에 자동 저장
+    // [추가] 인쇄 시 선택된 등록학급을 DB에 자동 저장 (기존 행 업데이트)
     if (clsVal) {
         const stuId  = document.getElementById('report-student')?.value;
         const catId  = document.getElementById('report-category')?.value;
         const cat    = globalConfig.categories?.find(c => c.id === catId);
         if (stuId && cat) {
             sendReliableRequest({
-                type: 'STUDENT_SAVE',
+                type: 'SAVE_STUDENT_CLASS',
                 parentFolderId: extractFolderId(cat.targetFolderUrl),
-                categoryName:   cat.name,
-                studentId: stuId,
-                data: { 등록학급: clsVal }
+                studentId:      stuId,
+                studentClass:   clsVal
             }).then(() => showToast(`💾 등록학급 '${clsVal}' 저장 완료`))
               .catch(e  => console.warn('등록학급 저장 실패:', e));
         }
