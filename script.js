@@ -4690,7 +4690,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
             scales: {
                 r: {
                     min: 0, max: 100,
-                    ticks: { stepSize: 20, font:{size:16}, backdropColor:'transparent', callback: v => v+'%' },
+                    ticks: { display: false, stepSize: 20 },
                     // padding을 늘려 바깥 텍스트(Listening 등)를 밀어내어 빨간 점수와 겹침 방지
                     pointLabels: { font:{size:16}, padding: 25 }
                 }
