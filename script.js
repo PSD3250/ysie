@@ -2754,6 +2754,7 @@ function applyYsDatePicker(selector, extraOpts = {}) {
             sel.appendChild(o);
         }
         sel.addEventListener('change', e => inst.changeYear(+e.target.value));
+        if (!yi.parentNode) return;
         yi.parentNode.replaceChild(sel, yi);
     };
     flatpickr(el, Object.assign({
