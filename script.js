@@ -4195,7 +4195,8 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                 <label for="chk-notes-toggle" class="cursor-pointer font-bold text-amber-700 fs-16 select-none">기타사항 추가</label>
             </div>
         </div>
-        <div class="space-y-4" id="sections-container">
+        <div class="space-y-4 w-full">
+            <div class="space-y-4" id="sections-container">
             ${activeSections.map(section => {
                 const sScore = parseFloat(record[section+'_점수'] || record[secMap[section]] || 0);
                 const sMaxV  = parseFloat(record[section+'_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
@@ -4241,7 +4242,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
 
         <!-- 6. 기타사항 -->
         <div id="notes-section">
-            <div id="notes-box" class="${notes ? '' : 'hidden '}bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 mt-4">
+            <div id="notes-box" class="${notes ? '' : 'hidden '}bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="ys-label text-amber-700 !mb-0">📝 기타사항</h4>
                     <button onclick="toggleNotesBox()" class="no-print text-slate-400 hover:text-red-400 text-sm px-2" title="기타사항 닫기">✕ 제거</button>
@@ -4252,6 +4253,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                         : `<p class="text-amber-600/50 italic fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">내용이 없습니다. 클릭하여 새로 작성하세요.</p>`
                     }
                 </div>
+            </div>
             </div>
         </div>
 
@@ -4730,11 +4732,11 @@ function editComment(type, section) {
         const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
         const wrap = document.getElementById('overall-comment-wrap');
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
+                <textarea id="overall-comment-edit" class="flex-1 ys-field !bg-white resize-none fs-15" rows="5">${cur}</textarea>
                 <div class="flex flex-col gap-2 flex-shrink-0">
                     <button onclick="saveCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
                     <button onclick="cancelCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
                 </div>
-                <textarea id="overall-comment-edit" class="flex-1 ys-field !bg-white resize-none fs-15" rows="5">${cur}</textarea>
             </div>`;
     } else if (type === 'section' && section) {
         const el = document.getElementById('sec-comment-text-' + section);
@@ -4742,22 +4744,22 @@ function editComment(type, section) {
         const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
         const wrap = document.getElementById('sec-comment-wrap-' + section);
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
+                <textarea id="sec-comment-edit-${section}" class="flex-1 ys-field !bg-white resize-none fs-15" rows="4">${cur}</textarea>
                 <div class="flex flex-col gap-2 flex-shrink-0">
                     <button onclick="saveCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
                     <button onclick="cancelCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
                 </div>
-                <textarea id="sec-comment-edit-${section}" class="flex-1 ys-field !bg-white resize-none fs-15" rows="4">${cur}</textarea>
             </div>`;
     } else if (type === 'notes') {
         const el = document.getElementById('notes-text');
         const cur = el ? el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : (window.currentReportData?.notes || '');
         const wrap = document.getElementById('notes-content-wrap');
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
+                <textarea id="notes-edit" class="flex-1 ys-field !bg-white resize-none fs-15 border-amber-300" rows="3" placeholder="담당 교사 메모, 특이사항 등 자유롭게 입력하세요.">${cur}</textarea>
                 <div class="flex flex-col gap-2 flex-shrink-0">
                     <button onclick="saveCommentEdit('notes')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-amber-600 !text-white border-amber-700">저장</button>
                     <button onclick="cancelCommentEdit('notes')" class="btn-ys !py-1.5 !px-4 !text-sm border-amber-300 text-amber-800 bg-white">취소</button>
                 </div>
-                <textarea id="notes-edit" class="flex-1 ys-field !bg-white resize-none fs-15 border-amber-300" rows="3" placeholder="담당 교사 메모, 특이사항 등 자유롭게 입력하세요.">${cur}</textarea>
             </div>`;
     }
 }
