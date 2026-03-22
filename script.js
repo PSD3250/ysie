@@ -4371,7 +4371,7 @@ function renderTotalChart(record, averages, sTotal, sMax) {
             responsive: true, maintainAspectRatio: false,
             scales: { y: { beginAtZero:true, max:sMax, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)} }, x:{ticks:{font:{size:16}}} },
             plugins: {
-                legend: { position: 'right', labels:{font:{size:16}} },
+                legend: { position: 'right', labels:{font:{size:16}, padding:15} },
                 tooltip: { bodyFont:{size:16}, titleFont:{size:16}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
                 datalabels: DL ? {
                     anchor: 'center', align: 'center',
@@ -4409,7 +4409,7 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
             responsive: true, maintainAspectRatio: false,
             scales: { y:{beginAtZero:true, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)}}, x:{ticks:{font:{size:16}}} },
             plugins: {
-                legend: { position: 'right', labels:{font:{size:16}} },
+                legend: { position: 'right', labels:{font:{size:16}, padding:15} },
                 tooltip: { bodyFont:{size:16}, titleFont:{size:16}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
                 datalabels: DL ? {
                     anchor: 'center', align: 'center',
@@ -4728,7 +4728,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
             },
             plugins: {
                 datalabels: { display: false },
-                legend: { position: 'right', labels: { font:{size:16}, padding:10 } },
+                legend: { position: 'right', labels: { font:{size:16}, padding:15 } },
                 tooltip: {
                     bodyFont:{size:16}, titleFont:{size:16},
                     callbacks: {
