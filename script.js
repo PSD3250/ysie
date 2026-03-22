@@ -5202,7 +5202,15 @@ function renderStudentStatsUI(students, _unused) {
                 layout: { padding: { top: 28 } },
                 plugins: {
                     legend: { display: false },
-                    datalabels: { display: false },
+                    datalabels: {
+                        display: true,
+                        anchor: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'end' : 'center',
+                        align:  (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? 'top'  : 'center',
+                        color: (ctx) => ctx.raw / (ctx.chart.scales.y.max||1) < 0.12 ? '#013976' : 'white',
+                        clamp: false,
+                        font: { size: 14, weight: 'bold' },
+                        formatter: (v) => v > 0 ? parseFloat(v).toFixed(1) : ''
+                    },
                     tooltip: { callbacks: { afterLabel: (ctx) => `만점: ${allMaxes[ctx.dataIndex]}점` } }
                 },
                 scales: {
@@ -5283,9 +5291,19 @@ function renderStudentStatsUI(students, _unused) {
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false,
+                            clip: false,
+                            layout: { padding: { right: 50 } },
                             indexAxis: 'y',
                             plugins: {
                                 legend: { display: false },
+                                datalabels: {
+                                    display: true,
+                                    anchor: 'end', align: 'right',
+                                    clamp: false,
+                                    formatter: (v) => v + '점',
+                                    color: '#013976',
+                                    font: { size: 14, weight: 'bold' }
+                                },
                                 tooltip: { callbacks: { label: (ctx) => ` 평균: ${ctx.parsed.x}점` } }
                             },
                             scales: {
@@ -5510,7 +5528,7 @@ function renderStatDoughnut(canvasId, data, total, label) {
                 c.font = 'bold 14px sans-serif';
                 c.shadowColor = 'rgba(0,0,0,0.3)';
                 c.shadowBlur = 3;
-                c.fillText(`${value}개`, x, y - 9);
+                c.fillText(`${value}명`, x, y - 9);
                 c.font = '14px sans-serif';
                 c.fillText(`${pct.toFixed(0)}%`, x, y + 9);
                 c.restore();
