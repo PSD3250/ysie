@@ -3809,23 +3809,21 @@ async function loadStudentReport() {
         if (result.status === "Success" && result.data) {
             const report = result.data;
 
-            // Report rendering logic (using single report object)
-            // Note: The original code expected an array of records and calculated averages client-side.
-            // But GET_STUDENT_REPORT returns a single PRE-CALCULATED report from the sheet row.
-            // If we need class averages, we might need a separate call or the backend should return them.
-            // For now, let's render the individual report.
-
-            // Check if averages are needed. Original code: calculateAverages(result.records).
-            // If result.records is missing (which it is for REPORT type), we can't calc averages client-side.
-            // However, the report usually contains the student's score and max score.
-            // Let's assume for now we display the individual report.
-            // If class average comparison is critical, we need GET_STUDENT_LIST (which returns all basic info)
-            // or GET_STUDENT_RECORDS (which we established DOES NOT EXIST).
-            // Actually, `GET_STUDENT_LIST` returns basic info (date, id, name, grade) but NOT scores.
-            // So to calculate averages client-side, we would need ALL students' full records.
-            // Since backend doesn't support "Get All Full Records", we might be limited to single report.
-            // OR, we can ask backend to calculate averages?
-            // The GS code for GET_STUDENT_REPORT only finds the specific row.
+            // [Fix] 문항별 상세보기를 위해 해당 카테고리 문항 데이터 보장
+            const existingCatQs = (globalConfig.questions || []).filter(q => String(q.catId) === String(categoryId));
+            if (existingCatQs.length === 0) {
+                try {
+                    const folderId = extractFolderId(category.targetFolderUrl);
+                    const qResult = await sendReliableRequest({ type: 'GET_FULL_DB', parentFolderId: folderId, categoryName: category.name });
+                    let newQuestions = (qResult.status === 'Success') ? (qResult.questions || []) : [];
+                    if (newQuestions.length > 0) {
+                        newQuestions = newQuestions.map(q => ({ ...q, catId: categoryId }));
+                        const others = (globalConfig.questions || []).filter(q => String(q.catId) !== String(categoryId));
+                        globalConfig.questions = [...others, ...newQuestions];
+                        console.log(`✅ 성적표용 문항 ${newQuestions.length}개 로드 완료`);
+                    }
+                } catch(qErr) { console.warn('문항 로드 실패 (상세보기 제한될 수 있음):', qErr); }
+            }
 
             // 평균 계산 (캐시된 전체 학생 데이터 사용)
             const allRecords = window.cachedStudentRecords || [];
@@ -4209,7 +4207,7 @@ function toggleAllQuestionDetail(checked) {
         return;
     }
 
-    const allQdetail = document.querySelectorAll('[id^="qdetail-"]');
+    const allQdetail = document.querySelectorAll('[id^="qdetail-"]:not(#qdetail-checkbox-row)');
     if (!checked) {
         allQdetail.forEach(el => el.classList.add('hidden'));
         return;
@@ -4230,28 +4228,42 @@ function toggleAllQuestionDetail(checked) {
         allQdetail.forEach(el => {
             const section = el.id.replace('qdetail-', '');
             el.classList.remove('hidden');
+            // [Fix] questionScores 자체에 section 필드가 있으면 우선, 없으면 no(문항번호)로 catQs 매칭
             const secItems = qs.filter(q => {
-                const found = catQs.find(cq => String(cq.id) === String(q.id));
+                if (q.section) return q.section === section;
+                const found = catQs.find(cq => String(cq.no) === String(q.no));
                 return found?.section === section;
             });
             if (secItems.length === 0) { el.innerHTML = '<p class="text-slate-400 fs-14 text-center py-4">문항 정보 없음</p>'; return; }
-            el.innerHTML = `<table class="w-full fs-14 mt-3 border-collapse">
-                <thead><tr class="bg-[#013976] text-white">
-                    <th class="py-2 px-3 text-center">번호</th>
-                    <th class="py-2 px-3 text-center">정오</th>
-                    <th class="py-2 px-3 text-center">점수/만점</th>
-                    <th class="py-2 px-3 text-center">난이도</th>
-                </tr></thead>
-                <tbody>${secItems.map((q, idx) => {
-                    const cq = catQs.find(cq => String(cq.id) === String(q.id));
-                    return `<tr class="${idx%2===0?'bg-white':'bg-slate-50'} border-b border-slate-100">
-                        <td class="py-2 px-3 text-center font-bold text-[#013976]">${q.no||'-'}</td>
-                        <td class="py-2 px-3 text-center">${mark(q)}</td>
-                        <td class="py-2 px-3 text-center">${q.score||0}/${q.maxScore||0}</td>
-                        <td class="py-2 px-3 text-center text-slate-500">${cq?.difficulty||'-'}</td>
-                    </tr>`;
-                }).join('')}</tbody>
-            </table>`;
+            // [Redesign] 가로 10열 그리드 레이아웃 (10개씩 묶음)
+            let gridHtml = '';
+            for (let i = 0; i < secItems.length; i += 10) {
+                const chunk = secItems.slice(i, i + 10);
+                const cols = chunk.length;
+                gridHtml += `<table class="w-full fs-14 mt-3 border-collapse" style="table-layout:fixed;">
+                    <tr class="bg-[#013976] text-white">${chunk.map(q =>
+                        `<th class="py-1.5 px-1 text-center font-bold border border-[#013976]" style="width:10%">${q.no||'-'}</th>`
+                    ).join('')}${'<th class="border-0" style="width:10%"></th>'.repeat(10 - cols)}</tr>
+                    <tr class="bg-slate-50">${chunk.map(q =>
+                        `<td class="py-1 px-1 text-center text-slate-500 border border-slate-200 text-[14px]">${q.maxScore||0}점</td>`
+                    ).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
+                    <tr class="bg-white">${chunk.map(q => {
+                        const cq = catQs.find(cq => String(cq.no) === String(q.no));
+                        const diff = q.difficulty || cq?.difficulty || '-';
+                        const diffColor = {'최상':'text-red-600','상':'text-orange-500','중':'text-blue-500','하':'text-green-500','기초':'text-slate-400'}[diff] || 'text-slate-500';
+                        return `<td class="py-1 px-1 text-center border border-slate-200 text-[14px] ${diffColor}">${diff}</td>`;
+                    }).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
+                    <tr class="bg-slate-50">${chunk.map(q =>
+                        `<td class="py-1 px-1 text-center font-bold border border-slate-200 text-[14px]">${q.score||0}점</td>`
+                    ).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
+                    <tr class="bg-white">${chunk.map(q =>
+                        `<td class="py-1.5 px-1 text-center font-black border border-slate-200 text-[15px]">${mark(q)}</td>`
+                    ).join('')}${'<td class="border-0"></td>'.repeat(10 - cols)}</tr>
+                </table>`;
+            }
+            el.innerHTML = `<div class="mt-3 space-y-1">
+                ${gridHtml}
+            </div>`;
         });
     } catch(e) { showToast('❌ 문항 데이터 오류: ' + e.message); }
 }
