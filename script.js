@@ -4346,7 +4346,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
             <h4 style="font-size:18px;font-weight:900;color:#013976;margin-bottom:0.4rem;">🕸 영역별 균형도</h4>
             <!-- 차트+범례+요약표가 단일 캔버스로 중앙 배치 -->
             <div class="flex justify-center" style="width:100%;margin-bottom:4px;">
-                <div style="width:900px;max-width:100%;height:320px;position:relative;">
+                <div style="width:100%;height:320px;position:relative;">
                     <canvas id="chart-radar" style="width:100%;height:100%;"></canvas>
                 </div>
             </div>
@@ -4866,7 +4866,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
         options: {
             responsive: true, maintainAspectRatio: false,
             // padding.top:2 제목과 차트 간격 최소화 / right:280 범례-표 간격 확보 / bottom:2 이하 간격 최소화
-            layout: { padding: { right: 360, left: 10, top: 2, bottom: 2 } },
+            layout: { padding: { right: 250, left: 10, top: 2, bottom: 2 } },
             scales: {
                 r: {
                     min: 0, max: 100,
