@@ -2496,12 +2496,12 @@ function renderScoreInput(c) {
 
                 <!-- Student Info -->
                 <div class="card space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
-                        <div class="md:col-span-3">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div>
                             <label class="ys-label font-bold">&#x1F4DD; &#xD559;&#xC0DD;&#xBA85;</label>
                             <input type="text" id="input-student-name" class="ys-field" placeholder="&#xC774;&#xB984; &#xC785;&#xB825;" autocomplete="off">
                         </div>
-                        <div class="md:col-span-1">
+                        <div>
                             <label class="ys-label font-bold">&#x1F393; &#xD559;&#xB144;</label>
                             <select id="input-grade" class="ys-field" onchange="updateClassDropdown06(this.value)">
                                 <option value="" disabled selected hidden>&#xD559;&#xB144; &#xC120;&#xD0DD;</option>
@@ -2519,18 +2519,18 @@ function renderScoreInput(c) {
                                 <option value="&#xACE0;3">&#xACE0;3</option>
                             </select>
                         </div>
-                        <div class="md:col-span-2">
+                        <div>
                             <label class="ys-label font-bold">&#x1F4C5; &#xC751;&#xC2DC;&#xC77C;</label>
                             <input type="text" id="input-test-date" class="ys-field" placeholder="YYYY-MM-DD" autocomplete="off">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="ys-label font-bold" style="color:#6366f1;">&#x1F3EB; &#xB4F1;&#xB85D;&#xD559;&#xAE09; <span style="font-weight:normal;color:#94a3b8;font-size:13px;">(&#xC120;&#xD0DD;)</span></label>
+                            <label class="ys-label font-bold" style="color:#6366f1;">&#x1F3EB; &#xB4F1;&#xB85D;&#xD559;&#xAE09;</label>
                             <select id="input-student-class" class="ys-field" style="border-color:#a5b4fc;background:#f5f3ff;color:#4338ca;">
-                                <option value="">&#xD559;&#xAE09; &#xC120;&#xD0DD; (&#xC120;&#xD0DD;&#xC0AC;&#xD56D;)</option>
+                                <option value="">&#xC120;&#xD0DD;</option>
                             </select>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="ys-label">&#x1F464; &#xD559;&#xC0DD;ID (&#xC790;&#xB3D9;&#xC0DD;&#xC131;)</label>
+                        <div>
+                            <label class="ys-label">&#x1F464; &#xD559;&#xC0DD;ID <span style="font-size:14px;">(&#xC790;&#xB3D9;&#xC0DD;&#xC131;)</span></label>
                             <input type="text" id="input-student-id" class="ys-field bg-slate-100 text-slate-500 font-mono" placeholder="&#xC800;&#xC7A5; &#xC2DC; &#xC790;&#xB3D9;&#xC644;&#xC131;" readonly>
                         </div>
                     </div>
@@ -2571,7 +2571,7 @@ function renderScoreInput(c) {
                             </button>
                             <div id="accordion-section" class="hidden px-6 pb-6 border-t border-slate-100">
                                 <p class="text-sm text-slate-400 mt-3 mb-4">&#xBB38;&#xD56D;&#xBCC4; &#xC785;&#xB825;&#xC774; &#xC5C6;&#xC744; &#xACBD;&#xC6B0;&#xC5D0;&#xB9CC; &#xCD1D;&#xC810; &#xACC4;&#xC0B0;&#xC5D0; &#xBC18;&#xC601;&#xB429;&#xB2C8;&#xB2E4;.</p>
-                                <div class="grid grid-cols-2 lg:grid-cols-10 gap-4">
+                                <div class="grid grid-cols-5 gap-4">
                                     <div><label class="text-sm font-bold text-slate-500 font-bold mb-0 block">Grammar</label><span id="max-grammar" class="font-normal text-slate-400 text-sm block mb-1"></span>
                                         <input type="number" id="input-grammar" data-max-id="max-grammar" class="ys-field text-center font-bold" placeholder="0" min="0" max="9999" oninput="clampAccordionScore(this); calculateTotalScore()"></div>
                                     <div><label class="text-sm font-bold text-slate-500 font-bold mb-0 block">Writing</label><span id="max-writing" class="font-normal text-slate-400 text-sm block mb-1"></span>
