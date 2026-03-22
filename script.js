@@ -1826,6 +1826,33 @@ function getClassesForGrade(grade) {
         .map(c => c.name);
 }
 
+// 학생 총점 기반 학급 추천 (cachedStudentRecords에서 학급별 평균 계산)
+function recommendClassByScore(totalScore, grade) {
+    if (totalScore == null || isNaN(totalScore)) return null;
+    const records = window.cachedStudentRecords || [];
+    const gradeRecs = records.filter(r => {
+        const rGrade = r['학년'] || r.grade || '';
+        const rClass = r.studentClass || r['등록학급'] || '';
+        return rGrade === grade && rClass;
+    });
+    if (!gradeRecs.length) return null;
+    const classMap = {};
+    gradeRecs.forEach(r => {
+        const cls = r.studentClass || r['등록학급'];
+        const total = parseFloat(r['완스코어'] || r['총점'] || r.totalScore || r.score || 0);
+        if (!classMap[cls]) classMap[cls] = { sum: 0, cnt: 0 };
+        classMap[cls].sum += total;
+        classMap[cls].cnt++;
+    });
+    let bestClass = null, bestDiff = Infinity;
+    Object.entries(classMap).forEach(([cls, data]) => {
+        const diff = Math.abs(totalScore - data.sum / data.cnt);
+        if (diff < bestDiff) { bestDiff = diff; bestClass = cls; }
+    });
+    return bestClass;
+}
+
+
 // 등록된 학급이 있는 학년만 반환 (순서: 초1~고3)
 function getRegisteredGrades() {
     const ORDER = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3'];
@@ -2550,6 +2577,7 @@ function renderScoreInput(c) {
                             <select id="input-student-class" class="ys-field" style="border-color:#a5b4fc;background:#f5f3ff;color:#4338ca;">
                                 <option value="">&#xC120;&#xD0DD;</option>
                             </select>
+                             <div id="class-recommend-badge06" style="font-size:12px;margin-top:3px;color:#94a3b8;">점수 입력 시 학급이 자동 추천됩니다</div>
                         </div>
                         <div>
                             <label class="ys-label">&#x1F464; &#xD559;&#xC0DD;ID <span style="font-size:14px;">(&#xC790;&#xB3D9;&#xC0DD;&#xC131;)</span></label>
@@ -2812,13 +2840,91 @@ function applyYsDatePicker(selector, extraOpts = {}) {
     }, extraOpts));
 }
 
+// Canvas 05-1: 등록학급 수동 변경 시 경고
+function warnClassChange05(sel) {
+    if (sel.value === '__RECOMMEND__') {
+        const rec = sel.dataset.rec || '';
+        if (rec) { sel.value = rec; }
+        else { showToast('추천 학급이 없습니다'); sel.value = ''; }
+        return;
+    }
+    const rec = sel.dataset.rec || '';
+    if (rec && sel.value !== rec) {
+        const ok = confirm('AI 추천 학급은 "' + rec + '"입니다.\n다른 학급("' + sel.value + '")을 선택하시겠습니까?');
+        if (!ok) { sel.value = rec; }
+    }
+}
+
 // Canvas 06: 학년 선택 시 해당 학년 학급만 dropdown에 표시
+function updateClassBadge06(rec) {
+    const badge = document.getElementById('class-recommend-badge06');
+    if (!badge) return;
+    if (rec) {
+        badge.textContent = 'AI 추천: ' + rec;
+        badge.style.color = '#6366f1';
+        badge.style.fontWeight = '700';
+    } else {
+        badge.textContent = '점수 입력 시 학급이 자동 추천됩니다';
+        badge.style.color = '#94a3b8';
+        badge.style.fontWeight = '400';
+    }
+}
+
+function calcAndRecommendClass06() {
+    const grade = document.getElementById('input-grade') ? document.getElementById('input-grade').value : '';
+    if (!grade) return;
+    let total = 0, hasScore = false;
+    document.querySelectorAll('[id^="q-score-"]').forEach(function(inp) {
+        const sc = parseInt(inp.value);
+        if (!isNaN(sc) && sc >= 0) { total += sc; hasScore = true; }
+    });
+    if (!hasScore) { updateClassBadge06(); return; }
+    const rec = recommendClassByScore(total, grade);
+    const sel = document.getElementById('input-student-class');
+    if (!sel) return;
+    sel.dataset.recommendedClass = rec || '';
+    const recOpt = sel.querySelector('option[value="__RECOMMEND__"]');
+    if (recOpt) recOpt.textContent = rec ? ('⭐ 추천: ' + rec) : '⭐ 추천 (해당없음)';
+    if (rec && (!sel.value || sel.value === '__RECOMMEND__')) {
+        sel.value = rec;
+        sel.dataset.autoSelected = '1';
+    }
+    updateClassBadge06(rec);
+}
+
 function updateClassDropdown06(grade) {
     const sel = document.getElementById('input-student-class');
     if (!sel) return;
     const list = getClassesForGrade(grade);
-    sel.innerHTML = `<option value="">${list.length ? '학급 선택 (선택 안해도 됨)' : '등록된 학급 없음'}</option>`
-        + list.map(n => `<option value="${n}">${n}</option>`).join('');
+    sel.innerHTML = '<option value="">' + (list.length ? '학급 선택 (선택 안해도 됨)' : '등록된 학급 없음') + '</option>'
+        + '<option value="__RECOMMEND__" style="font-weight:bold;color:#6366f1;">⭐ 추천 (점수 입력 후 자동결정)</option>'
+        + list.map(function(n) { return '<option value="' + n + '">' + n + '</option>'; }).join('');
+    sel.dataset.recommendedClass = '';
+    sel.dataset.autoSelected = '0';
+    sel.onchange = function() {
+        const rec = this.dataset.recommendedClass || '';
+        if (this.value === '__RECOMMEND__') {
+            if (rec) { this.value = rec; }
+            else { showToast('먼저 점수를 입력해주세요'); this.value = ''; }
+            return;
+        }
+        if (rec && this.value !== rec && this.dataset.autoSelected === '1') {
+            const ok = confirm('AI 추천 학급은 "' + rec + '"입니다.\n다른 학급("' + this.value + '")을 선택하시겠습니까?');
+            if (!ok) { this.value = rec; }
+            else { this.dataset.autoSelected = '0'; }
+        }
+    };
+    updateClassBadge06();
+}
+
+// q-score 변경 시 추천 계산 (이벤트 위임 - 한 번만 등록)
+if (!window._qscoreListenerAdded) {
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id && e.target.id.indexOf('q-score-') === 0) {
+            calcAndRecommendClass06();
+        }
+    });
+    window._qscoreListenerAdded = true;
 }
 
 function clampQScore(input) {
@@ -2898,7 +3004,8 @@ async function saveStudentScore() {
 
     const studentName  = document.getElementById('input-student-name').value.trim();
     const grade        = document.getElementById('input-grade').value;
-    const studentClass = document.getElementById('input-student-class')?.value.trim() || '';
+    let studentClass = document.getElementById('input-student-class')?.value.trim() || '';
+    if (studentClass === '__RECOMMEND__') { const sel=document.getElementById('input-student-class'); studentClass = sel?.dataset?.recommendedClass||''; }
     const testDate     = document.getElementById('input-test-date').value;
 
     if (!studentName) { showToast('\u26A0\uFE0F \uD559\uC0DD\uBA85\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694'); return; }
@@ -4127,6 +4234,8 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
     const sMax   = parseFloat(getVal(record, ['만점','maxScore','max']) || 100);
     let sRate    = getVal(record, ['정답률(%)','정답률','rate']);
     if (!sRate && sMax) sRate = ((sTotal / sMax) * 100).toFixed(1);
+    const recCls05 = recommendClassByScore(sTotal, sGrade);
+    const defaultCls05 = recCls05 || record.studentClass || record['등록학급'] || '';
 
     const secMap = { Grammar:'grammarScore', Writing:'writingScore', Reading:'readingScore', Listening:'listeningScore', Vocabulary:'vocabScore' };
     const maxMap  = { Grammar:'grammarMax',   Writing:'writingMax',   Reading:'readingMax',   Listening:'listeningMax',  Vocabulary:'vocabMax'   };
@@ -4151,10 +4260,13 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                     <!-- 드롭다운 박스 -->
                     <div style="border:2px solid #013976;border-left:none;border-radius:0 1rem 1rem 0;height:65px;min-width:100px;display:flex;align-items:center;justify-content:center;">
                         <select id="report-student-class"
+                            data-rec="${recCls05||''}"
+                            onchange="warnClassChange05(this)"
                             style="border:none;outline:none;font-size:20px;font-weight:900;color:#013976;background:transparent;text-align:center;text-align-last:center;cursor:pointer;-webkit-appearance:none;padding:0 12px;width:100%;">
                             <option value="" style="font-size:16px;">선택</option>
+                            <option value="__RECOMMEND__" style="font-size:16px;font-weight:bold;color:#6366f1;">${recCls05 ? '⭐ 추천: '+recCls05 : '⭐ 추천 없음'}</option>
                             ${(getClassesForGrade(record['학년']||record.grade||'') || []).map(c =>
-                                `<option value="${c}" style="font-size:16px;" ${(record.studentClass||record['등록학급']||'')===c?'selected':''}>${c}</option>`
+                                `<option value="${c}" style="font-size:16px;" ${defaultCls05===c?'selected':''}>${c}</option>`
                             ).join('')}
                         </select>
                     </div>
@@ -4436,7 +4548,8 @@ function printReport() {
 
     // 등록학급 필수 체크
     const clsEl  = document.getElementById('report-student-class');
-    const clsVal = clsEl?.value?.trim() || '';
+    let   clsVal = clsEl?.value?.trim() || '';
+    if (clsVal === '__RECOMMEND__') { clsVal = clsEl?.dataset?.rec || ''; if (clsEl) clsEl.value = clsVal; }
     if (!clsVal) {
         showToast('⚠️ 등록학급을 선택해야 출력할 수 있습니다.');
         clsEl?.focus();
