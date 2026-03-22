@@ -4621,10 +4621,10 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < 1) return;
                 const ux = dx/dist, uy = dy/dist;
-                // 선 시작: 데이터 포인트에서 8px 바깥
-                const x1 = px + ux*8, y1 = py + uy*8;
+                // 선 시작: 데이터 포인트에서 6px 바깥
+                const x1 = px + ux*6, y1 = py + uy*6;
                 // 선 끝: 추가 20px
-                const x2 = px + ux*28, y2 = py + uy*28;
+                const x2 = px + ux*20, y2 = py + uy*20;
                 // 선 그리기
                 ctx2.beginPath();
                 ctx2.moveTo(x1, y1);
@@ -4669,10 +4669,13 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap) {
                 r: {
                     min: 0, max: 100,
                     ticks: { stepSize: 20, font:{size:16}, backdropColor:'transparent', callback: v => v+'%' },
-                    pointLabels: { font:{size:16} }
+                    // padding을 늘려 바깥 텍스트(Listening 등)를 밀어내어 빨간 점수와 겹침 방지
+                    pointLabels: { font:{size:16}, padding: 25 }
                 }
             },
             plugins: {
+                // 이 차트에서는 전역 차트데이터라벨 비활성화 (검은색 100 중복 출력 억제)
+                datalabels: { display: false },
                 legend: { position: 'right', labels: { font:{size:16} } },
                 tooltip: {
                     bodyFont:{size:16}, titleFont:{size:16},
