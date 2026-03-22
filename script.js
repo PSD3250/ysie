@@ -4801,7 +4801,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
         afterDraw(chart) {
             const c2 = chart.ctx;
             const w = chart.width, h = chart.height;
-            const pW = 240, pX = 4;
+            const pW = 240, pX = w - pW - 4;
             const rowH = 30;
             const N = activeSections.length;
             const pH = 44 + N * rowH + 8;
@@ -4856,11 +4856,11 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
             const lw = chart.legend ? (chart.legend.width || 0) : 0;
             c2.save(); c2.setLineDash([6, 3]); c2.lineWidth = 2;
             c2.strokeStyle = 'rgba(220,38,38,0.8)';
-            c2.beginPath(); c2.moveTo(pW + 8, 0); c2.lineTo(pW + 8, h); c2.stroke();
+            c2.beginPath(); c2.moveTo(w - pW - 8, 0); c2.lineTo(w - pW - 8, h); c2.stroke();
             c2.strokeStyle = 'rgba(37,99,235,0.8)';
             c2.beginPath(); c2.moveTo(w - lw, 0); c2.lineTo(w - lw, h); c2.stroke();
             c2.setLineDash([]); c2.font = 'bold 11px sans-serif';
-            c2.fillStyle = 'rgba(220,38,38,0.9)'; c2.fillText('← 테이블끽', pW + 12, 14);
+            c2.fillStyle = 'rgba(220,38,38,0.9)'; c2.fillText('← 테이블끽', w - pW - 4, 14);
             c2.fillStyle = 'rgba(37,99,235,0.9)'; c2.fillText('← 범례영역', w - lw + 4, 14);
             c2.restore();
             c2.restore();
@@ -4877,7 +4877,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
         options: {
             responsive: true, maintainAspectRatio: false,
             // padding.top:2 제목과 차트 간격 최소화 / right:280 범례-표 간격 확보 / bottom:2 이하 간격 최소화
-            layout: { padding: { right: 0, left: 250, top: 2, bottom: 2 } },
+            layout: { padding: { right: 250, left: 10, top: 2, bottom: 2 } },
             scales: {
                 r: {
                     min: 0, max: 100,
