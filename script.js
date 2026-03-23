@@ -8100,6 +8100,8 @@ async function saveRegGroup() {
                     text: group.passage.text, // HTML
                     imgUrl: group.passage.img || "",
                     imgData: group.passage.imgData,
+                    audioData: group.passage.audioData || null,
+                    audioMaxPlay: group.passage.audioMaxPlay || 1,
                     questionIds: linkedNums
                 });
             }

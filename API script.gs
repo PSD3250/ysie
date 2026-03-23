@@ -604,6 +604,7 @@ function doPost(e) {
         var rootFolder = DriveApp.getFolderById(rootFolderId);
         var categoryName = data.categoryName || "미분류";
         var imgFolder = getOrCreateFolder(rootFolder, "이미지창고");
+        var audioFolder = getOrCreateFolder(rootFolder, "오디오창고");
         
         // 1. 통합 DB 파일 열기 (없으면 생성)
         var dbSpreadsheet = getOrCreateSpreadsheet(rootFolder, categoryName + "_통합DB");
@@ -641,6 +642,12 @@ function doPost(e) {
         // 5. 이전 데이터 클리어 (Overwrite Mode)
         if (sheetQ.getLastRow() > 1) sheetQ.deleteRows(2, sheetQ.getLastRow() - 1);
         if (sheetB.getLastRow() > 1) sheetB.deleteRows(2, sheetB.getLastRow() - 1);
+        // 오디오 컬럼 헤더 자동 추가 (기존 시트에 없는 경우)
+        if (sheetB.getLastColumn() < 6) {
+            sheetB.getRange(1, 6).setValue("오디오URL").setFontWeight("bold").setBackground("#EA580C").setFontColor("#FFFFFF");
+            sheetB.getRange(1, 7).setValue("오디오파일ID").setFontWeight("bold").setBackground("#EA580C").setFontColor("#FFFFFF");
+            sheetB.getRange(1, 8).setValue("최대재생횟수").setFontWeight("bold").setBackground("#EA580C").setFontColor("#FFFFFF");
+        }
         
         // 6. 데이터 저장: 묶음 (Bundles)
         if (data.bundles && data.bundles.length > 0) {
@@ -654,7 +661,7 @@ function doPost(e) {
                 var bAudioUrl = b.audioUrl || "";
                 var bAudioFileId = b.audioFileId || "";
                 if (b.audioData && b.audioData.base64) {
-                    var aResult = saveAudio(imgFolder, b.audioData.base64, b.audioData.mimeType, b.audioData.fileName);
+                    var aResult = saveAudio(audioFolder, b.audioData.base64, b.audioData.mimeType, b.audioData.fileName);
                     bAudioUrl = aResult.url; bAudioFileId = aResult.fileId;
                 }
                 return [
@@ -882,6 +889,7 @@ function doPost(e) {
         var rootFolder = DriveApp.getFolderById(rootFolderId);
         var categoryName = data.categoryName || "미분류";
         var imgFolder = getOrCreateFolder(rootFolder, "이미지창고");
+        var audioFolder = getOrCreateFolder(rootFolder, "오디오창고");
         
         // 1. 통합DB 파일 찾기
         var files = rootFolder.getFilesByName(categoryName + "_통합DB");
@@ -971,7 +979,7 @@ function doPost(e) {
                 var bAudioFileId = b.audioFileId || sheetB.getRange(bTargetRow, 7).getValue() || "";
                 var bAudioMaxPlay = b.audioMaxPlay || sheetB.getRange(bTargetRow, 8).getValue() || 1;
                 if (b.audioData && b.audioData.base64) {
-                    var aUpd = saveAudio(imgFolder, b.audioData.base64, b.audioData.mimeType, b.audioData.fileName);
+                    var aUpd = saveAudio(audioFolder, b.audioData.base64, b.audioData.mimeType, b.audioData.fileName);
                     bAudioUrl = aUpd.url; bAudioFileId = aUpd.fileId;
                 }
                 var bRow = [
