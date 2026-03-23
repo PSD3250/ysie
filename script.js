@@ -1954,7 +1954,7 @@ async function showStudentDBViewer(catId, catName) {
     const tBar = `<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#60a5fa,#6366f1,#a855f7);"></div>`;
 
     c.innerHTML = `
-    <div class="animate-fade-in-safe" style="height:calc(100vh - 120px);display:flex;flex-direction:column;overflow:hidden;gap:16px;">
+    <div class="animate-fade-in-safe" style="height:100%;display:flex;flex-direction:column;overflow:hidden;gap:16px;">
         <!-- 헤더: 제목만 -->
         <div class="flex justify-between items-center">
             <h2 class="fs-32 text-[#013976] leading-none font-black uppercase !border-none !pb-0">${catName} — 학생 DB</h2>
@@ -1965,11 +1965,11 @@ async function showStudentDBViewer(catId, catName) {
             ${tBar}
             <div class="flex items-center gap-4 flex-grow">
                 <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">📅 응시년도</span>
-                <select id="sdb-year" class="ys-field flex-grow !text-[16px] !font-normal !bg-white">
+                <select id="sdb-year" class="ys-field flex-grow !text-[16px] !font-normal !bg-white" onchange="applyStudentDBFilters()">
                     <option value="전체">전체</option>
                 </select>
                 <span style="font-size:17px;font-weight:700;color:#013976;white-space:nowrap;">🎓 학년</span>
-                <select id="sdb-grade" class="ys-field flex-grow !text-[16px] !font-normal !bg-white">
+                <select id="sdb-grade" class="ys-field flex-grow !text-[16px] !font-normal !bg-white" onchange="applyStudentDBFilters()">
                     <option value="전체">전체</option>
                 </select>
             </div>
@@ -2057,13 +2057,13 @@ function _renderStudentDBTable() {
     }
 
     const arw = c => col === c ? (dir === 1 ? ' ▲' : ' ▼') : ' <span class="opacity-30">⇅</span>';
-    const th = (c, lbl) => `<th class="cursor-pointer select-none hover:bg-[#012a5e] transition-colors text-center px-2 py-3 font-black text-white fs-15" onclick="sortStudentDB('${c}')">${lbl}${arw(c)}</th>`;
+    const th = (c, lbl) => `<th class="cursor-pointer select-none hover:bg-[#012a5e] transition-colors text-center px-2 py-3 font-black text-white fs-15 bg-[#013976]" onclick="sortStudentDB('${c}')">${lbl}${arw(c)}</th>`;
     wrap.innerHTML = `
     <table class="w-full border-collapse" style="table-layout:fixed;">
         <thead style="position:sticky;top:0;z-index:10;">
             <tr class="bg-[#013976]">
                 ${th('name','이름')}${th('grade','학년')}${th('year','응시년도')}${th('md','응시월일')}${th('score','점수')}
-                <th class="px-2 py-3 text-white fs-15 font-black text-center">삭제</th>
+                <th class="px-2 py-3 text-white fs-15 font-black text-center bg-[#013976]">삭제</th>
             </tr>
         </thead>
         <tbody>
