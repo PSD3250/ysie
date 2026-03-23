@@ -9504,14 +9504,14 @@ function renderBundleLeft(data) {
             + '</div>';
     }
 
-    return '<div class="bundle-left-content px-4 py-4 h-full overflow-y-auto">'
-        + (range ? '<div class="fs-13 font-bold text-indigo-400 mb-2 tracking-wide">' + range + '</div>' : '')
-        + (title ? '<div class="fs-16 font-bold text-slate-800 mb-3">' + title + '</div>' : '')
-        + (passage ? '<div class="border border-slate-300 rounded-lg p-4 fs-15 text-slate-700 leading-relaxed whitespace-pre-line bg-slate-50 mb-3">' + passage + '</div>' : '')
-        + bundleImgHtml
-        + bundleAudioHtml
-        + '</div>';
+    return `
+        ${title ? `<div class="px-0 pb-3 bg-white border-b border-slate-200 flex items-center"><h3 class="font-bold text-slate-700 text-[15px] flex items-center gap-2 m-0 leading-tight"><span class="text-indigo-600 text-[17px] font-bold shrink-0">${range}</span><span>${title}</span></h3></div>` : ''}
+        ${passage ? `<div class="mt-3 mb-0 p-4 border border-black rounded shadow-sm bg-white"><div class="prose prose-sm max-w-none text-slate-700 leading-relaxed font-serif text-[15px]">${passage}</div></div>` : ''}
+        ${bundleAudioHtml}
+        ${bundleImgHtml}
+    `;
 }
+
 
 // [Refactored] 번들 우측 (문항들) 렌더링
 function renderBundleRight(data) {
@@ -9582,24 +9582,25 @@ function getInputHtml(q) {
     }
 }
 
-// [Refactor] Render Choices (원문자 버튼)
+// [Refactor] Render Choices (원문자 버튼, 2-Col Grid)
 function renderChoices(q, choices) {
     const savedAns = examSession.answers[q.id];
     const cnums = ['①','②','③','④','⑤','⑥'];
+    // 선택지 길이 기반 레이아웃: 25자 초과 시 1열, 이하 2열
+    const isLong = choices.some(c => c.length > 25);
+    const gridClass = isLong ? "grid-cols-1" : "grid-cols-2";
     return `
-        <div class="flex flex-col gap-3">
+        <div class="grid ${gridClass} gap-x-6 gap-y-2">
             ${choices.map((choice, idx) => {
         const num = (idx + 1).toString();
         const isSel = String(savedAns) === num;
-        return `<button type="button" data-qid="${q.id}" data-val="${num}"
-                onclick="selectObjAnswer('${q.id}','${num}')"
-                class="exam-choice-btn flex items-center gap-3 p-2 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
-                style="border-color:${isSel?'#4f46e5':'#e2e8f0'};background:${isSel?'#eef2ff':'#ffffff'}">
-            <span class="exam-circle-num flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-[16px] font-bold"
-                style="background:${isSel?'#4f46e5':'#ffffff'};color:${isSel?'#ffffff':'#4f46e5'};border-color:${isSel?'#4f46e5':'#c7d2fe'}"
-            >${cnums[idx]||num}</span>
-            <span class="text-[14px] font-medium" style="color:${isSel?'#3730a3':'#374151'}">${choice}</span>
-        </button>`;
+        const textClass = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700';
+        return `<label class="flex items-start gap-2 cursor-pointer p-1 -ml-1 transition-colors" onclick="selectObjAnswer('${q.id}','${num}')">
+                    <span class="flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-[15px] font-bold mt-0.5"
+                        style="background:${isSel?'#4f46e5':'#ffffff'};color:${isSel?'#ffffff':'#4f46e5'};border-color:${isSel?'#4f46e5':'#c7d2fe'}"
+                    >${cnums[idx]||num}</span>
+                    <span class="${textClass} text-[14px] leading-snug hover:text-indigo-600 transition-colors mt-1">${choice}</span>
+                </label>`;
     }).join('')}
         </div>
     `;
