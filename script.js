@@ -564,7 +564,7 @@ function renderInitialScreen() {
                         </div>
                         
                         <h1 class="fs-32 text-[#013976] mb-4 tracking-tighter uppercase leading-none font-black text-center">
-                            AESTHESIA SCHOOL
+                            ONSEI INTERNATIONAL ENGLISH
                         </h1>
                         <p class="fs-14 text-slate-400 mb-12 tracking-[0.2em] font-medium text-center">AI POWERED ASSESSMENT ENGINE</p>
 
@@ -572,12 +572,12 @@ function renderInitialScreen() {
                             <button onclick="changeMode('student')" class="group p-10 bg-white border-2 border-slate-100 rounded-[2rem] hover:border-[#013976] hover:bg-slate-50 transition-all duration-500 text-center shadow-lg hover:shadow-2xl">
                                 <span class="text-5xl block mb-4 group-hover:scale-110 transition-transform">📝</span>
                                 <h3 class="fs-18 text-[#013976] font-black uppercase mb-2">Student Login</h3>
-                                <p class="text-slate-400 fs-14 font-medium">시험 응시 및 성적 확인</p>
+                                <p class="text-slate-400 fs-16 font-medium">온라인 레벨테스트 응시</p>
                             </button>
                             <button onclick="changeMode('auth_admin')" class="group p-10 bg-[#013976] border-2 border-transparent rounded-[2rem] hover:bg-[#002855] transition-all duration-500 text-center shadow-lg hover:shadow-2xl">
                                 <span class="text-5xl block mb-4 group-hover:scale-110 transition-transform">⚙️</span>
                                 <h3 class="fs-18 text-white font-black uppercase mb-2">Admin Panel</h3>
-                                <p class="text-blue-200/60 fs-14 font-medium">관리자 전용 대시보드</p>
+                                <p class="text-blue-200/60 fs-16 font-medium">관리자 전용 대시보드</p>
                             </button>
                         </div>
                     </div>
