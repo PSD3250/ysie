@@ -9464,36 +9464,35 @@ function renderBundleLeft(data) {
     }
 
     let bundleAudioHtml = '';
-    { const _bndA = first.setId && globalConfig.bundles ? globalConfig.bundles.find(b => b.id === first.setId) : null;
-      if (_bndA && _bndA.audioFileId) {
-        const _maxP = parseInt(_bndA.audioMaxPlay)||1;
+    const _bndA2 = first.setId && globalConfig.bundles ? globalConfig.bundles.find(function(b){ return b.id === first.setId; }) : null;
+    if (_bndA2 && _bndA2.audioFileId) {
+        const _maxP = parseInt(_bndA2.audioMaxPlay)||1;
         const _sid = first.setId;
         const _used = ((window._audioPlaysUsed||{})[_sid]||0);
         const _displayLeft = Math.max(0, _maxP - _used);
-        bundleAudioHtml = `<div class="mt-3 mb-2 flex items-center gap-3 flex-wrap">
-          <button id="audio-btn-${_sid}" data-max-play="${_maxP}" data-file-id="${_bndA.audioFileId}" onclick="playBundleAudio(this,'${_sid}')"
-            class="exam-audio-btn flex items-center gap-2 bg-[#013976] text-white px-5 py-2 rounded-xl font-bold text-[15px] hover:bg-blue-800 active:scale-95 transition-all shadow-sm flex-shrink-0${_displayLeft<=0?' opacity-50 cursor-not-allowed':''}" ${_displayLeft<=0?'disabled':''}>
-            🔊 듣기 &nbsp;<span class="plays-left">${_displayLeft}</span>회 남음
-          </button>
-          <div id="audio-player-${_sid}" class="hidden flex items-center gap-2 bg-slate-800 rounded-xl px-4 py-2 flex-1" style="min-width:0;max-width:380px">
-            <span id="audio-status-${_sid}" class="text-green-400 text-[13px] font-bold whitespace-nowrap">▶ 재생중</span>
-            <div class="flex-1 bg-slate-600 rounded-full overflow-hidden" style="height:6px">
-              <div id="audio-progress-${_sid}" class="bg-green-400 h-full rounded-full" style="width:0%;transition:width 0.5s linear"></div>
-            </div>
-            <span id="audio-time-${_sid}" class="text-slate-300 text-[12px] whitespace-nowrap">0:00</span>
-          </div>
-          <audio id="audio-elem-${_sid}" preload="none"></audio>
-        </div>`
+        const _dis = _displayLeft <= 0;
+        bundleAudioHtml = '<div class="mt-3 mb-2 flex items-center gap-3 flex-wrap">'
+            + '<button id="audio-btn-' + _sid + '" data-max-play="' + _maxP + '" data-file-id="' + _bndA2.audioFileId + '" onclick="playBundleAudio(this,\'' + _sid + '\')"'
+            + ' class="exam-audio-btn flex items-center gap-2 bg-[#013976] text-white px-5 py-2 rounded-xl font-bold text-[15px] hover:bg-blue-800 active:scale-95 transition-all shadow-sm flex-shrink-0' + (_dis?' opacity-50 cursor-not-allowed':'') + '"'
+            + (_dis?' disabled':'') + '>'
+            + ' 🔊 듣기 &nbsp;<span class="plays-left">' + _displayLeft + '</span>회 남음'
+            + '</button>'
+            + '<div id="audio-player-' + _sid + '" class="hidden flex items-center gap-2 bg-slate-800 rounded-xl px-4 py-2 flex-1" style="min-width:0;max-width:380px">'
+            + '<span id="audio-status-' + _sid + '" class="text-green-400 text-[13px] font-bold whitespace-nowrap">▶ 재생중</span>'
+            + '<div class="flex-1 bg-slate-600 rounded-full overflow-hidden" style="height:6px"><div id="audio-progress-' + _sid + '" class="bg-green-400 h-full rounded-full" style="width:0%;transition:width 0.5s linear"></div></div>'
+            + '<span id="audio-time-' + _sid + '" class="text-slate-300 text-[12px] whitespace-nowrap">0:00</span>'
+            + '</div>'
+            + '<audio id="audio-elem-' + _sid + '" preload="none"></audio>'
+            + '</div>';
+    }
 
-    return `
-        <div class="bundle-left-content px-4 py-4 h-full overflow-y-auto">
-            ${range ? `<div class="text-xs font-bold text-indigo-400 mb-2">${range}</div>` : ''}
-            ${title ? `<div class="text-sm font-bold text-slate-700 mb-2">${title}</div>` : ''}
-            ${passage ? `<div class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">${passage}</div>` : ''}
-            ${bundleImgHtml}
-            ${bundleAudioHtml}
-        </div>
-    `;
+    return '<div class="bundle-left-content px-4 py-4 h-full overflow-y-auto">'
+        + (range ? '<div class="text-xs font-bold text-indigo-400 mb-2">' + range + '</div>' : '')
+        + (title ? '<div class="text-sm font-bold text-slate-700 mb-2">' + title + '</div>' : '')
+        + (passage ? '<div class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">' + passage + '</div>' : '')
+        + bundleImgHtml
+        + bundleAudioHtml
+        + '</div>';
 }
 
 // [Refactored] 번들 우측 (문항들) 렌더링
