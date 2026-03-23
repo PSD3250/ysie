@@ -3510,12 +3510,12 @@ function getInputHtml(q) {
             const _cnum = _cnums[idx] || _v;
             return `<button type="button" data-qid="${q.id}" data-val="${_v}"
                 onclick="selectObjAnswer('${q.id}','${_v}')"
-                class="exam-choice-btn flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
+                class="exam-choice-btn flex items-center gap-3 p-2 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
                 style="border-color:${_sel?'#4f46e5':'#e2e8f0'};background:${_sel?'#eef2ff':'#ffffff'}">
                 <span class="exam-circle-num flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center text-[20px] font-bold transition-all"
                     style="background:${_sel?'#4f46e5':'#ffffff'};color:${_sel?'#ffffff':'#4f46e5'};border-color:${_sel?'#4f46e5':'#c7d2fe'}"
                 >${_cnum}</span>
-                <span class="text-[16px] font-medium" style="color:${_sel?'#3730a3':'#374151'}">${opt}</span>
+                <span class="text-[14px] font-medium" style="color:${_sel?'#3730a3':'#374151'}">${opt}</span>
             </button>`;
         }).join('')}
             </div>
@@ -7441,11 +7441,11 @@ function playBundleAudio(btn, bundleId) {
     const progressBar = document.getElementById('audio-progress-' + bundleId);
     const timeEl = document.getElementById('audio-time-' + bundleId);
     const statusEl = document.getElementById('audio-status-' + bundleId);
-    if (!audio) return;
+    if (!audio) { showToast('오디오 요소를 찾을 수 없습니다.'); return; }
     if (playerDiv) playerDiv.classList.remove('hidden');
+    if (statusEl) statusEl.textContent = '⏳ 로딩중...';
     const fileId = btn.dataset.fileId || '';
-    if (!fileId) { showToast('오디오 파일 ID를 찾을 수 없습니다.'); return; }
-    audio.src = 'https://drive.google.com/uc?export=download&id=' + fileId + '&confirm=t';
+    if (!fileId) { showToast('오디오 파일 ID 없음'); return; }
     if (!audio._audInit) {
         audio._audInit = true;
         audio.addEventListener('timeupdate', function() {
@@ -7459,15 +7459,32 @@ function playBundleAudio(btn, bundleId) {
             if (progressBar) progressBar.style.width = '100%';
             window.onbeforeunload = null;
         });
-        audio.addEventListener('error', function(e) {
-            showToast('오디오 로드 오류 - 선생님께 문의하세요.');
+    }
+    // GAS 프록시로 base64 가져와 blob URL 생성
+    sendReliableRequest({ type: 'GET_AUDIO_B64', fileId: fileId })
+        .then(function(res) {
+            if (!res || res.status !== 'Success' || !res.data) {
+                showToast('오디오 로드 실패: ' + (res && res.message || '알 수 없음'));
+                if (statusEl) statusEl.textContent = '⚠️ 오류';
+                return;
+            }
+            const byteStr = atob(res.data);
+            const ab = new ArrayBuffer(byteStr.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteStr.length; i++) ia[i] = byteStr.charCodeAt(i);
+            const blob = new Blob([ab], { type: res.mimeType || 'audio/mpeg' });
+            const blobUrl = URL.createObjectURL(blob);
+            audio.src = blobUrl;
+            audio.currentTime = 0;
+            if (statusEl) statusEl.textContent = '▶ 재생중';
+            const pp = audio.play();
+            if (pp !== undefined) pp.catch(function(e) { showToast('재생 실패: ' + e.message); });
+            window.onbeforeunload = function(e) { e.preventDefault(); return '듣기가 재생 중입니다.'; };
+        })
+        .catch(function(err) {
+            showToast('오디오 요청 오류: ' + err.message);
             if (statusEl) statusEl.textContent = '⚠️ 오류';
         });
-    }
-    audio.currentTime = 0;
-    const playPromise = audio.play();
-    if (playPromise !== undefined) playPromise.catch(function(e) { showToast('재생 시작 실패: ' + e.message); });
-    window.onbeforeunload = function(e) { e.preventDefault(); return '듣기가 재생 중입니다.'; };
 }
 
 function renderImageUploader(id, d, size = 'normal') {
@@ -9179,6 +9196,7 @@ async function startExamSequence() {
     const date = _p.date || document.getElementById('sdt')?.value || new Date().toISOString().split('T')[0];
     const timeLimit = _p.timeLimit != null ? _p.timeLimit : parseInt(document.getElementById('stm')?.value) || 0;
     window._examPending = null;
+    window._audioPlaysUsed = {};
 
     if (!name) return showToast("⚠️ 학생 이름을 입력해주세요.");
     if (!catId) return showToast("⚠️ 시험지를 선택해주세요.");
@@ -9575,12 +9593,12 @@ function renderChoices(q, choices) {
         const isSel = String(savedAns) === num;
         return `<button type="button" data-qid="${q.id}" data-val="${num}"
                 onclick="selectObjAnswer('${q.id}','${num}')"
-                class="exam-choice-btn flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
+                class="exam-choice-btn flex items-center gap-3 p-2 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
                 style="border-color:${isSel?'#4f46e5':'#e2e8f0'};background:${isSel?'#eef2ff':'#ffffff'}">
-            <span class="exam-circle-num flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center text-[20px] font-bold"
+            <span class="exam-circle-num flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-[16px] font-bold"
                 style="background:${isSel?'#4f46e5':'#ffffff'};color:${isSel?'#ffffff':'#4f46e5'};border-color:${isSel?'#4f46e5':'#c7d2fe'}"
             >${cnums[idx]||num}</span>
-            <span class="text-[16px] font-medium" style="color:${isSel?'#3730a3':'#374151'}">${choice}</span>
+            <span class="text-[14px] font-medium" style="color:${isSel?'#3730a3':'#374151'}">${choice}</span>
         </button>`;
     }).join('')}
         </div>

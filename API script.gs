@@ -409,7 +409,29 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
     
-    // --- [기능 8] 폴더 백업 (카테고리 삭제 시) ---
+    // --- [기능A] 오디오 파일 Base64 서빙 ---
+else if (data.type === "GET_AUDIO_B64") {
+  try {
+    var audioFileId = data.fileId;
+    if (!audioFileId) throw new Error("fileId가 없습니다.");
+    var audioFile = DriveApp.getFileById(audioFileId);
+    var audioBlob = audioFile.getBlob();
+    var audioBytes = audioBlob.getBytes();
+    var audioB64 = Utilities.base64Encode(audioBytes);
+    var audioMime = audioBlob.getContentType() || "audio/mpeg";
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "Success",
+      data: audioB64,
+      mimeType: audioMime
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch(e2) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "Error", message: e2.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// --- [기능 8] 폴더 백업 (카테고리 삭제 시) ---
     else if (data.type === "BACKUP_FOLDER") {
       var folderId = data.folderId;
       var categoryName = data.categoryName || "미분류";
