@@ -1039,14 +1039,6 @@ async function obsolete_renderEditForm(id) {
                     <button onclick="(${attemptReturn})()" class="btn-ys bg-white text-slate-500 border border-slate-200 hover:bg-slate-100 !py-2 !px-4 !text-[14px] !font-normal">
                         Cancel
                     </button>
-                    <button onclick="document.getElementById('${id}-audio-box').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-green-600 flex items-center gap-1.5 py-1 px-2 hover:bg-green-50 rounded-lg transition-colors">
-                        <span>🎵</span> 듣기 추가
-                    </button>
-                    <select id="${id}-audio-plays" data-field="audioMaxPlay" class="h-[28px] px-2 text-[13px] border border-slate-300 rounded-lg outline-none">
-                        <option value="1" ${(d.audioMaxPlay||1)==1?'selected':''}>1회</option>
-                        <option value="2" ${(d.audioMaxPlay||1)==2?'selected':''}>2회</option>
-                        <option value="3" ${(d.audioMaxPlay||1)==3?'selected':''}>3회</option>
-                    </select>
                 </div>
             </div>
 
@@ -6981,6 +6973,14 @@ function getComponentHtml(type, id, data) {
                     <button onclick="document.getElementById('${id}-img-box').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-orange-600 flex items-center gap-1.5 py-1 px-2 hover:bg-orange-50 rounded-lg transition-colors">
                         <span>📷</span> 이미지 추가
                     </button>
+                    <button onclick="document.getElementById('${id}-audio-box').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-green-600 flex items-center gap-1.5 py-1 px-2 hover:bg-green-50 rounded-lg transition-colors">
+                        <span>🎵</span> 듣기 추가
+                    </button>
+                    <select id="${id}-audio-plays" data-field="audioMaxPlay" class="h-[28px] px-2 text-[13px] border border-slate-300 rounded-lg outline-none">
+                        <option value="1" ${(d.audioMaxPlay||1)==1?'selected':''}>1회</option>
+                        <option value="2" ${(d.audioMaxPlay||1)==2?'selected':''}>2회</option>
+                        <option value="3" ${(d.audioMaxPlay||1)==3?'selected':''}>3회</option>
+                    </select>
                 </div>
 
                 <!-- Context (Hidden by default) -->
