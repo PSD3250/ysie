@@ -1039,6 +1039,14 @@ async function obsolete_renderEditForm(id) {
                     <button onclick="(${attemptReturn})()" class="btn-ys bg-white text-slate-500 border border-slate-200 hover:bg-slate-100 !py-2 !px-4 !text-[14px] !font-normal">
                         Cancel
                     </button>
+                    <button onclick="document.getElementById('${id}-audio-box').classList.toggle('hidden')" class="text-[14px] font-bold text-slate-500 hover:text-green-600 flex items-center gap-1.5 py-1 px-2 hover:bg-green-50 rounded-lg transition-colors">
+                        <span>🎵</span> 듣기 추가
+                    </button>
+                    <select id="${id}-audio-plays" data-field="audioMaxPlay" class="h-[28px] px-2 text-[13px] border border-slate-300 rounded-lg outline-none">
+                        <option value="1" ${(d.audioMaxPlay||1)==1?'selected':''}>1회</option>
+                        <option value="2" ${(d.audioMaxPlay||1)==2?'selected':''}>2회</option>
+                        <option value="3" ${(d.audioMaxPlay||1)==3?'selected':''}>3회</option>
+                    </select>
                 </div>
             </div>
 
@@ -7800,17 +7808,23 @@ async function updateBuilderQuestion(originalId) {
                 text: stripTwStyles(passageData.text || '')
             };
             if (passageData.imgData && passageData.imgData.base64) {
-                // 새 이미지 업로드된 경우
                 bundleData.imgData = passageData.imgData;
             } else if (passageData.img) {
-                // UI 미리보기에서 기존 URL 읽어온 경우
                 bundleData.imgUrl = passageData.img;
             } else {
-                // [Fix] UI에서 이미지 읽기 실패하더라도 로컬 캐시에서 기존 번들 이미지 URL 보존
-                // (07-1 방식: setId로 번들을 찾아 데이터 보존)
                 const existingBundle = (globalConfig.bundles || []).find(b => b.id === targetBundleId);
-                if (existingBundle && existingBundle.imgUrl) {
-                    bundleData.imgUrl = existingBundle.imgUrl;
+                if (existingBundle && existingBundle.imgUrl) bundleData.imgUrl = existingBundle.imgUrl;
+            }
+            // 오디오 처리
+            if (passageData.audioData && passageData.audioData.base64) {
+                bundleData.audioData = passageData.audioData;
+                bundleData.audioMaxPlay = passageData.audioMaxPlay || 1;
+            } else {
+                const existingBundleA = (globalConfig.bundles || []).find(b => b.id === targetBundleId);
+                if (existingBundleA) {
+                    if (existingBundleA.audioUrl) bundleData.audioUrl = existingBundleA.audioUrl;
+                    if (existingBundleA.audioFileId) bundleData.audioFileId = existingBundleA.audioFileId;
+                    bundleData.audioMaxPlay = passageData.audioMaxPlay || existingBundleA.audioMaxPlay || 1;
                 }
             }
         }
