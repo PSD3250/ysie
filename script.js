@@ -6998,6 +6998,9 @@ function getComponentHtml(type, id, data) {
                 <div id="${id}-img-box" class="mb-4 ${d.imgUrl ? '' : 'hidden'}">
                      ${renderImageUploader(id, d)}
                 </div>
+                 <div id="${id}-audio-box" class="mb-4 ${d.audioUrl ? '' : 'hidden'}">
+                     ${renderAudioUploader(id, d)}
+                 </div>
 
                 <!-- Nested Zone -->
                 <!-- Nested Zone Removed -->
