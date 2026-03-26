@@ -27,6 +27,19 @@
   - 클릭 시 `scrollIntoView({ behavior: 'smooth', block: 'center' })`로 부드럽게 이동
   - 이동 후 1.5초간 파란색 outline 강조 효과 표시
 
+### labelType(A~E/1~5) 저장 누락 버그 수정 (08-1/08-2 공통)
+- **지시**: 객관형 카드에서 A~E로 변경 후 저장해도 반영 안 되는 문제 수정
+- **원인**: 프론트엔드 `parseQuestionBlock` 및 `newQuestions.push`에 `labelType` 필드 누락. GAS Questions 시트에도 컬럼 미존재.
+- **수행**:
+  - `script.js` `parseQuestionBlock`: `[data-field="labelType"]` 셀렉트 값 수집 추가
+  - `script.js` `newQuestions.push`: `labelType` 필드 payload에 추가 (08-1/08-2 공통 경로)
+  - `API script.gs` Questions 헤더: `"라벨타입"` 컬럼 추가 (13→14컬럼)
+  - `API script.gs` SAVE_FULL_TEST_DATA 저장 row: `q.labelType` 추가
+  - `API script.gs` GET_FULL_DB mapper: `labelType: r[13]` 로드 추가
+  - `API script.gs` UPDATE_QUESTION newRow: `q.labelType` 추가
+  - **GAS 재배포 필요** ← 반드시 재배포 후 정상 동작
+
+
 
 
 ## 2026-03-23 (저녁 세션)
