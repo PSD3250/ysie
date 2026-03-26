@@ -6778,7 +6778,25 @@ function syncBundles(questions) {
                             }
                         }
                         badge.innerText = `#Set ${setNum}`;
-                        badge.className = `bundle-badge text-[14px] px-1.5 py-0.5 rounded-md font-bold ml-2 ${colorClass}`; // Dynamic Color
+                        badge.className = `bundle-badge text-[14px] px-1.5 py-0.5 rounded-md font-bold ml-2 ${colorClass} cursor-pointer hover:brightness-110 transition-all select-none`; // Dynamic Color
+                        badge.title = '묶음형 카드로 이동';
+                        badge.setAttribute('data-target-bundle', bundle.id);
+                        // [New] 클릭 시 zone-bundle의 해당 카드로 스크롤
+                        badge.onclick = function(e) {
+                            e.stopPropagation();
+                            const bundleId = this.getAttribute('data-target-bundle');
+                            const bundleEl = document.getElementById(bundleId);
+                            if (bundleEl) {
+                                bundleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                // 강조 효과
+                                bundleEl.style.outline = '2px solid #4f46e5';
+                                bundleEl.style.boxShadow = '0 0 0 4px rgba(79,70,229,0.2)';
+                                setTimeout(() => {
+                                    bundleEl.style.outline = '';
+                                    bundleEl.style.boxShadow = '';
+                                }, 1500);
+                            }
+                        };
                     }
 
                     // [New] Update Navigator Badges (Zone C)
