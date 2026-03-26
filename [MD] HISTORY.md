@@ -39,6 +39,16 @@
   - `API script.gs` UPDATE_QUESTION newRow: `q.labelType` 추가
   - **GAS 재배포 필요** ← 반드시 재배포 후 정상 동작
 
+### 라벨 타입 변경 시 정답 자동 변환 + 보기 수 범위 제한
+- **지시**: A~E↔1~5 전환 시 기존 정답값 자동 변환 (`3→C`, `C→3`). 보기 수에 따라 정답 입력 범위 제한.
+- **수행**:
+  - `convertAnswerOnLabelChange(itemId, newType)` 함수 추가: 라벨 타입 변경 시 정답값 자동 변환 후 `renderBuilderChoices` 호출
+  - `renderBuilderChoices` 끝부분: 정답 입력 validation 갱신
+    - number 모드: `type="number"`, `min=1`, `max=n`, placeholder `1~n`
+    - alpha 모드: `type="text"`, `maxLength=1`, `oninput` 필터 (허용 외 입력 시 자동 클리어+빨간 테두리)
+    - 보기 수 변경 시 기존 정답값이 범위 초과이면 자동 클리어
+
+
 
 
 
