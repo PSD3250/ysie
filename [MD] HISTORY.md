@@ -20,6 +20,14 @@
   - `handlePdfImport` 함수 전체 제거
   - 저장 오류 메시지에서 "PDF를 가져오거나" 문구 제거
 
+### #Set 배지 클릭 시 묶음형 카드로 스크롤 이동
+- **지시**: 문항 카드의 `#Set N` 배지 클릭 시 왼쪽 묶음형(zone-bundle) 영역의 해당 카드로 이동
+- **수행**:
+  - `syncBundles` 내 `bundle-badge` 생성 코드에 `data-target-bundle` 속성 및 `onclick` 핸들러 추가
+  - 클릭 시 `scrollIntoView({ behavior: 'smooth', block: 'center' })`로 부드럽게 이동
+  - 이동 후 1.5초간 파란색 outline 강조 효과 표시
+
+
 
 ## 2026-03-23 (저녁 세션)
 ### 객관식/학생DB/시험안내 개선 일괄 수정
