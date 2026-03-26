@@ -642,9 +642,9 @@ else if (data.type === "GET_AUDIO_B64") {
             sheetQ.appendRow([
                 "문항번호", "영역", "세부영역", "문항유형", "난이도", 
                 "배점", "질문 내용", "지문 내용", "이미지URL", "보기(JSON)", "정답", "모범답안",
-                "세트번호"
+                "세트번호", "라벨타입"
             ]);
-            sheetQ.getRange("A1:M1").setFontWeight("bold").setBackground("#4A90E2").setFontColor("#FFFFFF");
+            sheetQ.getRange("A1:N1").setFontWeight("bold").setBackground("#4A90E2").setFontColor("#FFFFFF");
         }
         
         // 4. 헤더 설정 (B탭: 묶음)
@@ -723,10 +723,11 @@ else if (data.type === "GET_AUDIO_B64") {
                     JSON.stringify(q.options || q.choices || []), // 보기 (프론트엔드 options 파라미터 매핑)
                     q.answer || "",         // 정답
                     q.modelAnswer || "",    // 모범답안
-                    q.setId || ""           // 세트번호
+                    q.setId || "",          // 세트번호
+                    q.labelType || "number" // [Fix] 라벨타입 (number/alpha)
                 ];
             });
-            sheetQ.getRange(2, 1, qRows.length, 13).setValues(qRows);
+            sheetQ.getRange(2, 1, qRows.length, 14).setValues(qRows);
         }
         
         return ContentService.createTextOutput(JSON.stringify({
@@ -799,6 +800,7 @@ else if (data.type === "GET_AUDIO_B64") {
                     answer: r[10],   // Index 9 -> 10
                     modelAnswer: r[11], // Index 10 -> 11
                     setId: r[12],    // Index 11 -> 12
+                    labelType: r[13] || "number", // [Fix] 라벨타입 (number/alpha)
                     // Backwards Compatibility for Frontend
                     id: generateMockId() // Need ID for frontend flow
                 };
@@ -967,7 +969,8 @@ else if (data.type === "GET_AUDIO_B64") {
             q.choices ? JSON.stringify(q.choices) : "[]",
             q.answer || "",
             q.modelAnswer || "",
-            q.setId || ""
+            q.setId || "",
+            q.labelType || "number" // [Fix] 라벨타입
         ];
         
         sheetQ.getRange(targetRow, 1, 1, newRow.length).setValues([newRow]);

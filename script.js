@@ -8249,7 +8249,8 @@ async function saveRegGroup() {
 
                     choices: q.options || q.choices, // Use options from serializeBuilderState or fallback
                     answer: q.answer || '', // Both types use answer field now
-                    modelAnswer: q.modelAnswer || '' // Both types use modelAnswer
+                    modelAnswer: q.modelAnswer || '', // Both types use modelAnswer
+                    labelType: q.labelType || 'number' // [Fix] 라벨 타입 저장
                 });
             });
         });
@@ -8499,6 +8500,8 @@ async function collectBuilderData() {
         const qImgPreviewEl = block.querySelector('[data-field="preview"]');
         const qImgData = await extractImg(qFileInput, qImgPreviewEl);
 
+        const labelTypeInput = block.querySelector('[data-field="labelType"]');
+
         const q = {
             linkedBundleId: block.getAttribute('data-bundle-id'), // Capture manual link
             id: generateUUID(),
@@ -8513,6 +8516,7 @@ async function collectBuilderData() {
             modelAnswer: modelInput ? modelInput.value : '', // Collect Model Answer
             useAiGrading: false,
             choices: [],
+            labelType: labelTypeInput ? labelTypeInput.value : 'number', // [Fix] 라벨 타입 수집
             qImg: qImgData?.url || '',
             qImgData: qImgData
         };
