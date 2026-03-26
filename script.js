@@ -3504,7 +3504,9 @@ function getInputHtml(q) {
         return `
             <div class="flex flex-col gap-3">
                 ${options.map((opt, idx) => {
-            const _lType = q.labelType || 'number';
+            // [Fix] q.labelType 없으면 answer 값으로 추론
+        const _inferredObjLT = (q.answer && /^[A-Ea-e]$/.test(String(q.answer).trim())) ? 'alpha' : 'number';
+        const _lType = q.labelType || _inferredObjLT;
             const _alphaCircled = ['Ⓐ','Ⓑ','Ⓒ','Ⓓ','Ⓔ'];
             const _numCircled   = ['①','②','③','④','⑤','⑥'];
             const _v = _lType === 'alpha' ? ['A','B','C','D','E'][idx] : (idx + 1).toString();
@@ -7053,7 +7055,9 @@ function getComponentHtml(type, id, data) {
             const borderColor = isObj ? 'border-blue-100' : 'border-rose-100';
             const optCount = (d.options && d.options.length >= 2 && d.options.length <= 5) ? d.options.length : 5;
             const optArr = Array.from({ length: optCount }, (_, i) => i + 1);
-            const labelType = d.labelType || 'number'; // 'number' | 'alpha'
+            // [Fix] d.labelType 없으면 answer 값으로 추론 (GAS 구버전 대응)
+        const _inferredLT = (d.answer && /^[A-Ea-e]$/.test(String(d.answer).trim())) ? 'alpha' : 'number';
+        const labelType = d.labelType || _inferredLT; // 'number' | 'alpha'
             const _alphaLabels = ['A','B','C','D','E'];
             const _numLabels   = ['1','2','3','4','5'];
 

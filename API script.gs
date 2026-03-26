@@ -661,6 +661,13 @@ else if (data.type === "GET_AUDIO_B64") {
             dbSpreadsheet.deleteSheet(defaultSheet);
         }
         
+        // [Migration] Questions 시트에 라벨타입 컬럼 없으면 자동 추가
+        var qHeaderRow = sheetQ.getLastRow() > 0 ? sheetQ.getRange(1, 1, 1, sheetQ.getLastColumn()).getValues()[0] : [];
+        if (qHeaderRow.length > 0 && qHeaderRow.indexOf('라벨타입') === -1) {
+            var newColIdx = qHeaderRow.length + 1;
+            sheetQ.getRange(1, newColIdx).setValue('라벨타입').setFontWeight('bold').setBackground('#4A90E2').setFontColor('#FFFFFF');
+        }
+
         // 5. 이전 데이터 클리어 (Overwrite Mode)
         if (sheetQ.getLastRow() > 1) sheetQ.deleteRows(2, sheetQ.getLastRow() - 1);
         if (sheetB.getLastRow() > 1) sheetB.deleteRows(2, sheetB.getLastRow() - 1);
