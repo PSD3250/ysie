@@ -7145,7 +7145,7 @@ function getComponentHtml(type, id, data) {
                     ? `<div class="flex justify-between items-center mb-3">
                                <label class="text-[14px] font-bold text-slate-700">보기 및 정답</label>
                                <div class="flex items-center gap-2">
-                                   <select id="${id}-label-type" data-field="labelType" onchange="renderBuilderChoices('${id}', document.getElementById('${id}-choice-count').value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500 bg-white">
+                                   <select id="${id}-label-type" data-field="labelType" onchange="convertAnswerOnLabelChange('${id}', this.value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500 bg-white">
                                        <option value="number" ${labelType === 'number' ? 'selected' : ''}>1~5</option>
                                        <option value="alpha"  ${labelType === 'alpha'  ? 'selected' : ''}>A~E</option>
                                    </select>
@@ -7245,6 +7245,24 @@ function serializeBuilderState() {
 
 
 // Helpers for Component Rendering
+// [Fix] 라벨 타입 변경 시 정답 자동 변환 (1→A, 2→B ... / A→1, B→2 ...)
+function convertAnswerOnLabelChange(itemId, newType) {
+    const ansInput = document.getElementById(itemId + '-answer');
+    if (ansInput) {
+        const cur = ansInput.value.trim();
+        const numToAlpha = { '1':'A','2':'B','3':'C','4':'D','5':'E' };
+        const alphaToNum = { 'A':'1','B':'2','C':'3','D':'4','E':'5' };
+        if (newType === 'alpha' && numToAlpha[cur]) {
+            ansInput.value = numToAlpha[cur]; // 숫자 → 알파벳
+        } else if (newType === 'number' && alphaToNum[cur.toUpperCase()]) {
+            ansInput.value = alphaToNum[cur.toUpperCase()]; // 알파벳 → 숫자
+        }
+    }
+    // 보기 라벨 재렌더
+    const countSel = document.getElementById(itemId + '-choice-count');
+    renderBuilderChoices(itemId, countSel ? countSel.value : 5);
+}
+
 function renderBuilderChoices(itemId, n) {
     const container = document.getElementById(itemId + '-choices');
     if (!container) return;
