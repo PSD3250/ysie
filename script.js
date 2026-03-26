@@ -7287,8 +7287,48 @@ function renderBuilderChoices(itemId, n) {
                 `;
     }
     container.innerHTML = html;
+
+    // 정답 입력 validation 갱신 (보기 수 기반)
     const ansInput = document.getElementById(itemId + '-answer');
-    if (ansInput) ansInput.placeholder = lType === 'alpha' ? 'A/B/C/D/E' : '1~5';
+    if (ansInput) {
+        const alphaLabels = ['A','B','C','D','E'];
+        const maxAlpha = alphaLabels[Number(n) - 1] || 'E';
+
+        if (lType === 'alpha') {
+            ansInput.type = 'text';
+            ansInput.maxLength = 1;
+            ansInput.placeholder = 'A~' + maxAlpha;
+            // 허용 알파벳 목록 저장 (oninput에서 참조)
+            ansInput.setAttribute('data-allowed', alphaLabels.slice(0, Number(n)).join(''));
+            ansInput.oninput = function() {
+                const allowed = this.getAttribute('data-allowed') || 'ABCDE';
+                const v = this.value.toUpperCase();
+                if (v && !allowed.includes(v)) {
+                    this.value = '';
+                    this.classList.add('border-red-400', 'bg-red-50');
+                    setTimeout(() => this.classList.remove('border-red-400', 'bg-red-50'), 800);
+                } else {
+                    this.value = v; // 항상 대문자 유지
+                }
+            };
+        } else {
+            ansInput.type = 'number';
+            ansInput.min = 1;
+            ansInput.max = Number(n);
+            ansInput.placeholder = '1~' + n;
+            ansInput.removeAttribute('data-allowed');
+            ansInput.oninput = null;
+        }
+
+        // 기존 값이 범위를 벗어나면 초기화
+        const cur = ansInput.value;
+        if (lType === 'alpha') {
+            const allowed = alphaLabels.slice(0, Number(n));
+            if (cur && !allowed.includes(cur.toUpperCase())) ansInput.value = '';
+        } else {
+            if (cur && (Number(cur) < 1 || Number(cur) > Number(n))) ansInput.value = '';
+        }
+    }
 }
 function renderMiniToolbar(targetId) {
     return `
