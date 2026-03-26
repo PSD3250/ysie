@@ -3504,10 +3504,12 @@ function getInputHtml(q) {
         return `
             <div class="flex flex-col gap-3">
                 ${options.map((opt, idx) => {
-            const _v = (idx + 1).toString();
+            const _lType = q.labelType || 'number';
+            const _alphaCircled = ['Ⓐ','Ⓑ','Ⓒ','Ⓓ','Ⓔ'];
+            const _numCircled   = ['①','②','③','④','⑤','⑥'];
+            const _v = _lType === 'alpha' ? ['A','B','C','D','E'][idx] : (idx + 1).toString();
             const _sel = savedAns === _v;
-            const _cnums = ['①','②','③','④','⑤','⑥'];
-            const _cnum = _cnums[idx] || _v;
+            const _cnum = _lType === 'alpha' ? (_alphaCircled[idx] || _v) : (_numCircled[idx] || _v);
             return `<button type="button" data-qid="${q.id}" data-val="${_v}"
                 onclick="selectObjAnswer('${q.id}','${_v}')"
                 class="exam-choice-btn flex items-center gap-3 p-2 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
@@ -7049,6 +7051,9 @@ function getComponentHtml(type, id, data) {
             const borderColor = isObj ? 'border-blue-100' : 'border-rose-100';
             const optCount = (d.options && d.options.length >= 2 && d.options.length <= 5) ? d.options.length : 5;
             const optArr = Array.from({ length: optCount }, (_, i) => i + 1);
+            const labelType = d.labelType || 'number'; // 'number' | 'alpha'
+            const _alphaLabels = ['A','B','C','D','E'];
+            const _numLabels   = ['1','2','3','4','5'];
 
             return `
                  <div class="flex items-center justify-between mb-4 ${headerBg} p-3 rounded-xl border ${borderColor}" data-bundle-id="${d.linkedGroupId || ''}">
@@ -7137,25 +7142,32 @@ function getComponentHtml(type, id, data) {
                     ${isObj
                     ? `<div class="flex justify-between items-center mb-3">
                                <label class="text-[14px] font-bold text-slate-700">보기 및 정답</label>
-                               <select onchange="renderBuilderChoices('${id}', this.value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500">
-                                    <option value="2" ${optCount === 2 ? 'selected' : ''}>2개</option>
-                                    <option value="3" ${optCount === 3 ? 'selected' : ''}>3개</option>
-                                    <option value="4" ${optCount === 4 ? 'selected' : ''}>4개</option>
-                                    <option value="5" ${optCount === 5 ? 'selected' : ''}>5개</option>
-                               </select>
+                               <div class="flex items-center gap-2">
+                                   <select id="${id}-label-type" data-field="labelType" onchange="renderBuilderChoices('${id}', document.getElementById('${id}-choice-count').value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500 bg-white">
+                                       <option value="number" ${labelType === 'number' ? 'selected' : ''}>1~5</option>
+                                       <option value="alpha"  ${labelType === 'alpha'  ? 'selected' : ''}>A~E</option>
+                                   </select>
+                                   <select id="${id}-choice-count" onchange="renderBuilderChoices('${id}', this.value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500">
+                                       <option value="2" ${optCount === 2 ? 'selected' : ''}>2개</option>
+                                       <option value="3" ${optCount === 3 ? 'selected' : ''}>3개</option>
+                                       <option value="4" ${optCount === 4 ? 'selected' : ''}>4개</option>
+                                       <option value="5" ${optCount === 5 ? 'selected' : ''}>5개</option>
+                                   </select>
+                               </div>
                            </div>
                            <div id="${id}-choices" class="grid grid-cols-2 gap-2 mb-4">
-                                ${optArr.map(n => `
-                                    <div class="flex items-center gap-2 group">
-                                       <span class="text-[14px] w-4">${n}.</span>
+                                ${optArr.map(n => {
+                                    const _lbl = labelType === 'alpha' ? _alphaLabels[n-1] : String(n);
+                                    return `<div class="flex items-center gap-2 group">
+                                       <span class="text-[14px] w-5 font-bold text-slate-400">${_lbl}.</span>
                                        <textarea id="${id}-choice-${n}" data-field="choice" data-index="${n}" rows="1" oninput="autoResize(this)"
                                               class="flex-1 p-2 text-[14px] bg-slate-50 border border-slate-200 rounded-lg overflow-hidden resize-none" style="min-height: 40px;">${(d.options && d.options[n - 1]) || ''}</textarea>
-                                    </div>
-                                 `).join('')}
+                                    </div>`;
+                                }).join('')}
                            </div>
                            <div class="flex items-center gap-3">
-                               <label class="text-[14px] font-bold text-blue-600">정답 번호:</label>
-                               <input type="number" id="${id}-answer" data-field="answer" value="${d.answer || ''}" class="w-20 p-2 text-center text-[14px] font-bold border border-blue-200 rounded-lg">
+                               <label class="text-[14px] font-bold text-blue-600">정답 ${labelType === 'alpha' ? '알파벳' : '번호'}:</label>
+                               <input type="text" id="${id}-answer" data-field="answer" value="${d.answer || ''}" placeholder="${labelType === 'alpha' ? 'A/B/C/D/E' : '1~5'}" class="w-20 p-2 text-center text-[14px] font-bold border border-blue-200 rounded-lg">
                            </div>
 `
                     : `<label class="text-[14px] font-bold text-slate-700 mb-2 block">정답 (채점용 핵심 키워드)</label>
@@ -7210,6 +7222,9 @@ function serializeBuilderState() {
                     // Query all choices in order
                     const choices = block.querySelectorAll('[data-field="choice"]');
                     choices.forEach(ch => val.options.push(ch.value));
+                    // labelType 수집 ('number' | 'alpha')
+                    const ltSel = block.querySelector('[data-field="labelType"]');
+                    val.labelType = ltSel ? ltSel.value : 'number';
                 }
             }
             // Log found data
@@ -7232,21 +7247,28 @@ function renderBuilderChoices(itemId, n) {
     const container = document.getElementById(itemId + '-choices');
     if (!container) return;
 
+    const _alphaLabels = ['A','B','C','D','E'];
+    const labelTypeSel = document.getElementById(itemId + '-label-type');
+    const lType = labelTypeSel ? labelTypeSel.value : 'number';
+
     let html = '';
     for (let i = 1; i <= n; i++) {
         const inputId = `${itemId}-choice-${i}`;
         const existing = document.getElementById(inputId);
         const val = existing ? existing.value : '';
+        const lbl = lType === 'alpha' ? _alphaLabels[i - 1] : String(i);
 
         html += `
                 <div class="flex items-center gap-2 group">
-                <span class="text-[14px] text-slate-400 font-bold w-4 group-hover:text-blue-500 transition-colors">${i}.</span>
+                <span class="text-[14px] text-slate-400 font-bold w-5 group-hover:text-blue-500 transition-colors">${lbl}.</span>
                 <textarea id="${inputId}" data-field="choice" data-index="${i}" rows="1" oninput="autoResize(this)"
                        class="flex-1 p-2 text-[14px] bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 outline-none transition-all overflow-hidden resize-none" style="min-height: 40px;">${val}</textarea>
              </div>
                 `;
     }
     container.innerHTML = html;
+    const ansInput = document.getElementById(itemId + '-answer');
+    if (ansInput) ansInput.placeholder = lType === 'alpha' ? 'A/B/C/D/E' : '1~5';
 }
 function renderMiniToolbar(targetId) {
     return `
