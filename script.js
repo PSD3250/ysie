@@ -1902,14 +1902,17 @@ function computeClassAvg(className, grade, secMap) {
 
 // 등록된 학급이 있는 학년만 반환 (순서: 초1~고3)
 function getRegisteredGrades() {
-    const ORDER = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3','고등','기타'];
-    if (!globalConfig.classes || !globalConfig.classes.length) return ORDER; // 미등록 시 전체 표시
-    const registered = new Set(
-        (globalConfig.classes)
+    const ORDER = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3'];
+    if (!globalConfig.classes || !globalConfig.classes.length) return ORDER;
+    const registered = [...new Set(
+        globalConfig.classes
             .filter(c => typeof c === 'object' && c.grade)
             .map(c => c.grade)
-    );
-    return ORDER.filter(g => registered.has(g));
+    )];
+    // ORDER 기준 정렬 + ORDER에 없는 학년(고등, 기타 등)은 뒤에 자동 추가
+    const inOrder    = ORDER.filter(g => registered.includes(g));
+    const notInOrder = registered.filter(g => !ORDER.includes(g));
+    return [...inOrder, ...notInOrder];
 }
 
 // 학년 select 요소를 등록 학년으로 채우기
