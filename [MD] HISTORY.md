@@ -13,6 +13,30 @@
 
 
 
+## 2026-03-30 (오전 세션)
+
+### Canvas 08-2: 번들 카드 연결 문항 번호 표시 및 수정 불가 처리
+
+#### 문제
+- 부분 수정 화면(08-2)에서 번들 카드에 연결 문항 번호가 표시되지 않음
+- `isEditMode` 판단이 구 canvas ID `"07-2"`를 참조 → 항상 false → 연결/해제 버튼 비활성화 안됨
+
+#### 수정 내용
+- **`getComponentHtml` 7365줄**: `[data-canvas-id="07-2"]` → `[data-canvas-id="08-2"]` 수정
+- **`renderEditForm` 8232줄**: `addComponent('bundle', {...})` 호출 시 `questionIds: bundleInfo.questionIds` 추가 전달
+- **번들 카드 HTML**: `value=""` → `value="${d.questionIds || ''}"` 변경
+- **isEditMode 시 처리**: 숨기기 제거 → input `readonly` + 연결/해제 버튼 `opacity-40 pointer-events-none`으로 수정 불가 처리
+- **수정 모드 안내 문구**: `"수정 모드에서는 해당 문항 및 소속 지문만 수정 가능합니다."` → `"연결된 번들(지문)과 선택 문항만 수정 가능 (연결 번호는 불가)"`
+- **exitEditMode**: 직전 카테고리 자동 복귀(`_editReturnCatId`, `handleBankCategoryChange`) 로직 제거
+- **구 ID 흔적 제거**: `// --- Edit Form Builder (New 07-2) ---` 주석, `console.log('[07-2 Debug]...')` 제거
+
+#### 영향 범위 확인
+- 08-1 저장/불러오기: 영향 없음 (isEditMode=false, questionIds 미전달로 기존과 동일)
+- 통합DB Bundles E열(questionIds): UPDATE_QUESTION에서 시트값 직접 읽어 유지 → 변경 안됨
+- Git: `d4027ab` → `74424b2` → `8d47f98` → `371b76b` → `2eda498`
+
+---
+
 ## 2026-03-30 (새벽 세션)
 
 ### Canvas 08: 문항 관리(Question Bank) UX 개편
