@@ -6076,6 +6076,25 @@ function getGroupColor(index) {
 
 // [Refactor] 문항 뱅크 렌더링 (Canvas 08)
 // [New] Bank Category Change Handler
+function onBankCatSelect(catId) {
+    curCatId = catId;
+    // 자동 로드 안함 — 문항 수정 버튼 클릭 시 로드
+}
+
+function openEditMode() {
+    if (!curCatId) return showToast('시험지를 먼저 선택해주세요.');
+    loadBankQuestions(curCatId);
+}
+
+function openRegMode() {
+    if (!curCatId) return showToast('시험지를 먼저 선택해주세요.');
+    const ok = confirm('⚠️ 선택된 시험지의 문항이 등록되어 있는 경우\n전체 문항 상세 내용이 로딩됩니다.\n\n이에 전체 등록 버튼은 시험지의 전체 문항에 대한\n등록 및 수정 시 시행하는 것을 권장합니다.\n\n계속하시겠습니까?');
+    if (!ok) return;
+    // 08-1로 이동 후 해당 시험지 자동 선택 및 불러오기
+    window._autoLoadCatId = curCatId;
+    changeTab('reg');
+}
+
 function handleBankCategoryChange(catId) {
     curCatId = catId;
     loadBankQuestions(catId);
@@ -6191,14 +6210,17 @@ function renderBank(c) {
                 <div style="position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, #60a5fa, #6366f1, #a855f7);"></div>
                 <div class="flex items-center gap-4 flex-grow">
                     <label class="ys-label !mb-0 whitespace-nowrap !text-[#013976] font-bold">📂 시험지 선택</label>
-                    <select onchange="handleBankCategoryChange(this.value)" 
+                    <select id="bank-cat-select" onchange="onBankCatSelect(this.value)"
                             class="ys-field flex-grow !font-normal !text-[#013976] !bg-white !text-[16px]">
                         <option value="" disabled ${!curCatId ? 'selected' : ''} hidden>시험지를 선택하세요</option>
                         ${globalConfig.categories.map(cat => `<option value="${cat.id}" ${curCatId === cat.id ? 'selected' : ''} class="text-[#013976] !text-[16px] !font-normal">${cat.name}</option>`).join('')}
                     </select>
                 </div>
-                <button onclick="changeTab('reg')" class="btn-ys !bg-[#013976] !text-white !border-[#013976] hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex-shrink-0 flex items-center gap-2">
-                    ✨ 문항 등록
+                <button onclick="openEditMode()" class="btn-ys !bg-indigo-600 !text-white !border-indigo-600 hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex-shrink-0 flex items-center gap-2">
+                    📋 문항 수정
+                </button>
+                <button onclick="openRegMode()" class="btn-ys !bg-[#013976] !text-white !border-[#013976] hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex-shrink-0 flex items-center gap-2">
+                    ✨ 전체 등록
                 </button>
             </div>
 
@@ -6215,7 +6237,7 @@ function renderBank(c) {
                 
                 <!-- 리스트 영역 -->
                 <div id="bank-list-container" class="overflow-y-auto flex-grow p-2 space-y-2 bg-slate-50/50">
-                     <div class="p-20 text-center text-slate-400">👈 카테고리를 선택하세요</div>
+                     <div class="p-20 text-center text-slate-400">👈 시험지를 선택 후 문항 수정 버튼을 클릭하세요.</div>
                 </div>
             </div>
         </div>
@@ -6588,6 +6610,13 @@ function renderRegForm() {
             <!-- Palette Removed (Integrated into Header) -->
         </div>
     `;
+    // 전체 등록 버튼에서 넘어온 경우: 시험지 자동 선택 + 불러오기
+    if (window._autoLoadCatId) {
+        const sel = document.getElementById('reg-target-cat');
+        if (sel) sel.value = window._autoLoadCatId;
+        window._autoLoadCatId = null;
+        setTimeout(() => loadQuestionsFromCategory(), 100);
+    }
 }
 
 // Split View Helpers
