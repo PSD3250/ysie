@@ -4763,10 +4763,15 @@ function printReport() {
     // 3b-2. 등록권장 학급 <select> → span으로 교체
     const _clsSel = clone.querySelector('#report-student-class');
     if (_clsSel) {
+        const _clsParent = _clsSel.parentNode;
         const _clsSpan = document.createElement('span');
-        _clsSpan.style.cssText = 'font-size:20px;font-weight:900;color:#013976;background:white;display:inline-flex;align-items:center;justify-content:center;min-width:80px;padding:0 12px;height:65px;border:none !important;outline:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;';
+        _clsSpan.style.cssText = 'font-size:20px;font-weight:900;color:#013976;background:white;display:inline-flex;align-items:center;justify-content:center;min-width:80px;padding:0 12px;height:61px;-webkit-print-color-adjust:exact;print-color-adjust:exact;';
         _clsSpan.textContent = clsVal || '미선택';
         _clsSel.parentNode.replaceChild(_clsSpan, _clsSel);
+        if (_clsParent) {
+            _clsParent.style.setProperty('border', '2px solid #013976', 'important');
+            _clsParent.style.setProperty('border-left', 'none', 'important');
+        }
     }
 
     // 3c. 영역별 코멘트 앞 페이지 강제 분리
@@ -4818,6 +4823,7 @@ function printReport() {
   img { max-width:100%; }
   .no-print { display:none !important; }
   .fs-15 { font-size: 13px !important; line-height: 1.6; }
+  table.fs-14 td, table.fs-14 th { font-size: 13px !important; }
   @media print {
     @page { margin:12mm; }
     body { padding-bottom:140px; }
