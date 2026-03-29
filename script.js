@@ -1971,7 +1971,7 @@ async function showStudentDBViewer(catId, catName) {
     setCanvasId('09-3');
 
     _sdbCache = { catId, catName, records: [] };
-    _sdbSort  = { col: 'name', dir: 1 };
+    _sdbSort  = { col: 'date', dir: -1 };
     _sdbList  = [];
 
     const bSty = `background:linear-gradient(135deg,#fff 0%,#eef4ff 100%);border:2px solid rgba(1,57,118,0.15);`;
@@ -2063,8 +2063,7 @@ function _renderStudentDBTable() {
         switch(col) {
             case 'name':  return dir * String(a['학생명']||a.name||'').localeCompare(String(b['학생명']||b.name||''), 'ko');
             case 'grade': return dir * String(a['학년']||a.grade||'').localeCompare(String(b['학년']||b.grade||''), 'ko');
-            case 'year':  return dir * dA.substring(0,4).localeCompare(dB.substring(0,4));
-            case 'md':    return dir * dA.substring(5).localeCompare(dB.substring(5));
+            case 'date':  return dir * dA.localeCompare(dB);
             case 'score': return dir * ((parseFloat(a['총점']??a.totalScore??0)||0) - (parseFloat(b['총점']??b.totalScore??0)||0));
             default: return 0;
         }
@@ -2086,7 +2085,7 @@ function _renderStudentDBTable() {
     <table class="w-full border-collapse" style="table-layout:fixed;">
         <thead style="position:sticky;top:0;z-index:10;">
             <tr class="bg-[#013976]">
-                ${th('name','이름')}${th('grade','학년')}${th('year','응시년도')}${th('md','응시월일')}${th('score','점수')}
+                ${th('name','이름')}${th('grade','학년')}${th('date','응시년월일')}${th('score','점수')}
                 <th class="px-2 py-3 text-white fs-15 font-black text-center bg-[#013976]">삭제</th>
             </tr>
         </thead>
@@ -2116,8 +2115,7 @@ function _renderStudentDBTable() {
                 return `<tr class="${row} border-b border-slate-100">
                     <td class="px-2 py-3 font-bold text-[#013976] fs-15 text-center">${name}</td>
                     <td class="px-2 py-3 text-slate-700 fs-15 text-center">${grade}</td>
-                    <td class="px-2 py-3 text-slate-600 fs-15 text-center">${yr}</td>
-                    <td class="px-2 py-3 text-slate-600 fs-15 text-center">${md}</td>
+                    <td class="px-2 py-3 text-slate-600 fs-15 text-center">${full}</td>
                     <td class="px-2 py-3 font-bold text-slate-800 fs-15 text-center">${score}${max?'/'+max:''}</td>
                     <td class="px-2 py-3 text-center">
                         <button onclick="deleteStudentRecord('${catId}','${sid}','${name}')" class="text-red-500 hover:text-red-700 fs-13 font-bold px-3 py-1 rounded-lg border border-red-200 hover:bg-red-50">🗑️ 삭제</button>
