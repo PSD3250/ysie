@@ -2,7 +2,56 @@
 
 
 
+## 2026-03-29
+### 시험화면 묶음 문항 객관식 A~E 원문자 미표시 버그 수정
+- **지시**: A~E로 저장해도 시험화면에서 ①②③으로 표시되는 버그 수정 요청. `API script.gs`, `style.css`, `index.html` 전체 파일 점검 병행 요청.
+- **전체 점검 결과**: `API script.gs`(labelType 저장/로드/업데이트 정상), `style.css`(이상 없음), `index.html`(이상 없음)
+- **원인**: `script.js` 내 `renderChoices`(9661줄)가 `labelType`을 무시하고 `['①','②','③','④','⑤']`를 하드코딩. 묶음 문항은 `renderSubQuestion` → `getInputHtml`(9641줄) → `renderChoices` 경로를 타므로 alpha 설정이 반영되지 않음. (pair/solo 단독 문항은 3493줄의 다른 버전이 쓰여 정상)
+- **수행**: `renderChoices` 함수에 `_lType = q.labelType || 'number'` 분기 추가
+  - alpha 모드: 원문자 `['Ⓐ','Ⓑ','Ⓒ','Ⓓ','Ⓔ']`, 선택값 `A/B/C/D/E`
+  - number 모드: 원문자 `['①','②','③','④','⑤']`, 선택값 `1/2/3/4/5`
+- **결과**: `script.js` 수정, 한글 인코딩 검증 통과, Git 커밋 `e6142c4`
+
+### 오디오 링크 DB 소실 + Questions 시트 파란배경 버그 수정
+- **지시**: 빌더/시험 화면 오디오 미표시, Bundles DB 오디오 링크 소멸, Questions 시트 전행 파란배경 문제
+- **원인 1 (오디오 링크 소실)**: 08-1 전체저장 시 `serializeBuilderState()`가 DOM만 읽어 `audioUrl`/`audioFileId` 누락 → `newBundles.push()`에 없음 → GAS가 빈값 저장 → 링크 소멸. (08-2 수정경로는 이미 올바르게 처리 중)
+- **원인 2 (파란배경)**: GAS에서 `deleteRows()` 후 `setValues()` 시 구글시트가 1행 헤더 파란색 포맷 자동 상속
+- **수행**:
+  - `script.js` `newBundles.push()`: `_existBnd = globalConfig.bundles.find(setId)` 로 기존 번들 조회 후 `audioUrl`/`audioFileId` 보존 추가
+  - `API script.gs` SAVE_FULL_TEST_DATA: `clearFormat()` + `setBackground("#ffffff")` + `setFontColor("#000000")` + `setFontWeight("normal")` 추가
+- **GAS 재배포 필요** ← API script.gs 수정분 반드시 재배포
+- **기존 소실된 링크 복구**: 구글 드라이브 오디오창고에 파일 존재 → 빌더(08-2)에서 해당 번들 수정 모드 진입 후 오디오 재업로드 必
+- **결과**: `script.js`+`API script.gs` 수정, 한글 인코딩 검증 통과, Git 커밋 `e61a833`
+
+### Questions 헤더 O열 어긋남 버그 수정
+- **원인**: 헤더 생성 코드가 `getLastRow() === 0` (빈 시트)일 때만 실행 → '라벨타입' 컬럼 추가 후 재배포 시 기존 시트에 반영 안 됨 → N열(실제 데이터 위치)에 헤더 없고 O열에 잘못된 '라벨타입' 텍스트 생성됨
+- **수행**: `API script.gs` SAVE_FULL_TEST_DATA - 헤더를 `setValues()`로 **항상 덮어쓰기** 방식으로 변경 (조건 제거)
+- **수동 작업 필요**: 구글 시트 Questions탭 **O열 직접 삭제** 필요
+- **결과**: `API script.gs` 수정, Git 커밋 `102631d`
+
+### 빌더 불러오기 시 오디오 및 labelType 전수 누락 수정 (4커밋)
+- **지시**: 매번 편집 시 오디오 재업로드 요구 문제, 로직 전수 점검 요구
+- **원인 종합**:
+  - 08-1 bundleMap 구성 시 `audioUrl`/`audioFileId`/`audioMaxPlay` 3필드 미포함 → addComponent에 전달 안 됨
+  - 08-1/08-2 addComponent('bundle')에 audio 3필드 누락 → `d.audioUrl`이 항상 falsy → 오디오 박스 hidden
+  - 08-1 번들문항/단독문항(orphan)/08-2 문항 addComponent에 `labelType` 누락
+  - 08-2 `updateBuilderQuestion` questionData에서 `qInput.innerPassage`(존재X) 사용 → 실제 키 `qInput.passageText`로 수정 필요. 지문내용이 항상 빈값 저장되던 버그
+  - 08-2 `updateBuilderQuestion` questionData에 `labelType` 누락 → 항상 'number'로 저장
+- **수행**:
+  - `script.js` bundleMap: audio 3필드 추가
+  - `script.js` addComponent('bundle') 08-1/08-2: audio 3필드 추가
+  - `script.js` addComponent(질문) 08-1 번들문항/단독문항/08-2: `labelType: q.labelType || 'number'` 추가
+  - `script.js` updateBuilderQuestion questionData: `innerPassage` → `passageText`, `labelType` 추가
+- **채점 영향 확인**: submitExam 채점로직 전수 점검 결과 A~E 변경이 채점/학생DB에 영향 없음 확인 (alpha 문항은 오히려 처음 정상화)
+- **결과**: `script.js` 수정, 한글 인코딩 검증 통과, Git 커밋 `e39f94b`, `4d1b579`, `1d1fefc`
+
+### 미완료 사항 (다음 세션 시작 전 선행 필요)
+1. 🚨 **`API script.gs` → 구글 앱스크립트 복붙 후 재배포** (오늘 수정: 파란배경, 헤더 덮어쓰기, 오디오 clearFormat 포함)
+2. **구글 시트 Questions탭 O열 수동 삭제** (라벨타입 헤더 잘못된 위치)
+3. **오디오 재업로드** — 08-2 수정 모드에서 각 번들 1회 (파일은 Drive에 존재)
+
 ## 2026-03-26
+
 ### 객관식 보기 라벨 타입 선택 기능 추가
 - **지시**: 문항 카드(빌더)의 "보기 및 정답" 섹션에 1~5 / A~E 라벨 타입 선택 옵션 추가. 시험화면에도 선택된 타입에 맞게 원문자(①②③ / ⒶⒷⒸ) 표시 요청.
 - **수행**:
@@ -47,6 +96,20 @@
     - number 모드: `type="number"`, `min=1`, `max=n`, placeholder `1~n`
     - alpha 모드: `type="text"`, `maxLength=1`, `oninput` 필터 (허용 외 입력 시 자동 클리어+빨간 테두리)
     - 보기 수 변경 시 기존 정답값이 범위 초과이면 자동 클리어
+
+### 🔴 미해결 이슈 (다음 세션 계속)
+- **시험화면 A~E 원문자(Ⓐ~Ⓔ) 미표시 문제**
+  - 현상: 기존 저장 문항 불러올 때 시험화면에서 A~E 대신 ①②③으로 표시됨
+  - 원인 후보:
+    1. 기존 저장 데이터의 `answer`가 'C'가 아닌 '3'(숫자)로 저장됨 → 추론 로직 무효
+    2. 또는 시험화면 문항 로드 시 `q.answer`/`q.labelType` 값이 비어있을 가능성
+  - 시도한 수정: `getInputHtml`에 `answer` 값으로 labelType 추론 (`/^[A-Ea-e]$/`) 추가했으나 미동작
+  - **다음 세션 할 일**:
+    1. Console에서 `globalConfig.questions`의 `answer`, `labelType` 값 직접 확인
+    2. 빌더에서 해당 문항 A~E로 바꾸고 **다시 저장** (answer='C', labelType='alpha' 재저장)
+    3. 저장 후 시험화면 재확인
+  - **참고**: `file:// URL Unsafe` 콘솔 오류는 별개 이슈 (file:// 프로토콜 iframe 보안 경고, 기능 무관)
+
 
 
 
