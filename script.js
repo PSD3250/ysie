@@ -5271,12 +5271,13 @@ function editComment(type, section) {
         const wrap = document.getElementById('overall-comment-wrap');
         const overallRows = Math.max(5, cur.split('\n').length + 1);
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
-                <textarea id="overall-comment-edit" class="flex-1 ys-field !bg-white resize-none fs-15" rows="${overallRows}">${cur}</textarea>
+                <textarea id="overall-comment-edit" class="flex-1 ys-field !bg-white resize-y fs-15" rows="${overallRows}" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="overflow:hidden;">${cur}</textarea>
                 <div class="flex flex-col gap-2 flex-shrink-0">
                     <button onclick="saveCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
                     <button onclick="cancelCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
                 </div>
             </div>`;
+        setTimeout(()=>{const ta=document.getElementById('overall-comment-edit');if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}},0);
     } else if (type === 'section' && section) {
         const el = document.getElementById('sec-comment-text-' + section);
         if (!el) return;
@@ -5284,12 +5285,13 @@ function editComment(type, section) {
         const wrap = document.getElementById('sec-comment-wrap-' + section);
         const sectionRows = Math.max(4, cur.split('\n').length + 1);
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
-                <textarea id="sec-comment-edit-${section}" class="flex-1 ys-field !bg-white resize-none fs-15" rows="${sectionRows}">${cur}</textarea>
+                <textarea id="sec-comment-edit-${section}" class="flex-1 ys-field !bg-white resize-y fs-15" rows="${sectionRows}" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="overflow:hidden;">${cur}</textarea>
                 <div class="flex flex-col gap-2 flex-shrink-0">
                     <button onclick="saveCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
                     <button onclick="cancelCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
                 </div>
             </div>`;
+        setTimeout(()=>{const ta=document.getElementById('sec-comment-edit-'+section);if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}},0);
     } else if (type === 'notes') {
         const el = document.getElementById('notes-text');
         const cur = el ? el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : (window.currentReportData?.notes || '');
