@@ -8313,6 +8313,9 @@ function exitEditMode(skipConfirm = false) {
 
 // [SAFE] Partial Update Logic — Only modifies the specific row in the sheet
 async function updateBuilderQuestion(originalId) {
+    if (!_editHasChanged()) {
+        return showToast('⚠️ 변경된 내용이 없습니다.');
+    }
     if (!confirm('이 문항의 변경사항이 저장됩니다.')) return;
     try {
         if (!originalId) throw new Error("수정할 문항 ID가 없습니다.");
@@ -8639,6 +8642,9 @@ async function loadQuestionsFromCategory(catId) {
 
 // [New] Save Reg Group (Integrated Full Save)
 async function saveRegGroup() {
+    if (!window._changedItems || window._changedItems.size === 0) {
+        return showToast('⚠️ 변경된 내용이 없습니다.');
+    }
     if (!confirm('변경사항을 저장하겠습니까?')) return;
     try {
         const result = await collectBuilderData(); // Returns { catId, groups: [{passage, questions}, ...] }
