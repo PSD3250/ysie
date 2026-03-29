@@ -9684,7 +9684,7 @@ function preloadBundleAudios(catId) {
     if (!globalConfig.bundles || !Array.isArray(globalConfig.bundles)) return;
     window._preloadedAudioCache = window._preloadedAudioCache || {};
     const bundles = globalConfig.bundles.filter(function(b) {
-        return b.audioFileId && b.audioFileId.trim() !== '';
+        return b.audioFileId && b.audioFileId.trim() !== '' && b.catId === catId;
     });
     if (bundles.length === 0) return;
     console.log('[Preload] 오디오 ' + bundles.length + '개 백그라운드 로드 시작');
