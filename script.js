@@ -4045,7 +4045,7 @@ async function generateOverallComment(record, averages, activeSections, sectionC
 
     const prompt = `${gradeTone}
 
-아래 학생의 영역별 코멘트를 종합해 전체 피드백을 작성해주세요.
+아래 학생의 영역별 코멘트를 참고해 종합 피드백을 작성해주세요.
 
 [학생 정보]
 이름: ${sName}
@@ -4057,9 +4057,10 @@ ${sectionSummary}
 개인 총점: ${totalScore}점 / 시험지 만점: ${totalMax}점 / 반 평균: ${totalAvg.toFixed(1)}점 / 정답률: ${totalRate}% / 성취레벨: ${totalLevel}
 
 [작성 규칙]
-1) 각 영역에서의 강점 종합 (1~2문장)
-2) 부족한 영역과 코멘트를 바탕으로 실질적 학습 방향 (1~2문장)
-3) 전체적 격려 메시지 (1문장)
+1) 각 영역 코멘트에서 이미 언급된 세부 내용(특정 표현, 문법 항목, 단어 유형 등)은 그대로 반복하지 마세요.
+2) 영역들을 가로질러 보이는 전체적 패턴이나 공통 특징만 종합적으로 언급하세요 (1~2문장)
+3) 부족한 영역의 핵심 학습 방향을 종합 관점에서 간결하게 제안하세요 (1~2문장)
+4) 전체적 격려 메시지로 마무리하세요 (1문장)
 
 실제 총점/만점을 반드시 언급하세요. 호칭이 필요한 경우 "${sName} 학생은" 형식으로 실명을 사용하세요. "우리 OO 학생" 같은 가상 호칭은 절대 사용하지 마세요. 학원명, 교재명, 브랜드명은 절대 언급하지 마세요. 모든 답변은 순수 한국어로만 작성하세요. 인사말(안녕하세요, 반갑습니다 등)로 시작하지 마세요. 바로 내용으로 시작하세요.`;
 
@@ -4826,12 +4827,12 @@ function printReport() {
 <style>
   /* Noto Sans KR via link tag above */
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  body { font-family: 'Noto Sans KR', sans-serif; background:#fff; margin:0; padding:24px 32px 160px; color:#1e293b; }
+  body { font-family: 'Noto Sans KR', sans-serif; background:#fff; margin:0; padding:24px 32px 200px; color:#1e293b; }
   img { max-width:100%; }
   .no-print { display:none !important; }
   @media print {
     @page { margin:12mm; }
-    body { padding-bottom:140px; }
+    body { padding-bottom:200px; }
     .card, section, [class*='rounded'] { page-break-inside: avoid; }
     h4 { page-break-after: avoid; }
   }
