@@ -30,6 +30,10 @@
 - **exitEditMode**: 직전 카테고리 자동 복귀(`_editReturnCatId`, `handleBankCategoryChange`) 로직 제거
 - **구 ID 흔적 제거**: `// --- Edit Form Builder (New 07-2) ---` 주석, `console.log('[07-2 Debug]...')` 제거
 
+#### 추가 작업
+- **Canvas 08-1**: 시험지 불러오기 시 변경사항 없을 때 불필요한 confirm 제거 (`ba0b6ec`)
+- **Canvas 08/08-1/08-2**: 캔버스 이탈 시 `hasUnsavedChanges()` 경고 제거 → 별도 변경감지 시스템(`_changedItems`, `_editHasChanged`)으로 충분 (`d440659`)
+
 #### 영향 범위 확인
 - 08-1 저장/불러오기: 영향 없음 (isEditMode=false, questionIds 미전달로 기존과 동일)
 - 통합DB Bundles E열(questionIds): UPDATE_QUESTION에서 시트값 직접 읽어 유지 → 변경 안됨
