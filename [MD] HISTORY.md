@@ -45,10 +45,15 @@
 - **채점 영향 확인**: submitExam 채점로직 전수 점검 결과 A~E 변경이 채점/학생DB에 영향 없음 확인 (alpha 문항은 오히려 처음 정상화)
 - **결과**: `script.js` 수정, 한글 인코딩 검증 통과, Git 커밋 `e39f94b`, `4d1b579`, `1d1fefc`
 
-### 미완료 사항 (다음 세션 시작 전 선행 필요)
-1. 🚨 **`API script.gs` → 구글 앱스크립트 복붙 후 재배포** (오늘 수정: 파란배경, 헤더 덮어쓰기, 오디오 clearFormat 포함)
-2. **구글 시트 Questions탭 O열 수동 삭제** (라벨타입 헤더 잘못된 위치)
-3. **오디오 재업로드** — 08-2 수정 모드에서 각 번들 1회 (파일은 Drive에 존재)
+### 08-1 저장 시 번들 UUID 매번 신규 생성 버그 수정
+- **원인**: `collectBuilderData()`에서 `block.getAttribute('data-group-id')`를 읽는데, `addComponent`에서 bundle div에 `data-group-id` 속성이 설정 안 됨 → 매번 `generateUUID()`로 신규 UUID 생성 → 저장할 때마다 모든 번들 세트번호가 바뀜 → `_existBnd` 매칭 실패 → audioUrl/audioFileId 소멸 + 문항 setId 연결도 깨짐
+- **수행**: `collectBuilderData` 8471줄: `block.getAttribute('data-group-id') || block.id || generateUUID()` — `block.id`가 불러오기 시 원본 UUID로 설정되므로 이를 우선 사용
+- **결과**: `script.js` 수정, 한글 인코딩 검증 통과, Git 커밋 `b7ade01`
+
+### 완료된 수동 작업
+1. ✅ **`API script.gs` 재배포** 완료
+2. ✅ **구글 시트 Questions탭 O열 삭제** 완료
+3. ⬜ **오디오 재업로드** — 08-1 전체저장으로 재업로드 시도했으나 UUID 버그로 실패 → b7ade01 수정 후 재시도 필요
 
 ## 2026-03-26
 
