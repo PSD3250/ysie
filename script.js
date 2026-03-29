@@ -6661,6 +6661,8 @@ function renderRegForm() {
             <!-- Palette Removed (Integrated into Header) -->
         </div>
     `;
+    // 진입 즉시 이벤트 위임 등록 (불러오기 없이 직접 추가/수정해도 변경 감지 작동)
+    _builderInitChangeTrack();
     // 전체 등록 버튼에서 넘어온 경우: 시험지 자동 선택 + 불러오기
     if (window._autoLoadCatId) {
         const sel = document.getElementById('reg-target-cat');
