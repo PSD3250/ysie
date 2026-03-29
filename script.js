@@ -7362,7 +7362,7 @@ function getComponentHtml(type, id, data) {
                     <!-- Legacy UI for cat if needed, but usually hidden or handled by top bar -->`;
 
         case 'bundle':
-            const isEditMode = !!document.querySelector('[data-canvas-id="07-2"]');
+            const isEditMode = !!document.querySelector('[data-canvas-id="08-2"]');
             return `
                 <div class="flex items-center justify-between gap-3 mb-4 bg-orange-50 p-3 rounded-xl border border-orange-100" data-group-id="${d.groupId || generateUUID()}">
                     <div class="flex items-center gap-3">
@@ -8117,8 +8117,7 @@ function clearBuilderImg(id) {
 }
 
 
-// --- Edit Form Builder (New 08-2) ---
-// --- Edit Form Builder (New 07-2) ---
+// --- Edit Form Builder (Canvas 08-2) ---
 function renderEditForm(qId) {
     const q = globalConfig.questions.find(item => item.id === qId);
     if (!q) return showToast("⚠️ 문항 정보를 찾을 수 없습니다.");
@@ -8129,7 +8128,7 @@ function renderEditForm(qId) {
     setCanvasId('08-2');
     const c = document.getElementById('dynamic-content');
 
-    // [Fix] app-canvas 패딩 제거 (07-2 콘텐츠 영역 최대화, 사이드바는 유지)
+    // app-canvas 패딩 제거
     const ac = document.getElementById('app-canvas');
     if (ac) ac.style.padding = '0';
     document.getElementById('app-canvas').classList.add('!overflow-hidden');
@@ -8252,7 +8251,7 @@ function renderEditForm(qId) {
     if (type === 'subj' && q.choices && Array.isArray(q.choices) && q.choices.length > 0) {
         type = 'obj';
     }
-    console.log('[07-2 Debug] q.type:', q.type, '→ resolved:', type);
+
 
     addComponent(type, {
         id: q.id,
