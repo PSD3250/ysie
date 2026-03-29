@@ -1753,7 +1753,7 @@ function renderMainConfig(c) {
                                     <option value="초1">초1</option><option value="초2">초2</option><option value="초3">초3</option>
                                     <option value="초4">초4</option><option value="초5">초5</option><option value="초6">초6</option>
                                     <option value="중1">중1</option><option value="중2">중2</option><option value="중3">중3</option>
-                                    <option value="고1">고1</option><option value="고2">고2</option><option value="고3">고3</option>
+                                    <option value="고1">고1</option><option value="고2">고2</option><option value="고3">고3</option><option value="고등">고등</option><option value="기타">기타</option>
                                 </select>
                                 <input type="text" id="new-class-input" class="ys-field !w-auto flex-grow min-w-0" placeholder="예) A반, 영어반" autocomplete="off" onkeydown="if(event.key==='Enter') addClassItem()">
                                 <button onclick="addClassItem()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl fs-14 font-bold shadow-md transition-all active:scale-95 whitespace-nowrap flex-none">+ 추가</button>
@@ -1831,7 +1831,7 @@ function renderMainConfig(c) {
 function renderClassListHtml() {
     const classes = (globalConfig.classes || []).filter(c => typeof c === 'object' && c.grade && c.name);
     if (classes.length === 0) return '<span class="text-slate-400 fs-14">등록된 학급이 없습니다.</span>';
-    const GRADES = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3'];
+    const GRADES = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3','고등','기타'];
     const groups = {};
     classes.forEach((c, i) => { if (!groups[c.grade]) groups[c.grade] = []; groups[c.grade].push({...c, idx: i}); });
     return GRADES.filter(g => groups[g])
