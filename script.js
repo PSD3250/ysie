@@ -2907,7 +2907,7 @@ function warnClassChange05(sel) {
         if (!ok) { sel.value = rec; }
     }
     rerenderReportCharts();
-    window._reportDirty = true;
+    window._dirtyClass = true;
 }
 
 // 성적표 평균 표시 모드 변경
@@ -4355,7 +4355,7 @@ async function callGeminiAPI(prompt, silent = false, imageUrls = []) {
 function renderReportCard(record, averages, sectionComments, overallComment, activeSections, notes) {
     const display = document.getElementById('report-display');
     if (!display) return;
-    window._reportDirty = false;
+    window._dirtyClass = false; window._dirtyComment = false;
 
     setCanvasId('05-1'); // 개인 성적표 캔버스
 
@@ -4686,15 +4686,16 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
 function saveReportData() {
     const catVal = document.getElementById('report-category')?.value;
     const stuVal = document.getElementById('report-student')?.value;
-    if (!catVal || !stuVal) { showToast('\u26a0\ufe0f \uc2dc\ud5d8\uc9c0\uc640 \ud559\uc0dd\uc744 \uba3c\uc800 \uc120\ud0dd\ud574\uc8fc\uc138\uc694.'); return; }
+    if (!catVal || !stuVal) { showToast('⚠️ 시험지와 학생을 먼저 선택해주세요.'); return; }
+    if (!window._dirtyClass && !window._dirtyComment) { showToast('✅ 변경사항이 없습니다.'); return; }
     const cat = globalConfig.categories?.find(c => c.id === catVal);
     const folderId = cat ? extractFolderId(cat.targetFolderUrl) : null;
-    if (!folderId) { showToast('\u26a0\ufe0f \ud3f4\ub354 \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.'); return; }
+    if (!folderId) { showToast('⚠️ 폴더 정보가 없습니다.'); return; }
     const clsVal = document.getElementById('report-student-class')?.value;
     const btn = document.getElementById('btn-save-report');
-    if (btn) { btn.disabled = true; btn.textContent = '\uc800\uc7a5 \uc911...'; }
+    if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
     const promises = [];
-    if (clsVal && clsVal !== '__RECOMMEND__') {
+    if (window._dirtyClass && clsVal && clsVal !== '__RECOMMEND__') {
         promises.push(sendReliableRequest({
             type: 'SAVE_STUDENT_CLASS',
             parentFolderId: folderId,
@@ -4702,7 +4703,7 @@ function saveReportData() {
             studentClass: clsVal
         }));
     }
-    if (window.currentReportData) {
+    if (window._dirtyComment && window.currentReportData) {
         promises.push(sendReliableRequest({
             type: 'SAVE_AI_COMMENT',
             parentFolderId: folderId,
@@ -4713,9 +4714,9 @@ function saveReportData() {
         }));
     }
     Promise.all(promises)
-        .then(() => { window._reportDirty = false; showToast('\ud83d\udcbe \uc800\uc7a5 \uc644\ub8cc!'); })
-        .catch(e  => { console.warn('\uc800\uc7a5 \uc2e4\ud328:', e); showToast('\u274c \uc800\uc7a5 \uc2e4\ud328. \ub2e4\uc2dc \uc2dc\ub3c4\ud574\uc8fc\uc138\uc694.'); })
-        .finally(() => { if (btn) { btn.disabled = false; btn.textContent = '\ud83d\udcbe \uc800\uc7a5'; } });
+        .then(() => { window._dirtyClass = false; window._dirtyComment = false; showToast('💾 저장 완료!'); })
+        .catch(e  => { console.warn('저장 실패:', e); showToast('❌ 저장 실패. 다시 시도해주세요.'); })
+        .finally(() => { if (btn) { btn.disabled = false; btn.textContent = '💾 저장'; } });
 }
 
 function printReport() {
@@ -4725,7 +4726,7 @@ function printReport() {
         showToast('⚠️ 시험지와 학생을 먼저 선택해주세요.');
         return;
     }
-    if (window._reportDirty) {
+    if (window._dirtyClass || window._dirtyComment) {
         const ok = confirm('변경사항이 감지되었습니다.\n저장 후 인쇄를 권장합니다.\n\n그래도 인쇄하시겠습니까?');
         if (!ok) return;
     }
@@ -5045,7 +5046,7 @@ async function regenerateSectionComment(section) {
 
 // AI 코멘트 인라인 편집
 function editComment(type, section) {
-    window._reportDirty = true;
+    window._dirtyComment = true;
     if (type === 'overall') {
         const el = document.getElementById('overall-comment-text');
         if (!el) return;
@@ -5128,13 +5129,13 @@ function saveCommentEdit(type, section) {
                 overallComment: window.currentReportData.overallComment,
                 sectionComments: window.currentReportData.sectionComments,
                 notes: window.currentReportData.notes // 비고란 추가
-            }).then(() => { window._reportDirty = false; showToast('💾 서버에 저장되었습니다.'); })
+            }).then(() => { window._dirtyComment = false; showToast('💾 서버에 저장되었습니다.'); })
               .catch(e => console.warn('개별 저장 중 GAS 통신 실패:', e));
         }
     }
 }
 function cancelCommentEdit(type, section) {
-    window._reportDirty = false;
+    window._dirtyComment = false;
     if (type === 'overall') {
         const txt = window.currentReportData && window.currentReportData.overallComment || '';
         const wrap = document.getElementById('overall-comment-wrap');
