@@ -2257,13 +2257,14 @@ function showCat(editId = null) {
 
                     <!-- 우측: 폼 -->
                     <div class="flex-1 space-y-4 text-left">
+                        <div class="space-y-2">
+                            <label class="ys-label font-bold !mb-0">🏷️ 구분</label>
+                            <select id="cc" class="ys-field !bg-slate-50/50 hover:border-blue-400 focus:bg-white transition-all shadow-sm ${classStyle}" ${classDisabled}>
+                                ${classificationOptions}
+                            </select>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="ys-label font-bold !mb-0">🏷️ 구분</label>
-                                <select id="cc" class="ys-field !bg-slate-50/50 hover:border-blue-400 focus:bg-white transition-all shadow-sm ${classStyle}" ${classDisabled}>
-                                    ${classificationOptions}
-                                </select>
-                            </div>
                             <div class="space-y-2">
                                 <label class="ys-label font-bold !mb-0">🎓 권장 평가 학년 <span class="text-red-500">*</span></label>
                                 <select id="cgr" class="ys-field !bg-slate-50/50 hover:border-blue-400 focus:bg-white transition-all shadow-sm" required>
@@ -2271,11 +2272,10 @@ function showCat(editId = null) {
                                     ${getRegisteredGrades().map(g => `<option value="${g}" ${cat?.targetGrade === g ? 'selected' : ''}>${g}</option>`).join('')}
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
-                            <input type="number" id="ctm" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="0 = 무제한" value="${cat?.timeLimit || 0}" min="0">
+                            <div class="space-y-2">
+                                <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
+                                <input type="number" id="ctm" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="0 = 무제한" value="${cat?.timeLimit || 0}" min="0">
+                            </div>
                         </div>
 
                         <div class="space-y-2">
@@ -2317,17 +2317,30 @@ function showCopyCat(srcCatId) {
         <div class="animate-fade-in-safe flex flex-col items-center pb-10 mt-5">
             <div class="canvas-premium-box !max-w-3xl w-full">
                 <div class="flex flex-row items-start gap-10">
-                    <div class="flex flex-col items-center gap-4 flex-shrink-0 w-40 border-r border-slate-200 pr-10">
+                    <!-- 좌측: 아이콘 + 원본 + 복사할 데이터 -->
+                    <div class="flex flex-col items-center gap-4 flex-shrink-0 w-44 border-r border-slate-200 pr-6">
                         <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl shadow-inner">📋</div>
                         <h2 class="fs-18 text-[#013976] uppercase text-center font-black tracking-tight leading-tight">COPY EXAM</h2>
-                        <p class="text-xs text-slate-500 text-center">원본: <b>${srcCat.name}</b></p>
+                        <p style="font-size:14px;" class="text-slate-500 text-center">원본: <b>${srcCat.name}</b></p>
+                        <div class="w-full space-y-2 bg-slate-50 rounded-xl p-3 border border-slate-200">
+                            <label class="ys-label font-bold !mb-1">📦 복사할 데이터</label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="copy-copyQ" checked class="w-5 h-5 accent-blue-600">
+                                <span class="fs-14 font-medium text-slate-700">통합DB (문항 데이터)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer mt-1">
+                                <input type="checkbox" id="copy-copyS" class="w-5 h-5 accent-purple-600">
+                                <span class="fs-14 font-medium text-slate-700">학생DB (응시 기록)</span>
+                            </label>
+                        </div>
                     </div>
+                    <!-- 우측: 폼 -->
                     <div class="flex-1 space-y-4 text-left">
+                        <div class="space-y-2">
+                            <label class="ys-label font-bold !mb-0">🏷️ 구분</label>
+                            <select id="copy-cc" class="ys-field !bg-slate-50/50">${classificationOptions}</select>
+                        </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="ys-label font-bold !mb-0">🏷️ 구분</label>
-                                <select id="copy-cc" class="ys-field !bg-slate-50/50">${classificationOptions}</select>
-                            </div>
                             <div class="space-y-2">
                                 <label class="ys-label font-bold !mb-0">🎓 권장 평가 학년 <span class="text-red-500">*</span></label>
                                 <select id="copy-cgr" class="ys-field !bg-slate-50/50">
@@ -2335,25 +2348,14 @@ function showCopyCat(srcCatId) {
                                     ${getRegisteredGrades().map(g => `<option value="${g}" ${srcCat.targetGrade === g ? 'selected' : ''}>${g}</option>`).join('')}
                                 </select>
                             </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
-                            <input type="number" id="copy-ctm" class="ys-field !bg-slate-50/50" placeholder="0 = 무제한" value="${srcCat.timeLimit || 0}" min="0">
+                            <div class="space-y-2">
+                                <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
+                                <input type="number" id="copy-ctm" class="ys-field !bg-slate-50/50" placeholder="0 = 무제한" value="${srcCat.timeLimit || 0}" min="0">
+                            </div>
                         </div>
                         <div class="space-y-2">
                             <label class="ys-label font-bold !mb-0">📝 새 시험지 이름 <span class="text-red-500">*</span></label>
                             <input type="text" id="copy-cn" autocomplete="off" class="ys-field !bg-slate-50/50" placeholder="새 시험지 이름을 입력하세요.">
-                        </div>
-                        <div class="space-y-2 bg-slate-50 rounded-xl p-4 border border-slate-200">
-                            <label class="ys-label font-bold !mb-2">📦 복사할 데이터</label>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="copy-copyQ" checked class="w-5 h-5 accent-blue-600">
-                                <span class="fs-15 font-medium text-slate-700">통합DB (문항 데이터)</span>
-                            </label>
-                            <label class="flex items-center gap-3 cursor-pointer mt-2">
-                                <input type="checkbox" id="copy-copyS" class="w-5 h-5 accent-purple-600">
-                                <span class="fs-15 font-medium text-slate-700">학생DB (응시 기록)</span>
-                            </label>
                         </div>
                         <div>
                             <button onclick="copyCat('${srcCatId}')" class="btn-ys w-full !py-4 fs-16 font-bold shadow-lg mt-2">📋 시험지 복사 생성</button>
