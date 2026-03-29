@@ -1326,7 +1326,7 @@ async function gradeWithAI(q, userAns) {
 
     // [Fix] 이미지 URL 수집 (문항 이미지 + 번들 이미지) — GAS에서 Drive 파일로 읽어 AI에 전달
     const imageUrls = [];
-    if (q.qImg && q.qImg.trim()) imageUrls.push(q.qImg.trim());
+    if ((q.imgUrl || q.qImg) && (q.imgUrl || q.qImg).trim()) imageUrls.push((q.imgUrl || q.qImg).trim());
     if (q.bundleImgUrl && q.bundleImgUrl.trim()) imageUrls.push(q.bundleImgUrl.trim());
 
     const hasImages = imageUrls.length > 0;
@@ -5242,8 +5242,8 @@ function switchStatsMode(mode) {
     const OFF = 'btn-ys !bg-white !text-slate-500 !border-2 !border-slate-300 hover:!border-purple-500 hover:!text-purple-700 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl whitespace-nowrap flex items-center gap-2';
     if (qBtn) qBtn.className = mode === 'question' ? ON : OFF;
     if (sBtn) sBtn.className = mode === 'student'  ? ON : OFF;
-    if (mode === 'question') loadQuestionStats();
-    else loadStudentStats();
+    if (mode === 'question') { setCanvasId('07-1'); loadQuestionStats(); }
+    else { setCanvasId('07-2'); loadStudentStats(); }
 }
 
 function onStatsCategoryChange() {
