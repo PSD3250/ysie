@@ -30,9 +30,13 @@
 - **exitEditMode**: 직전 카테고리 자동 복귀(`_editReturnCatId`, `handleBankCategoryChange`) 로직 제거
 - **구 ID 흔적 제거**: `// --- Edit Form Builder (New 07-2) ---` 주석, `console.log('[07-2 Debug]...')` 제거
 
-#### 추가 작업
-- **Canvas 08-1**: 시험지 불러오기 시 변경사항 없을 때 불필요한 confirm 제거 (`ba0b6ec`)
-- **Canvas 08/08-1/08-2**: 캔버스 이탈 시 `hasUnsavedChanges()` 경고 제거 → 별도 변경감지 시스템(`_changedItems`, `_editHasChanged`)으로 충분 (`d440659`)
+#### 추가 작업 (근본 버그 수정)
+- **Canvas 08-1 `saveRegGroup`**: `_changedItems.size===0` 저장 차단 로직 제거 (`3daf937`)
+- **Canvas 08-2 `updateBuilderQuestion`**: `_editHasChanged()` 차단 (1차) + `questionChanged/bundleChanged` 비교 차단 (2차) + 중복 confirm 제거 (`89d4d52`, `b64d762`)
+- **Canvas 08-1 `loadQuestionsFromCategory`**: `const bundleInfo` 재할당 런타임 오류 수정 → `let`으로 변경 (`3152849`)
+- **Canvas 08-1 `loadQuestionsFromCategory` 근본 버그**: 신규 시험지(문항 없음) 진입 시 `_builderLoading=true`가 해제되지 않아 이후 카드 추가해도 변경감지 마킹이 안됨 → `return` 전 `_builderLoading=false` + `_builderInitChangeTrack()` 추가 (`82fefc2`)
+  - **근본 원인**: 전체 등록 버튼 → 08-1 진입 → 자동 불러오기 → 문항 없음 → 중간 return → loading 플래그 미해제 → 카드 추가해도 `_changedItems` 빈 상태 유지 → 저장 차단
+- **Canvas 08/08-1/08-2 이탈 경고**: `hasUnsavedChanges()` 경고 제거, 불필요한 confirm 제거 (`ba0b6ec`, `d440659`)
 
 #### 영향 범위 확인
 - 08-1 저장/불러오기: 영향 없음 (isEditMode=false, questionIds 미전달로 기존과 동일)
