@@ -2274,7 +2274,7 @@ function showCat(editId = null) {
                             </div>
                             <div class="space-y-2">
                                 <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
-                                <input type="number" id="ctm" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="0 = 무제한" value="${cat?.timeLimit || 0}" min="0">
+                                <input type="number" id="ctm" class="ys-field !bg-slate-50/50 focus:bg-white transition-all shadow-sm" placeholder="시험 시간(분) 입력" value="${cat?.timeLimit || ''}" min="1">
                             </div>
                         </div>
 
@@ -2350,7 +2350,7 @@ function showCopyCat(srcCatId) {
                             </div>
                             <div class="space-y-2">
                                 <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
-                                <input type="number" id="copy-ctm" class="ys-field !bg-slate-50/50" placeholder="0 = 무제한" value="${srcCat.timeLimit || 0}" min="0">
+                                <input type="number" id="copy-ctm" class="ys-field !bg-slate-50/50" placeholder="시험 시간(분) 입력" value="${srcCat.timeLimit || ''}" min="1">
                             </div>
                         </div>
                         <div class="space-y-2">
@@ -2380,6 +2380,7 @@ async function copyCat(srcCatId) {
 
     if (!newName) return showToast('새 시험지 이름을 입력해 주세요.');
     if (!tGrade)  return showToast('권장 평가 학년을 선택해 주세요.');
+    if (!tLimit || Number(tLimit) <= 0) return showToast('권장 평가 시간(분)을 입력해 주세요.');
     if (!globalConfig.mainServerLink) return showToast('Main Server Folder 설정이 필요합니다.');
 
     const finalFolderName = `${cCode}_${newName}`;
@@ -2444,24 +2445,34 @@ async function saveCat(editId = '') {
     const tLimit = document.getElementById('ctm')?.value || 0;
     let u = '';
 
-    if (!n) return showToast("시험지 이름을 입력해 주세요.");
-    if (!tGrade) return showToast("권장 평가 학년을 선택해 주세요.");
+    if (!n) return showToast('시험지 이름을 입력해 주세요.');
+    if (!tGrade) return showToast('권장 평가 학년을 선택해 주세요.');
+    if (!tLimit || Number(tLimit) <= 0) return showToast('권장 평가 시간(분)을 입력해 주세요.');
 
     if (editId) {
-        if (!confirm('💾 수정된 시험지 정보를 저장하시겠습니까?')) return;
+        // 변경사항 없으면 저장 불필요
         const cat = globalConfig.categories.find(c => c.id === editId);
         if (cat) {
-            const oldName = cat.name;
+            const noChange = (n === cat.name) &&
+                             (cCode === (cat.classification || 'A')) &&
+                             (tGrade === (cat.targetGrade || '')) &&
+                             (String(tLimit) === String(cat.timeLimit || 0));
+            if (noChange) return showToast('수정된 사항이 없습니다.');
+        }
+        if (!confirm('💾 수정된 시험지 정보를 저장하시겠습니까?')) return;
+        const cat2 = globalConfig.categories.find(c => c.id === editId);
+        if (cat2) {
+            const oldName = cat2.name;
             const newName = n;
 
             if (oldName !== newName) {
-                const folderId = extractFolderId(cat.targetFolderUrl);
+                const folderId = extractFolderId(cat2.targetFolderUrl);
                 if (folderId && globalConfig.masterUrl) {
                     try {
                         toggleLoading(true);
                         showToast(`🛰️ 폴더명 변경 중: [${newName}]...`);
                         const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
-                        const finalFolderName = `${cat.classification || 'A'}_${newName}`;
+                        const finalFolderName = `${cat2.classification || 'A'}_${newName}`;
                         const res = await fetch(masterUrl, {
                             method: 'POST',
                             body: JSON.stringify({ type: 'RENAME_FOLDER', folderId: folderId, newName: finalFolderName })
@@ -2488,9 +2499,9 @@ async function saveCat(editId = '') {
                 }
             }
 
-            cat.name = n;
-            cat.targetGrade = tGrade;
-            cat.timeLimit = tLimit;
+            cat2.name = n;
+            cat2.targetGrade = tGrade;
+            cat2.timeLimit = tLimit;
             save();
             await saveConfigToCloud();
             showToast(`[${n}] 시험지 정보가 업데이트되었습니다.`);
