@@ -3188,6 +3188,18 @@ function updateClassDropdown06(grade) {
 // AI 추천: calculateTotalScore()에서 직접 호출하므로 별도 이벤트 불필요
 
 // Canvas 06: 학년 변경 시 권장 학년 다른지 체크
+// [학생 로그인] 학년 변경 시 권장 학년과 다르면 경고
+function handleSgrGradeChange(val, sel) {
+    const rec = window._sgrTargetGrade || '';
+    if (rec && val !== rec) {
+        const ok = confirm(`⚠️ 이 시험지의 권장 학년은 "${rec}" 입니다.\n"${val}"(으)로 변경하시겠습니까?`);
+        if (!ok) {
+            sel.value = rec;
+            return;
+        }
+    }
+}
+
 function handleGradeChange06(val, sel) {
     const rec = window._recommendedGrade06 || '';
     if (rec && val !== rec) {
@@ -3500,6 +3512,13 @@ function updatePage(delta) {
 
     if (newPage < 0) newPage = 0;
     if (newPage >= totalPages) newPage = totalPages - 1;
+
+    // [Fix] 이동 불가(첫/마지막 페이지)이면 토스트 후 종료
+    if (newPage === examSession.currentPage) {
+        if (delta < 0) showToast('⬅️ 첫 번째 페이지입니다.');
+        else showToast('➡️ 마지막 페이지입니다.');
+        return;
+    }
 
     // [경고 1] 오디오 재생 중 이동 확인
     const _playingAudios = Array.from(document.querySelectorAll('audio')).filter(function(a){ return !a.paused && !a.ended; });
@@ -9444,7 +9463,7 @@ async function renderStudentLogin() {
                             </div>
                             <div>
                                 <label class="ys-label font-bold !mb-0">🎓 학년</label>
-                                <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm">
+                                <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" onchange="handleSgrGradeChange(this.value, this)">
                                     <option value="" disabled selected hidden>학년을 선택하세요</option>
                                 </select>
                             </div>
@@ -9546,6 +9565,9 @@ function handleCategorySelect() {
         if (cat.targetGrade) {
             const sgrSelect = document.getElementById('sgr');
             if (sgrSelect) sgrSelect.value = cat.targetGrade;
+            window._sgrTargetGrade = cat.targetGrade; // [Fix] 학년 경고용 기준값 저장
+        } else {
+            window._sgrTargetGrade = '';
         }
 
         // 권장 평가 시간 덮어쓰기
