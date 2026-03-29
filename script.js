@@ -7377,27 +7377,27 @@ function getComponentHtml(type, id, data) {
                     <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">질문 내용 (Question)</label>
                     <textarea id="${id}-title" data-field="title" rows="1" oninput="autoResize(this)" class="${inputClass} resize-none overflow-hidden" placeholder="질문을 입력하세요">${d.title || d.text || ''}</textarea>
                 </div>
-                <!-- 연결 문항 관련 영역은 수정 모드가 아닐 때만 표시 (수정 모드에서는 새끼 변경 금지) -->
-                <div class="mb-4" ${isEditMode ? 'style="display:none;"' : ''}>
+                <!-- 연결 문항 관련 영역 -->
+                <div class="mb-4">
                      <label class="text-[14px] font-bold text-slate-600 mb-1.5 block">연결 문항 (Linked Questions)</label>
                      <div class="flex items-center gap-2 overflow-hidden">
                         <input type="text" id="${id}-link-input" 
-                                class="flex-1 min-w-0 p-2 text-[14px] font-bold text-orange-600 border-2 border-orange-200 rounded-lg outline-none focus:border-orange-400 placeholder:text-orange-300 placeholder:font-normal" 
+                                class="flex-1 min-w-0 p-2 text-[14px] font-bold text-orange-600 border-2 border-orange-200 rounded-lg outline-none focus:border-orange-400 placeholder:text-orange-300 placeholder:font-normal ${isEditMode ? 'bg-slate-100 cursor-not-allowed' : ''}" 
                                 placeholder="예: 1, 2, 3 (번호 입력)"
                                 onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleBundleLinkInput('${id}', this.value); }"
-                                value="">
+                                value="${d.questionIds || ''}"
+                                ${isEditMode ? 'readonly' : ''}>
                         <div class="flex flex-row gap-1 flex-shrink-0">
                             <button onclick="handleBundleLinkInput('${id}', document.getElementById('${id}-link-input').value)" 
-                                    class="btn-ys !bg-orange-600 !text-white !border-orange-600 hover:brightness-110 !px-3 !py-1 !text-[14px] !font-bold rounded shadow-sm whitespace-nowrap">
+                                    class="btn-ys !bg-orange-600 !text-white !border-orange-600 hover:brightness-110 !px-3 !py-1 !text-[14px] !font-bold rounded shadow-sm whitespace-nowrap ${isEditMode ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}">
                                 연결
                             </button>
                             <button onclick="handleBundleDisconnect('${id}')" 
-                                    class="btn-ys !bg-white !text-red-500 !border-red-200 hover:bg-red-50 !px-3 !py-1 !text-[14px] !font-bold rounded shadow-sm whitespace-nowrap">
+                                    class="btn-ys !bg-white !text-red-500 !border-red-200 hover:bg-red-50 !px-3 !py-1 !text-[14px] !font-bold rounded shadow-sm whitespace-nowrap ${isEditMode ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}">
                                 해제
                             </button>
                         </div>
                      </div>
-                     <!-- Value will be populated by sync logic if data-linked-ids exists -->
                 </div>
                 
                 <!-- Toggle Controls -->
