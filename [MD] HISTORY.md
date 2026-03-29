@@ -2,7 +2,27 @@
 
 
 
+
+
+## 2026-03-29 (추가 작업 4차 - 저녁 2)
+
+### printReport 롤백 + 인쇄 UI 전면 개선
+- **지시**: 성적표 인쇄 화면이 작동 불안정 → html2canvas 신버전 제거, 구버전(DOM 클론 방식)으로 롤백
+- **수행**:
+  - `async function printReport()` → `function printReport()` (DOM 클론 방식) 복원
+  - 인쇄 배너 로고 위치(padding-bottom 140px), `@page margin:12mm` 원복 (1a0badf/9d26855 인쇄 관련만)
+  - 종합AI코멘트 프롬프트 개선은 유지
+- **추가 개선**:
+  - 팝업 창 가로: A4 너비(794px) 고정
+  - 등록학급 박스(6A) 테두리 버그 수정: span height:61px + 부모 div border !important 강제
+  - 코멘트(영역별·종합AI) 인쇄 글자크기 13px (.fs-15 정의)
+  - 정오답표 인쇄 글자크기 13px (table.fs-14 td/th)
+  - 정오답표 행높이 py-1 통일, Q번호 행도 py-1 통일, 정오답 ○/✕ text-[14px] 통일
+- **PROJECT RULES 업데이트**: 규칙 #10 괄호 검증 원칙 추가 (node --check), GEMINI.md 전역룰에도 추가
+- **결과**: Git 커밋 `ce94ab6` → `92dba57` → `0493690` → `41745ca` → `382661c` → `e06f377`
+
 ## 2026-03-29 (추가 작업 3차 - 저녁)
+
 
 ### Canvas 09-3: 응시년도+응시월일 → 응시년월일 통합
 - 두 컬럼을 하나로 합치고, 기본 정렬을 최신순(date, dir=-1)으로 변경
