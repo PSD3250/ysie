@@ -7863,6 +7863,7 @@ function renderEditForm(qId) {
         modelAnswer: q.modelAnswer,
         options: q.choices,  // 07-1과 동일: DB의 choices가 보기 배열
         imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : "",
+        labelType: q.labelType || 'number', // [Fix] 라벨타입 첨가
         isLinked: bundleIdToLoad ? true : false,
         linkedGroupId: bundleIdToLoad || ''
     });
@@ -8146,6 +8147,9 @@ async function loadQuestionsFromCategory(catId) {
                         title: bundleInfo?.title || "지문 묶음",
                         html: rawHtml,
                         imgUrl: (bundleInfo?.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : "",
+                        audioUrl:    bundleInfo?.audioUrl    || "",  // [Fix] 오디오 필드 추가
+                        audioFileId: bundleInfo?.audioFileId || "",  // [Fix] 오디오 필드 추가
+                        audioMaxPlay: bundleInfo?.audioMaxPlay || 1,  // [Fix] 오디오 필드 추가
                         questions: []
                     });
                 }
@@ -8187,6 +8191,7 @@ async function loadQuestionsFromCategory(catId) {
                     modelAnswer: q.modelAnswer,
                     options: q.choices, // Fixed: 'options' for UI, 'choices' from DB
                     imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : "", // [Fix] Sanitize on Load
+                    labelType: q.labelType || 'number', // [Fix] 라벨타입 첨가
                     isLinked: true,
                     linkedGroupId: setId
                 });
