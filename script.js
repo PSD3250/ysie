@@ -7972,12 +7972,13 @@ async function updateBuilderQuestion(originalId) {
             type: qInput.type || '객관식',
             difficulty: qInput.diff || '중',
             score: qInput.score || 0,
-            title: qInput.title || '',       // 질문 내용
-            text: qInput.innerPassage || '', // 지문 내용
+            title: qInput.title || '',           // 질문 내용 (발문)
+            text: qInput.passageText || '',      // [Fix] innerPassage→passageText (parseQuestionBlock 키 일치)
             answer: qInput.answer || '',
             modelAnswer: qInput.modelAnswer || '',
             choices: qInput.choices || [],
-            setId: targetBundleId
+            setId: targetBundleId,
+            labelType: qInput.labelType || 'number'  // [Fix] 라벨타입 추가
         };
 
         // Image handling
@@ -8216,7 +8217,8 @@ async function loadQuestionsFromCategory(catId) {
                 answer: q.answer,
                 modelAnswer: q.modelAnswer,
                 options: q.choices,
-                imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : "" // [Fix] Sanitize on Load
+                imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : "",
+                labelType: q.labelType || 'number' // [Fix] 라벨타입 추가
             });
         });
 
