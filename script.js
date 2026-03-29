@@ -4831,7 +4831,7 @@ function printReport() {
   img { max-width:100%; }
   .no-print { display:none !important; }
   @media print {
-    @page { margin:12mm; }
+    @page { margin:12mm 12mm 38mm; }
     body { padding-bottom:200px; }
     .card, section, [class*='rounded'] { page-break-inside: avoid; }
     h4 { page-break-after: avoid; }
