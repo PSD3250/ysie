@@ -699,13 +699,9 @@ function hasUnsavedChanges() {
         if (hasQScore) return true;
         return false;
     }
-    // 08: 카테고리가 선택된 상태(리스트 조회 중)에서 이탈 시 경고
-    if (cid === '08') {
-        return !!curCatId;
-    }
-    // 07-2(부분 수정), 08-1(등록), 08-2(수정): 진입한 상태라면 무조건 경고
-    if (cid === '08-2' || cid === '08-1' || cid === '08-2') {
-        return true;
+    // 08/08-1/08-2: 별도 변경 감지 시스템(_changedItems, _editHasChanged) 있으므로 여기선 제외
+    if (cid === '08' || cid === '08-1' || cid === '08-2') {
+        return false;
     }
     return false;
 }
