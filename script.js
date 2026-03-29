@@ -8237,7 +8237,8 @@ function renderEditForm(qId) {
                 imgUrl: (bundleInfo.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : "",
                 audioUrl: bundleInfo.audioUrl || "",       // [Fix] 오디오 표시 복원
                 audioFileId: bundleInfo.audioFileId || "", // [Fix] 오디오 표시 복원
-                audioMaxPlay: bundleInfo.audioMaxPlay || 1  // [Fix] 오디오 표시 복원
+                audioMaxPlay: bundleInfo.audioMaxPlay || 1,  // [Fix] 오디오 표시 복원
+                questionIds: bundleInfo.questionIds || ''  // [Fix] 연결 문항 번호 표시
             });
         }
     }
