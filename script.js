@@ -2618,11 +2618,13 @@ function renderScoreInput(c) {
                             <input type="text" id="input-test-date" class="ys-field" placeholder="YYYY-MM-DD" autocomplete="off">
                         </div>
                         <div>
-                            <label class="ys-label font-bold" style="color:#6366f1;">&#x1F3EB; &#xB4F1;&#xB85D;&#xD559;&#xAE09;</label>
+                            <label class="ys-label font-bold flex items-center gap-2" style="color:#6366f1;">
+                                🏫 등록학급
+                                <span id="class-recommend-badge06" class="font-bold" style="color:#6366f1;"></span>
+                            </label>
                             <select id="input-student-class" class="ys-field" style="border-color:#a5b4fc;background:#f5f3ff;color:#4338ca;">
-                                <option value="">&#xC120;&#xD0DD;</option>
+                                <option value="">선택</option>
                             </select>
-                             <div id="class-recommend-badge06" style="font-size:12px;margin-top:3px;color:#94a3b8;"></div>
                         </div>
                     </div>
                 </div>
@@ -2727,12 +2729,13 @@ async function handleScoreCategoryChange(catId) {
         }
         catQuestions = newQuestions.sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0));
 
-        // [Fix] 학생 DB도 함께 로드 → 등록학급 자동 추천에 필요
+        // [Fix] 학생 DB 로드 완료 후 학급 추천 재계산
         try {
             const studentRes = await sendReliableRequest({ type: 'GET_STUDENT_LIST', parentFolderId: folderId, categoryName: category.name });
             window.cachedStudentRecords = studentRes.data || [];
+            calcAndRecommendClass06(); // [Fix] 새 데이터 반영하여 재추천
         } catch(e2) {
-            console.warn('[Canvas 06] \ud559\uc0dd DB \ub85c\ub4dc \uc2e4\ud328 (\ud559\uae09 \ucd94\ucc9c \ube44\ud65c\uc131\ud654):', e2.message);
+            console.warn('[Canvas 06] 학생 DB 로드 실패 (학급 추천 비활성화):', e2.message);
         }
 
     } catch(e) {
@@ -2956,7 +2959,7 @@ function calcAndRecommendClass06() {
     sel.dataset.recommendedClass = rec || '';
     const recOpt = sel.querySelector('option[value="__RECOMMEND__"]');
     if (recOpt) recOpt.textContent = rec ? ('⭐ 추천: ' + rec) : '⭐ 추천 (해당없음)';
-    if (rec && (!sel.value || sel.value === '__RECOMMEND__')) {
+    if (rec && (!sel.value || sel.value === '__RECOMMEND__' || sel.value === '달성미달')) {
         sel.value = rec;
         sel.dataset.autoSelected = '1';
     }
