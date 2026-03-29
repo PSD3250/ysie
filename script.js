@@ -4589,8 +4589,8 @@ function toggleAllQuestionDetail(checked) {
                 const cols = chunk.length;
                 gridHtml += `<table class="w-full fs-14 mt-3 border-collapse" style="table-layout:fixed;">
                     <tr class="bg-[#013976] text-white">${chunk.map(q =>
-                        `<th class="py-1.5 px-1 text-center font-bold border border-[#013976]" style="width:10%">${q.no||'-'}</th>`
-                    ).join('')}${'<th class="py-1.5 border border-[#013976]" style="width:10%"></th>'.repeat(10 - cols)}</tr>
+                        `<th class="py-1 px-1 text-center font-bold border border-[#013976]" style="width:10%">${q.no||'-'}</th>`
+                    ).join('')}${'<th class="py-1 border border-[#013976]" style="width:10%"></th>'.repeat(10 - cols)}</tr>
                     <tr class="bg-slate-50">${chunk.map(q =>
                         `<td class="py-1 px-1 text-center text-slate-500 border border-slate-200 text-[14px]">${q.maxScore||0}점</td>`
                     ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
@@ -4604,7 +4604,7 @@ function toggleAllQuestionDetail(checked) {
                         `<td class="py-1 px-1 text-center font-bold border border-slate-200 text-[14px]">${q.score||0}점</td>`
                     ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-white">${chunk.map(q =>
-                        `<td class="py-1 px-1 text-center font-black border border-slate-200 text-[15px]">${mark(q)}</td>`
+                        `<td class="py-1 px-1 text-center font-black border border-slate-200 text-[14px]">${mark(q)}</td>`
                     ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                 </table>`;
             }
@@ -4764,7 +4764,7 @@ function printReport() {
     const _clsSel = clone.querySelector('#report-student-class');
     if (_clsSel) {
         const _clsSpan = document.createElement('span');
-        _clsSpan.style.cssText = 'font-size:20px;font-weight:900;color:#013976;background:white;display:inline-flex;align-items:center;justify-content:center;min-width:80px;padding:0 12px;height:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact;';
+        _clsSpan.style.cssText = 'font-size:20px;font-weight:900;color:#013976;background:white;display:inline-flex;align-items:center;justify-content:center;min-width:80px;padding:0 12px;height:65px;border:none !important;outline:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;';
         _clsSpan.textContent = clsVal || '미선택';
         _clsSel.parentNode.replaceChild(_clsSpan, _clsSel);
     }
@@ -4796,7 +4796,7 @@ function printReport() {
 
     // 5. 팝업 열기
     const _dispW = display.offsetWidth || 900;
-    const _popW  = Math.max(900, Math.min(_dispW + 80, 1400));
+    const _popW  = 794;
     const win = window.open('', '_blank', `width=${_popW},height=1200`);
     if (!win) { showToast('⚠️ 팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.'); return; }
     win.document.write(`<!DOCTYPE html>
