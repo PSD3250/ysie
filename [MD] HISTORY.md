@@ -2,7 +2,53 @@
 
 
 
+## 2026-03-29 (추가 작업)
+
+### 오디오 저장 구조 이미지 방식으로 전면 개선
+- **원인**: `renderAudioUploader`에 기존 audioUrl/audioFileId를 DOM에 보관하는 방법이 없어, `collectBuilderData`에서 `_existBnd`(globalConfig 참조)에 의존했으나 UUID 불일치로 항상 실패
+- **이전 방식**: `_existBnd = globalConfig.bundles.find(b => b.id === setId)` → UUID 불일치 시 빈값
+- **새 방식 (이미지와 동일)**: hidden input `[data-field="audioUrl"]`, `[data-field="audioFileId"]`를 DOM에 심어 `collectBuilderData`에서 직접 읽기
+- **수행**:
+  - `renderAudioUploader`: hidden input 2개 추가 (audioUrl, audioFileId)
+  - `clearBuilderAudio`: ✕ 클릭 시 hidden input도 초기화
+  - `collectBuilderData`: `existingAudioUrl` = DOM hidden input 직접 읽기
+  - `groups.push passage`: existingAudioUrl/FileId 포함
+  - `newBundles.push`: `_existBnd` 제거, `group.passage.audioUrl` 직접 사용
+  - `addComponent`: bundle/passage 타입에 `data-group-id` 명시적 세팅
+- **결과**: Git 커밋 `8762050`
+
+### AI 채점 로직 복원 (인코딩 복구 작업 중 누락된 로직 재적용)
+- **원인**: `0698825` 한글 인코딩 복구 커밋에서 `submitExam`의 `for...of` 루프가 `forEach`로 바뀌어 `await gradeWithAI()` 미실행, `_gradingV2` 플래그 누락
+- **수행**:
+  - `forEach` → `for...of` 복원
+  - 2단계 AI 채점 로직 (`gradeWithAI` 호출) 복원
+  - `_gradingV2: true` 플래그 복원
+  - `section`, `difficulty` 필드 복원
+  - `earnedScore` 구조 복원 (부분점수 지원)
+  - submitExam에 `bundleImgUrl` 주입 추가
+- **결과**: Git 커밋 (AI 채점 복원)
+
+### AI 채점 이미지 멀티모달 지원
+- **내용**: 문항 이미지(`q.qImg`), 번들 이미지(`q.bundleImgUrl`)를 Gemini에 함께 전달하여 이미지 기반 채점 가능하게 수정
+- **수행**:
+  - `gradeWithAI`: imageUrls 수집 후 `callGeminiAPI` 전달
+  - `callGeminiAPI`: `imageUrls` 3번째 파라미터 추가
+  - `API script.gs` CALL_GEMINI: Drive 파일 ID 추출 → `DriveApp.getFileById().getBlob()` → base64 → `inlineData` 파트로 Gemini 전달
+- **🚨 GAS 재배포 필요**
+- **결과**: Git 커밋 `4ad452a`
+
+### AI 채점 프롬프트 강화 (관대한 채점 기준 명시)
+- **수행**: gradeWithAI Instructions에 아래 규칙 명시
+  - 대소문자/띄어쓰기 무시
+  - 하이픈-en dash-em dash 혼용 허용
+  - 정답 핵심 단어 포함 시 추가 정보 있어도 정답
+  - 숫자↔한글 표기 혼용 허용 (11.30 = 11시30분)
+  - 괄호안 선택적 표현 허용
+  - 철자(스펠링)는 엄격하게
+- **결과**: Git 커밋 `29225be`
+
 ## 2026-03-29
+
 ### 시험화면 묶음 문항 객관식 A~E 원문자 미표시 버그 수정
 - **지시**: A~E로 저장해도 시험화면에서 ①②③으로 표시되는 버그 수정 요청. `API script.gs`, `style.css`, `index.html` 전체 파일 점검 병행 요청.
 - **전체 점검 결과**: `API script.gs`(labelType 저장/로드/업데이트 정상), `style.css`(이상 없음), `index.html`(이상 없음)
