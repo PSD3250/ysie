@@ -2167,7 +2167,9 @@ function renderCatManage(c) {
                                                     <div class="flex items-center gap-4">
                                 <button onclick="editCat('${cat.id}')" class="fs-18 text-blue-600 hover:text-blue-800">✏️ 수정</button>
                                 <span class="text-slate-300">|</span>
-                                <button onclick="showStudentDBViewer('${cat.id}', '${cat.name}')" class="fs-18 text-purple-600 hover:text-purple-800">📋 학생 DB</button>
+                                <button onclick="showCopyCat('${cat.id}')" class="fs-18 text-green-600 hover:text-green-800">📋 복사</button>
+                                <span class="text-slate-300">|</span>
+                                <button onclick="showStudentDBViewer('${cat.id}', '${cat.name}')" class="fs-18 text-purple-600 hover:text-purple-800">📊 학생 DB</button>
                                 <span class="text-slate-300">|</span>
                                 <button onclick="delCat('${cat.id}')" class="fs-18 text-red-500 underline hover:text-red-700">🗑️ 삭제</button>
                             </div>
@@ -2252,6 +2254,139 @@ function showCat(editId = null) {
         </div>`;
 }
 function editCat(id) { showCat(id); }
+
+function showCopyCat(srcCatId) {
+    const c = document.getElementById('dynamic-content');
+    setCanvasId('09-3');
+    const srcCat = globalConfig.categories.find(c => c.id === srcCatId);
+    if (!srcCat) return showToast('원본 시험지를 찾을 수 없습니다.');
+
+    const classificationOptions = [
+        { name: '레벨 테스트지 (A)', code: 'A' },
+        { name: '기타 테스트지 (B)', code: 'B' }
+    ].map(opt => `<option value="${opt.code}" ${srcCat.classification === opt.code ? 'selected' : ''}>${opt.name}</option>`).join('');
+
+    c.innerHTML = `
+        <div class="animate-fade-in-safe flex flex-col items-center pb-10 mt-5">
+            <div class="canvas-premium-box !max-w-3xl w-full">
+                <div class="flex flex-row items-start gap-10">
+                    <div class="flex flex-col items-center gap-4 flex-shrink-0 w-40 border-r border-slate-200 pr-10">
+                        <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl shadow-inner">📋</div>
+                        <h2 class="fs-18 text-[#013976] uppercase text-center font-black tracking-tight leading-tight">COPY EXAM</h2>
+                        <p class="text-xs text-slate-500 text-center">원본: <b>${srcCat.name}</b></p>
+                    </div>
+                    <div class="flex-1 space-y-4 text-left">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="ys-label font-bold !mb-0">🏷️ 구분</label>
+                                <select id="copy-cc" class="ys-field !bg-slate-50/50">${classificationOptions}</select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="ys-label font-bold !mb-0">🎓 권장 평가 학년 <span class="text-red-500">*</span></label>
+                                <select id="copy-cgr" class="ys-field !bg-slate-50/50">
+                                    <option value="" disabled hidden>학년 선택</option>
+                                    ${getRegisteredGrades().map(g => `<option value="${g}" ${srcCat.targetGrade === g ? 'selected' : ''}>${g}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="ys-label font-bold !mb-0">⏱️ 권장 평가 시간 (분)</label>
+                            <input type="number" id="copy-ctm" class="ys-field !bg-slate-50/50" placeholder="0 = 무제한" value="${srcCat.timeLimit || 0}" min="0">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="ys-label font-bold !mb-0">📝 새 시험지 이름 <span class="text-red-500">*</span></label>
+                            <input type="text" id="copy-cn" autocomplete="off" class="ys-field !bg-slate-50/50" placeholder="새 시험지 이름을 입력하세요.">
+                        </div>
+                        <div class="space-y-2 bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <label class="ys-label font-bold !mb-2">📦 복사할 데이터</label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="copy-copyQ" checked class="w-5 h-5 accent-blue-600">
+                                <span class="fs-15 font-medium text-slate-700">통합DB (문항 데이터)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer mt-2">
+                                <input type="checkbox" id="copy-copyS" class="w-5 h-5 accent-purple-600">
+                                <span class="fs-15 font-medium text-slate-700">학생DB (응시 기록)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <button onclick="copyCat('${srcCatId}')" class="btn-ys w-full !py-4 fs-16 font-bold shadow-lg mt-2">📋 시험지 복사 생성</button>
+                            <button onclick="changeTab('cat_manage')" class="w-full mt-4 text-slate-400 fs-14 underline hover:text-red-500 font-medium text-center">CANCEL &amp; RETURN</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+}
+
+async function copyCat(srcCatId) {
+    const srcCat = globalConfig.categories.find(c => c.id === srcCatId);
+    if (!srcCat) return showToast('원본 시험지를 찾을 수 없습니다.');
+
+    const newName  = document.getElementById('copy-cn').value.trim();
+    const cCode    = document.getElementById('copy-cc').value || 'A';
+    const tGrade   = document.getElementById('copy-cgr').value || '';
+    const tLimit   = document.getElementById('copy-ctm').value || 0;
+    const copyQ    = document.getElementById('copy-copyQ').checked;
+    const copyS    = document.getElementById('copy-copyS').checked;
+
+    if (!newName) return showToast('새 시험지 이름을 입력해 주세요.');
+    if (!tGrade)  return showToast('권장 평가 학년을 선택해 주세요.');
+    if (!globalConfig.mainServerLink) return showToast('Main Server Folder 설정이 필요합니다.');
+
+    const finalFolderName = `${cCode}_${newName}`;
+    if (!confirm(`📋 [${finalFolderName}] 으로 시험지를 복사 생성합니다.\n계속하시겠습니까?`)) return;
+
+    try {
+        toggleLoading(true);
+        showToast('⏳ 새 폴더 생성 중...');
+        const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
+        const rootId    = extractFolderId(globalConfig.mainServerLink);
+        if (!rootId) throw new Error('서버 폴더 ID를 추출할 수 없습니다.');
+
+        // 1. 새 폴더 생성
+        const createRes  = await sendReliableRequest({ type: 'CREATE_FOLDER', parentFolderId: rootId, folderName: finalFolderName });
+        if (createRes.status !== 'Success') throw new Error(createRes.message || '폴더 생성 실패');
+        const newFolderUrl = createRes.folderUrl;
+        const newFolderId  = createRes.folderId;
+
+        // 2. DB 파일 복사 (선택한 경우)
+        if (copyQ || copyS) {
+            showToast('⏳ 데이터 복사 중...');
+            const srcFolderId = extractFolderId(srcCat.targetFolderUrl);
+            const copyRes = await sendReliableRequest({
+                type: 'COPY_EXAM',
+                srcFolderId:   srcFolderId,
+                dstFolderId:   newFolderId,
+                newName:       newName,
+                copyQuestions: copyQ,
+                copyStudents:  copyS
+            });
+            if (copyRes.status !== 'Success') throw new Error(copyRes.message || '데이터 복사 실패');
+        }
+
+        // 3. 새 카테고리 로컬 등록
+        const newCat = {
+            id:             'cat_' + Date.now(),
+            name:           newName,
+            createdDate:    new Date().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace(/\. /g, '').replace('.', ''),
+            targetFolderUrl: newFolderUrl,
+            classification: cCode,
+            targetGrade:    tGrade,
+            timeLimit:      tLimit
+        };
+        globalConfig.categories.push(newCat);
+        save();
+        await saveConfigToCloud();
+
+        showToast(`✅ [${newName}] 복사 생성 완료!`);
+        changeTab('cat_manage');
+    } catch (err) {
+        console.error('copyCat error:', err);
+        showToast(`❌ 복사 실패: ${err.message}`);
+    } finally {
+        toggleLoading(false);
+    }
+}
 
 async function saveCat(editId = '') {
     const n = document.getElementById('cn').value.trim();

@@ -527,6 +527,38 @@ else if (data.type === "GET_AUDIO_B64") {
         return ContentService.createTextOutput(JSON.stringify({ status: "Success", message: "DB 파일명 변경 완료" })).setMimeType(ContentService.MimeType.JSON);
     }
 
+    // --- [기능 10-2] 시험지 복사 (COPY_EXAM) ---
+    else if (data.type === "COPY_EXAM") {
+        var srcFolderId = data.srcFolderId;
+        var dstFolderId = data.dstFolderId;
+        var newName    = data.newName;
+        var copyQ      = data.copyQuestions; // 통합DB 복사 여부
+        var copyS      = data.copyStudents;  // 학생DB 복사 여부
+
+        if (!srcFolderId || !dstFolderId || !newName) throw new Error("필수 파라미터 누락");
+
+        var srcFolder = DriveApp.getFolderById(srcFolderId);
+        var dstFolder = DriveApp.getFolderById(dstFolderId);
+
+        if (copyQ || copyS) {
+            var ssFiles = srcFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
+            while (ssFiles.hasNext()) {
+                var sf = ssFiles.next();
+                var sfName = sf.getName();
+                if (copyQ && sfName.includes("통합DB")) {
+                    sf.makeCopy(newName + "_통합DB", dstFolder);
+                } else if (copyS && sfName.includes("학생DB")) {
+                    sf.makeCopy(newName + "_학생DB", dstFolder);
+                }
+            }
+        }
+
+        return ContentService.createTextOutput(JSON.stringify({
+            status: "Success",
+            message: "시험지 복사 완료"
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     // --- [기능 11] 루트 하위 폴더 목록 조회 (복구용) ---
     else if (data.type === "LIST_FOLDERS") {
         if (!rootFolderId) throw new Error("루트 폴더 ID가 필요합니다.");
