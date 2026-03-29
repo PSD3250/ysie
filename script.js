@@ -8333,36 +8333,6 @@ async function updateBuilderQuestion(originalId) {
         // [Fix] 07-1 setId 직접 참조 방식과 동일하게: origQ.setId(DB 원본 UUID) 우선 사용
         const targetBundleId = isGeneral ? "" : (origQ.setId || passageData.id || "");
 
-        // [New] 변경사항 감지: 수정된 내용이 없으면 저장 불필요
-        const choicesChanged = JSON.stringify(origQ.choices || []) !== JSON.stringify(qInput.choices || []);
-        const questionChanged =
-            String(origQ.section || '') !== String(qInput.sec || '') ||
-            String(origQ.subType || '') !== String(qInput.sub || '') ||
-            String(origQ.difficulty || '') !== String(qInput.diff || '') ||
-            String(origQ.score || 0) !== String(qInput.score || 0) ||
-            (origQ.title || '') !== (qInput.title || '') ||
-            (origQ.answer || '') !== (qInput.answer || '') ||
-            (origQ.modelAnswer || '') !== (qInput.modelAnswer || '') ||
-            choicesChanged;
-
-        // 번들이 있는 경우 지문 변경사항도 확인
-        let bundleChanged = false;
-        if (!isGeneral && targetBundleId) {
-            const existingBundle = (globalConfig.bundles || []).find(b => b.id === targetBundleId);
-            if (existingBundle) {
-                bundleChanged =
-                    (existingBundle.title || '') !== (passageData.title || '') ||
-                    (existingBundle.text || '') !== (passageData.text || '');
-            }
-        }
-
-        if (!questionChanged && !bundleChanged) {
-            showToast("⚠️ 수정된 사항이 없습니다.");
-            return;
-        }
-
-        if (!confirm("수정 내용을 저장하시겠습니까?")) return;
-
         toggleLoading(true);
 
         const category = globalConfig.categories.find(c => c.id === result.catId);
