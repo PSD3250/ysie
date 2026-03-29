@@ -5051,8 +5051,9 @@ function editComment(type, section) {
         if (!el) return;
         const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
         const wrap = document.getElementById('overall-comment-wrap');
+        const overallRows = Math.max(5, cur.split('\n').length + 1);
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
-                <textarea id="overall-comment-edit" class="flex-1 ys-field !bg-white resize-none fs-15" rows="5">${cur}</textarea>
+                <textarea id="overall-comment-edit" class="flex-1 ys-field !bg-white resize-none fs-15" rows="${overallRows}">${cur}</textarea>
                 <div class="flex flex-col gap-2 flex-shrink-0">
                     <button onclick="saveCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
                     <button onclick="cancelCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
@@ -5063,8 +5064,9 @@ function editComment(type, section) {
         if (!el) return;
         const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
         const wrap = document.getElementById('sec-comment-wrap-' + section);
+        const sectionRows = Math.max(4, cur.split('\n').length + 1);
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
-                <textarea id="sec-comment-edit-${section}" class="flex-1 ys-field !bg-white resize-none fs-15" rows="4">${cur}</textarea>
+                <textarea id="sec-comment-edit-${section}" class="flex-1 ys-field !bg-white resize-none fs-15" rows="${sectionRows}">${cur}</textarea>
                 <div class="flex flex-col gap-2 flex-shrink-0">
                     <button onclick="saveCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm !bg-[#013976] !text-white">저장</button>
                     <button onclick="cancelCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
