@@ -7831,7 +7831,10 @@ function renderEditForm(qId) {
                 groupId: bundleInfo.id, // [Fix] Preserve Original UUID as Group ID — 07-1과 동일
                 title: bundleInfo.title || '지문 묶음',
                 html: rawHtml,
-                imgUrl: (bundleInfo.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : ""
+                imgUrl: (bundleInfo.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : "",
+                audioUrl: bundleInfo.audioUrl || "",       // [Fix] 오디오 표시 복원
+                audioFileId: bundleInfo.audioFileId || "", // [Fix] 오디오 표시 복원
+                audioMaxPlay: bundleInfo.audioMaxPlay || 1  // [Fix] 오디오 표시 복원
             });
         }
     }
@@ -8162,7 +8165,10 @@ async function loadQuestionsFromCategory(catId) {
                 groupId: setId, // [Fix] Preserve Original UUID as Group ID
                 title: bundleData.title,
                 html: bundleData.html,
-                imgUrl: bundleData.imgUrl
+                imgUrl: bundleData.imgUrl,
+                audioUrl: bundleData.audioUrl || "",       // [Fix] 오디오 표시 복원
+                audioFileId: bundleData.audioFileId || "", // [Fix] 오디오 표시 복원
+                audioMaxPlay: bundleData.audioMaxPlay || 1  // [Fix] 오디오 표시 복원
             });
 
             // Zone B: Questions
