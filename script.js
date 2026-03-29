@@ -4818,7 +4818,7 @@ function printReport() {
   img { max-width:100%; }
   .no-print { display:none !important; }
   @media print {
-    @page { margin:12mm; margin-bottom:38mm; }
+    @page { margin:12mm; }
     body { padding-bottom:140px; }
     .card, section, [class*='rounded'] { page-break-inside: avoid; }
     h4 { page-break-after: avoid; }
