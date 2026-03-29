@@ -2288,6 +2288,10 @@ async function saveCat(editId = '') {
 
                         if (result.status === "Success") {
                             showToast("✅ 드라이브 폴더명 변경 완료");
+                            // DB 파일명 백그라운드 변경 (UI 블로킹 없음)
+                            sendReliableRequest({ type: 'RENAME_DB_FILES', parentFolderId: folderId, newName: newName })
+                                .then(() => showToast("✅ DB 파일명 변경 완료"))
+                                .catch(e => console.warn("DB 파일명 변경 실패 (무시됨):", e));
                         } else {
                             showToast(`⚠️ 폴더명 변경 실패: ${result.message || '알 수 없는 오류'}`);
                         }
