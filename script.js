@@ -2786,7 +2786,7 @@ function renderScoreInput(c) {
                                 <span id="class-recommend-badge06" class="font-bold" style="color:#6366f1;"></span>
                             </label>
                             <select id="input-student-class" class="ys-field" style="border-color:#a5b4fc;background:#f5f3ff;color:#4338ca;">
-                                <option value="">선택</option>
+                                <option value="">점수입력 시 자동 추천</option>
                             </select>
                         </div>
                     </div>
@@ -3155,7 +3155,14 @@ function updateClassDropdown06(grade) {
             else { this.dataset.autoSelected = '0'; }
         }
     };
-    updateClassBadge06();
+    // 학년 선택 시 이미 점수가 있으면 바로 추천 계산 적용
+    const dispEl = document.getElementById('score-total-display');
+    const currentTotal = parseInt(dispEl ? dispEl.textContent : '0') || 0;
+    if (currentTotal > 0) {
+        calcAndRecommendClass06();
+    } else {
+        updateClassBadge06();
+    }
 }
 
 // q-score 변경 시 추천 계산 (이벤트 위임 - 한 번만 등록)
@@ -3230,6 +3237,14 @@ function clearScoreInputs(resetCat = true, showMsg = true) {
     document.querySelectorAll('[id^="q-score-"]').forEach(inp => inp.value = '');
     const d = document.getElementById('score-total-display');
     if (d) d.textContent = '0';
+    // 등록학급 초기화 → '점수입력 시 자동 추천' 상태로 복원
+    const clsSel = document.getElementById('input-student-class');
+    if (clsSel) {
+        clsSel.value = '';
+        clsSel.dataset.recommendedClass = '';
+        clsSel.dataset.autoSelected = '0';
+        updateClassBadge06();
+    }
     if (showMsg) showToast('\u2728 \uC785\uB825 \uB0B4\uC6A9\uC774 \uCD08\uAE30\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4');
 }
 
