@@ -8482,8 +8482,6 @@ async function loadQuestionsFromCategory(catId) {
     if (window._changedItems?.size > 0) {
         const label = _builderGetLabel();
         if (!confirm(`⚠️ ${label} 문항이 변경되었습니다!\n변경된 사항이 저장되지 않습니다!\n새 시험지를 불러오시겠습니까?`)) return;
-    } else {
-        if (!confirm("⚠️ 새로운 시험지를 불러오면 현재 작성 중인 내용은 초기화됩니다. 계속하시겠습니까?")) return;
     }
 
     window._builderLoading = true;
