@@ -2160,9 +2160,9 @@ async function bulkDeleteStudents(catId) {
     toggleLoading(true);
     try {
         const folderId = extractFolderId(cat.targetFolderUrl);
-        for (const chk of checked) {
-            await sendReliableRequest({ type: 'DELETE_STUDENT', parentFolderId: folderId, studentId: chk.dataset.sid });
-        }
+        const studentIds = checked.map(c => c.dataset.sid);
+        // 단 1번의 GAS 요청으로 일괄 삭제
+        await sendReliableRequest({ type: 'BULK_DELETE_STUDENTS', parentFolderId: folderId, studentIds });
         showToast(`✅ ${checked.length}명 삭제 완료`);
         await showStudentDBViewer(_sdbCache.catId, _sdbCache.catName);
     } catch(e) {
@@ -2170,6 +2170,7 @@ async function bulkDeleteStudents(catId) {
     } finally {
         toggleLoading(false);
     }
+
 }
 
 async function deleteStudentRecord(catId, studentId, studentName) {

@@ -362,7 +362,40 @@ function doPost(e) {
       }
       return ContentService.createTextOutput(JSON.stringify({ status: "Error", message: "학생 미발견" })).setMimeType(ContentService.MimeType.JSON);
     }
-    
+
+    // --- [기능 6-4] 학생 레코드 일괄 삭제 (BULK_DELETE_STUDENTS) ---
+    else if (data.type === "BULK_DELETE_STUDENTS") {
+      if (!rootFolderId) throw new Error("폴더 없음");
+      var bulkIds = data.studentIds; // 배열
+      if (!bulkIds || !bulkIds.length) throw new Error("삭제할 학생 ID가 없습니다.");
+      var bulkIdSet = {};
+      bulkIds.forEach(function(id) { bulkIdSet[String(id)] = true; });
+
+      var bFolder = DriveApp.getFolderById(rootFolderId);
+      var bFiles  = bFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
+      var bTarget = null;
+      while (bFiles.hasNext()) { var bf = bFiles.next(); if (bf.getName().includes("학생DB")) { bTarget = bf; break; } }
+      if (!bTarget) throw new Error("학생DB 파일 없음");
+
+      var bSheet  = SpreadsheetApp.open(bTarget).getSheets()[0];
+      var bLast   = bSheet.getLastRow();
+      // 전체 B열(학생ID) 한 번에 읽기
+      var allIds  = bSheet.getRange(2, 2, bLast - 1, 1).getValues(); // [[id], [id], ...]
+      // 뒤에서부터 삭제 (행 인덱스 변형 방지)
+      var deleted = 0;
+      for (var bi = bLast; bi >= 2; bi--) {
+        var rowId = String(allIds[bi - 2][0]);
+        if (bulkIdSet[rowId]) {
+          bSheet.deleteRow(bi);
+          deleted++;
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "Success",
+        message: deleted + "명 일괄 삭제 완료"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     // --- [기능 7] 문항 조회 (통계용) ---
     else if (data.type === "GET_QUESTIONS") {
       if (!rootFolderId) throw new Error("카테고리 폴더가 설정되지 않았습니다.");
