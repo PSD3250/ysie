@@ -8123,7 +8123,6 @@ function renderEditForm(qId) {
     if (!q) return showToast("⚠️ 문항 정보를 찾을 수 없습니다.");
 
     // [Fix] 직전 카테고리 ID 보존 (Cancel 복귀용)
-    window._editReturnCatId = q.catId || curCatId || '';
 
     setCanvasId('08-2');
     const c = document.getElementById('dynamic-content');
@@ -8313,19 +8312,7 @@ function exitEditMode(skipConfirm = false) {
     document.getElementById('app-canvas').classList.remove('!overflow-hidden');
     document.body.classList.add('has-sidebar');
 
-    // Return to Bank with previous category auto-selected
-    const returnCatId = window._editReturnCatId || '';
-
-    // Set curCatId BEFORE renderBank so the select renders with correct selection
-    if (returnCatId) curCatId = returnCatId;
     renderBank();
-
-    if (returnCatId) {
-        // Trigger category load to show question list
-        setTimeout(() => {
-            handleBankCategoryChange(returnCatId);
-        }, 200);
-    }
 }
 
 // [SAFE] Partial Update Logic — Only modifies the specific row in the sheet
