@@ -9641,7 +9641,24 @@ function renderExamInstructions() {
     window._examPending = { name, grade, catId, date, timeLimit };
     window._audioTestDone = false;
     setCanvasId('02-3');
-    setTimeout(function() { preloadBundleAudios(catId); }, 200);
+    // 해당 시험지 번들 확인 후 미로드 시 직접 GET_FULL_DB로 가져와 catId 주입 후 프리로드
+    const hasBundles = (globalConfig.bundles || []).some(b => b.catId === catId && b.audioFileId);
+    if (!hasBundles) {
+        const cat02 = (globalConfig.categories || []).find(c => c.id === catId);
+        const fid02 = cat02 ? extractFolderId(cat02.targetFolderUrl) : null;
+        if (fid02) {
+            sendReliableRequest({ type: 'GET_FULL_DB', parentFolderId: fid02, categoryName: cat02.name })
+                .then(function(res) {
+                    const fb = (res && res.bundles) ? res.bundles : [];
+                    fb.forEach(b => b.catId = catId);
+                    globalConfig.bundles = (globalConfig.bundles || []).filter(b => b.catId !== catId);
+                    globalConfig.bundles.push(...fb);
+                    preloadBundleAudios(catId);
+                }).catch(function() { preloadBundleAudios(catId); });
+        }
+    } else {
+        setTimeout(function() { preloadBundleAudios(catId); }, 200);
+    }
     const timeTxt = timeLimit > 0 ? timeLimit + '분' : '시간 제한 없음';
     const dynContent = document.getElementById('dynamic-content');
     if (!dynContent) return;
