@@ -219,11 +219,11 @@ function doPost(e) {
     else if (data.type === "SAVE_AI_COMMENT") {
       if (!rootFolderId) throw new Error("폴더가 없습니다.");
       var rootFolder = DriveApp.getFolderById(rootFolderId);
-      var files2 = rootFolder.getFiles();
+      var files2 = rootFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
       var targetFile2 = null;
       while (files2.hasNext()) {
         var f2 = files2.next();
-        if (f2.getName().endsWith("_학생DB")) { targetFile2 = f2; break; }
+        if (f2.getName().includes("학생DB")) { targetFile2 = f2; break; }
       }
       if (!targetFile2) throw new Error("학생DB 파일을 찾을 수 없습니다.");
       var sai = SpreadsheetApp.open(targetFile2).getSheets()[0];
@@ -261,9 +261,9 @@ function doPost(e) {
     else if (data.type === "GET_STUDENT_LIST") {
       if (!rootFolderId) throw new Error("카테고리 폴더가 설정되지 않았습니다.");
       var rootFolder = DriveApp.getFolderById(rootFolderId);
-      var allFiles6 = rootFolder.getFiles();
+      var ssFiles6 = rootFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
       var targetFile6 = null;
-      while (allFiles6.hasNext()) { var f6 = allFiles6.next(); if (f6.getName().includes("학생DB")) { targetFile6 = f6; break; } }
+      while (ssFiles6.hasNext()) { var f6 = ssFiles6.next(); if (f6.getName().includes("학생DB")) { targetFile6 = f6; break; } }
       if (!targetFile6) {
         return ContentService.createTextOutput(JSON.stringify({ status: "Success", data: [] })).setMimeType(ContentService.MimeType.JSON);
       }
@@ -287,11 +287,11 @@ function doPost(e) {
     else if (data.type === "GET_STUDENT_REPORT") {
       if (!rootFolderId) throw new Error("카테고리 폴더가 설정되지 않았습니다.");
       var rootFolder = DriveApp.getFolderById(rootFolderId);
-      var files = rootFolder.getFiles();
+      var files = rootFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
       var targetFile = null;
       while (files.hasNext()) {
         var f = files.next();
-        if (f.getName().endsWith("_학생DB")) { targetFile = f; break; }
+        if (f.getName().includes("학생DB")) { targetFile = f; break; }
       }
       if (!targetFile) return ContentService.createTextOutput(JSON.stringify({ status: "Error", message: "학생 DB 파일을 찾을 수 없습니다." })).setMimeType(ContentService.MimeType.JSON);
       var sheet = SpreadsheetApp.open(targetFile).getSheets()[0];
@@ -347,9 +347,9 @@ function doPost(e) {
     else if (data.type === "DELETE_STUDENT") {
       if (!rootFolderId) throw new Error("폴더 없음");
       var rootFolder = DriveApp.getFolderById(rootFolderId);
-      var delFiles = rootFolder.getFiles();
+      var delFiles = rootFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
       var delTarget = null;
-      while (delFiles.hasNext()) { var df = delFiles.next(); if (df.getName().endsWith("_학생DB")) { delTarget = df; break; } }
+      while (delFiles.hasNext()) { var df = delFiles.next(); if (df.getName().includes("학생DB")) { delTarget = df; break; } }
       if (!delTarget) throw new Error("학생DB 파일 없음");
       var delSheet = SpreadsheetApp.open(delTarget).getSheets()[0];
       var delLast = delSheet.getLastRow();
@@ -516,7 +516,7 @@ else if (data.type === "GET_AUDIO_B64") {
     else if (data.type === "RENAME_DB_FILES") {
         if (!rootFolderId || !data.newName) throw new Error("폴더 ID와 새 이름이 필요합니다.");
         var renFolder = DriveApp.getFolderById(rootFolderId);
-        var renFiles = renFolder.getFiles();
+        var renFiles = renFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
         var newDbName = data.newName;
         while (renFiles.hasNext()) {
             var renF = renFiles.next();
@@ -557,7 +557,7 @@ else if (data.type === "GET_AUDIO_B64") {
         var dbType = data.dbType;
         var resetSuffix = (dbType === 'student') ? "학생DB" : "통합DB";
         var rootFolder = DriveApp.getFolderById(rootFolderId);
-        var allResetFiles = rootFolder.getFiles();
+        var allResetFiles = rootFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
         var files = { _f: null, hasNext: function(){ return !!this._f; }, next: function(){ return this._f; } };
         while (allResetFiles.hasNext()) { var rf = allResetFiles.next(); if (rf.getName().includes(resetSuffix)) { files._f = rf; break; } }
         
@@ -757,7 +757,7 @@ else if (data.type === "GET_AUDIO_B64") {
         if (!rootFolderId) throw new Error("대분류 폴더가 연결되지 않았습니다.");
         
         var rootFolder = DriveApp.getFolderById(rootFolderId);
-        var allFiles15 = rootFolder.getFiles();
+        var allFiles15 = rootFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
         var targetFile15 = null;
         while (allFiles15.hasNext()) { var f15 = allFiles15.next(); if (f15.getName().includes("통합DB")) { targetFile15 = f15; break; } }
         if (!targetFile15) {
@@ -958,7 +958,7 @@ else if (data.type === "GET_AUDIO_B64") {
         var audioFolder = getOrCreateFolder(rootFolder, "오디오창고");
         
         // 1. 통합DB 파일 찾기
-        var allFiles16 = rootFolder.getFiles();
+        var allFiles16 = rootFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
         var targetFile16 = null;
         while (allFiles16.hasNext()) { var f16 = allFiles16.next(); if (f16.getName().includes("통합DB")) { targetFile16 = f16; break; } }
         if (!targetFile16) throw new Error("통합DB 파일을 찾을 수 없습니다. 먼저 문항을 등록해주세요.");
@@ -1114,10 +1114,10 @@ function saveAudio(folder, base64, mime, name) {
 function getOrCreateSpreadsheet(parentFolder, name) {
   // suffix 추출: "카테고리_학생DB" → "학생DB" (앞 prefix 무시)
   var suffix = name.includes('_') ? name.substring(name.lastIndexOf('_') + 1) : name;
-  // 폴더 내에서 suffix 포함 파일 먼저 검색
-  var allFiles = parentFolder.getFiles();
-  while (allFiles.hasNext()) {
-    var f = allFiles.next();
+  // 스프레드시트 파일만 검색 (이미지/오디오 제외 → 빠름)
+  var ssFiles = parentFolder.getFilesByType(MimeType.GOOGLE_SHEETS);
+  while (ssFiles.hasNext()) {
+    var f = ssFiles.next();
     if (f.getName().includes(suffix)) return SpreadsheetApp.open(f);
   }
   // 없으면 suffix 이름만으로 생성
