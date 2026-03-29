@@ -6440,8 +6440,10 @@ function addComponent(type, data = null) {
     // UI: Card Styling
     div.className = 'builder-item bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all relative group';
     div.setAttribute('data-type', type);
-    // [Disabled] Drag disabled for Zone A/B as requested
-    // div.setAttribute('draggable', 'true');
+    // [Fix] bundle UUID 보존 — collectBuilderData가 data-group-id를 우선 읽으므로 반드시 세팅
+    if (type === 'bundle' || type === 'passage') {
+        div.setAttribute('data-group-id', id);
+    }
 
     // Render Content
     div.innerHTML = getComponentHtml(type, id, data || {});
@@ -7487,6 +7489,9 @@ function renderAudioUploader(id, d) {
                 <span class="text-sm">📂 Upload Audio</span>
                 <input type="file" id="${id}-audio-file" data-field="audio-file" class="hidden" accept="audio/*" onchange="previewBuilderAudio(this, '${id}')">
             </label>
+            <!-- [Fix] 기존 오디오 URL/FileId를 DOM에 보존 (이미지 방식과 동일) -->
+            <input type="hidden" data-field="audioUrl"    value="${d.audioUrl    || ''}">
+            <input type="hidden" data-field="audioFileId" value="${d.audioFileId || ''}">
             <div id="${id}-audio-preview" data-field="audio-preview" class="${d.audioUrl ? '' : 'hidden'} flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded">
                 <span class="text-green-600 text-sm">🎵</span>
                 <span id="${id}-audio-name" class="text-sm font-bold text-green-700 truncate">${d.audioFileName || (d.audioUrl ? '업로드됨' : '')}</span>
@@ -7510,6 +7515,11 @@ function clearBuilderAudio(id) {
     const inp = document.getElementById(id+'-audio-file'); if(inp) inp.value='';
     const prev = document.getElementById(id+'-audio-preview'); if(prev) prev.classList.add('hidden');
     const n = document.getElementById(id+'-audio-name'); if(n) n.textContent='';
+    // [Fix] hidden input도 초기화 (✕ 클릭 시 기존 URL 삭제)
+    const urlInp  = prev ? prev.parentElement.querySelector('[data-field="audioUrl"]')    : null;
+    const fidInp  = prev ? prev.parentElement.querySelector('[data-field="audioFileId"]') : null;
+    if(urlInp)  urlInp.value  = '';
+    if(fidInp)  fidInp.value  = '';
 }
 
 function playBundleAudio(btn, bundleId) {
@@ -8288,19 +8298,17 @@ async function saveRegGroup() {
                 // 연결 문항 번호 계산 (qCounter + 1부터 시작)
                 const linkedNums = group.questions.map((_, i) => qCounter + i + 1).join(', ');
 
-                // [Fix] 기존 번들에서 audioUrl/audioFileId 보존 (새 업로드가 없으면 기존 값 유지)
-                const _existBnd = (globalConfig.bundles || []).find(b => String(b.id) === String(setId));
-
+                // [Fix] 이미지 방식와 동일: DOM hidden input에서 직접 읽은 기존 URL 사용 (_existBnd 개입 불필요)
                 newBundles.push({
                     id: setId,
                     title: group.passage.title,
-                    text: group.passage.text, // HTML
+                    text: group.passage.text,
                     imgUrl: group.passage.img || "",
                     imgData: group.passage.imgData,
                     audioData: group.passage.audioData || null,
-                    audioUrl:    group.passage.audioData ? "" : (_existBnd ? (_existBnd.audioUrl    || "") : ""),
-                    audioFileId: group.passage.audioData ? "" : (_existBnd ? (_existBnd.audioFileId || "") : ""),
-                    audioMaxPlay: group.passage.audioMaxPlay || (_existBnd ? (_existBnd.audioMaxPlay || 1) : 1),
+                    audioUrl:    group.passage.audioData ? "" : (group.passage.audioUrl    || ""),
+                    audioFileId: group.passage.audioData ? "" : (group.passage.audioFileId || ""),
+                    audioMaxPlay: group.passage.audioMaxPlay || 1,
                     questionIds: linkedNums
                 });
             }
@@ -8477,7 +8485,7 @@ async function collectBuilderData() {
             const previewEl = block.querySelector('[data-field="preview"]');
             const imgData = await extractImg(fileInput, previewEl);
 
-            // Audio 추출
+            // Audio 추출 — 이미지와 동일하게 DOM hidden input에서 기존 URL/FileId 직접 읽기
             const audioFileInput = block.querySelector('[data-field="audio-file"]');
             let audioData = null;
             if (audioFileInput && audioFileInput.files && audioFileInput.files[0]) {
@@ -8485,6 +8493,8 @@ async function collectBuilderData() {
                 const aBase64 = await new Promise(r => { const reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(aFile); });
                 audioData = { base64: aBase64.split(',')[1], mimeType: aFile.type, fileName: aFile.name };
             }
+            const existingAudioUrl    = block.querySelector('[data-field="audioUrl"]')?.value    || '';
+            const existingAudioFileId = block.querySelector('[data-field="audioFileId"]')?.value  || '';
             const audioMaxPlayEl = block.querySelector('[data-field="audioMaxPlay"]');
             const audioMaxPlay = parseInt(audioMaxPlayEl?.value) || 1;
 
@@ -8507,6 +8517,8 @@ async function collectBuilderData() {
                     img: imgData?.url || '',
                     imgData: imgData,
                     audioData: audioData,
+                    audioUrl: existingAudioUrl,       // [Fix] DOM hidden input에서 직접 읽은 기존 URL
+                    audioFileId: existingAudioFileId, // [Fix] DOM hidden input에서 직접 읽은 기존 FileId
                     audioMaxPlay: audioMaxPlay
                 },
                 questions: nestedQuestions,
