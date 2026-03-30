@@ -9464,7 +9464,7 @@ async function renderStudentLogin() {
                             </div>
                             <div>
                                 <label class="ys-label font-bold !mb-0">🎓 학년</label>
-                                <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm text-sm" onchange="handleSgrGradeChange(this.value, this)" disabled>
+                                <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" onchange="handleSgrGradeChange(this.value, this)" disabled>
                                     <option value="" disabled selected hidden>시험지 먼저 선택</option>
                                 </select>
                             </div>

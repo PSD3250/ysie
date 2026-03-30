@@ -422,6 +422,11 @@
             cursor: pointer;
         }
 
+        /* [Fix] 학생 로그인 학년 선택 - input placeholder와 동일한 크기 */
+        #sgr {
+            font-size: 14.5px !important;
+        }
+
         .ys-label {
             font-size: 17px !important;
             /* 17px로 조정 */
