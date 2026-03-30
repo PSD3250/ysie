@@ -7941,7 +7941,7 @@ function playBundleAudio(btn, bundleId) {
     const used = window._audioPlaysUsed[bundleId] || 0;
     const left = maxPlay - used;
     if (left <= 0) { showToast('⚠️ 재생 횟수를 모두 사용했습니다.'); return; }
-    if (!confirm('지정된 횟수만큼만 재생할 수 있으며, 일시정지, 빨리감기, 뒤로감기 등의 기능은 할 수가 없습니다.')) return;
+    if (!confirm('⚠️ 먼저 문항의 내용을 확인 후 재생하세요!\n🎧 지정된 횟수만큼만 재생할 수가 있으며, 한 번 재생되면 멈추거나 되돌릴 수 없습니다!')) return;
     window._audioPlaysUsed[bundleId] = used + 1;
     const newLeft = left - 1;
     const sp = btn.querySelector('.plays-left'); if (sp) sp.textContent = newLeft;
