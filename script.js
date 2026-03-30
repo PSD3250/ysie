@@ -9550,7 +9550,12 @@ async function renderStudentLogin() {
     }, 100);
     // 등록된 학년만 학생 로그인 학년 드롭박스에 채우기
     const gradeLabels = { '초1':'초등 1학년','초2':'초등 2학년','초3':'초등 3학년','초4':'초등 4학년','초5':'초등 5학년','초6':'초등 6학년','중1':'중등 1학년','중2':'중등 2학년','중3':'중등 3학년','고1':'고등 1학년','고2':'고등 2학년','고3':'고등 3학년' };
-    populateGradeSelect(document.getElementById('sgr'), { placeholder: '학년을 선택하세요', labelFn: g => g });
+    populateGradeSelect(document.getElementById('sgr'), { placeholder: '시험지 먼저 선택하세요', labelFn: g => g });
+    // [Fix] 시험지 선택 전까지 학년/시험시간 비활성화
+    const sgrEl = document.getElementById('sgr');
+    const stmEl = document.getElementById('stm');
+    if (sgrEl) { sgrEl.disabled = true; sgrEl.value = ''; }
+    if (stmEl) stmEl.disabled = true;
 }
 
 // [Added] 카테고리 선택 시 권장 학년 및 평가 시간 자동완성
@@ -9564,7 +9569,9 @@ function handleCategorySelect() {
     if (cat) {
         // 권장 평가 학년 덮어쓰기
         const sgrSelect = document.getElementById('sgr');
-        if (sgrSelect) sgrSelect.disabled = false; // [Fix] 시험지 선택 후 학년 활성화
+        const stmInput = document.getElementById('stm');
+        if (sgrSelect) sgrSelect.disabled = false;
+        if (stmInput) stmInput.disabled = false;
         if (cat.targetGrade) {
             if (sgrSelect) sgrSelect.value = cat.targetGrade;
             window._sgrTargetGrade = cat.targetGrade;
