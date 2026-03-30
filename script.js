@@ -9421,6 +9421,7 @@ async function renderStudentLogin() {
     document.body.classList.remove('has-sidebar');
 
     setCanvasId('02');
+    window._sgrTargetGrade = ''; // [Fix] 시험지 재선택 시 잔여 경고 방지
 
     // [Debug] Student Mode Exam List
     console.log("📝 Student Mode Init. Categories:", globalConfig.categories);
@@ -9463,8 +9464,8 @@ async function renderStudentLogin() {
                             </div>
                             <div>
                                 <label class="ys-label font-bold !mb-0">🎓 학년</label>
-                                <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" onchange="handleSgrGradeChange(this.value, this)">
-                                    <option value="" disabled selected hidden>학년을 선택하세요</option>
+                                <select id="sgr" class="ys-field mt-1.5 !bg-slate-50/50 focus:bg-white transition-all shadow-sm" onchange="handleSgrGradeChange(this.value, this)" disabled>
+                                    <option value="" disabled selected hidden>시험지 먼저 선택하세요</option>
                                 </select>
                             </div>
                         </div>
@@ -9562,12 +9563,14 @@ function handleCategorySelect() {
 
     if (cat) {
         // 권장 평가 학년 덮어쓰기
+        const sgrSelect = document.getElementById('sgr');
+        if (sgrSelect) sgrSelect.disabled = false; // [Fix] 시험지 선택 후 학년 활성화
         if (cat.targetGrade) {
-            const sgrSelect = document.getElementById('sgr');
             if (sgrSelect) sgrSelect.value = cat.targetGrade;
-            window._sgrTargetGrade = cat.targetGrade; // [Fix] 학년 경고용 기준값 저장
+            window._sgrTargetGrade = cat.targetGrade;
         } else {
             window._sgrTargetGrade = '';
+            if (sgrSelect) sgrSelect.value = '';
         }
 
         // 권장 평가 시간 덮어쓰기
