@@ -74,3 +74,5 @@ node -e "const c=require('fs').readFileSync('script.js','utf8'); console.log(c.i
 | choices null 저장 | `serializeBuilderState`만 수정, `parseQuestionBlock` 누락 | choices 관련 수정 시 두 함수 모두 확인 |
 | 워드 복붙 주석 노출 | MS Word HTML 주석(`<!--...-->`) 미처리 | paste 처리 시 실제 사용 시나리오 전부 고려 |
 | 확인 없이 "안전하다" 발언 | 코드만 보고 판단 | 실제 실행 경로 추적 후 판단 |
+| **GAS 변수 선언 삭제 (치명)** | **multi_replace 시 타겟 범위에 변수 선언 포함시켜 삭제** | **GAS 수정 후 반드시 전체 함수 변수 선언 존재 여부 확인** |
+| **GAS 수정 승인 없이 진행** | **STEP 3 생략** | **GAS 파일도 예외 없이 STEP 1~3 준수. 특히 deleteRows 전후 로직은 반드시 사용자 확인** |

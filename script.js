@@ -373,9 +373,9 @@ async function sendReliableRequest(payload, silent = false) {
             console.warn(`Sync Attempt ${i} Failed:`, e);
             if (i === MAX_RETRIES) {
                 // If standard fetch fails (likely CORS or network), try no-cors as last resort
-                // [Fix] Do NOT use no-cors for GET requests (we need the response data)
-                if (payload.type && payload.type.startsWith('GET_')) {
-                    throw new Error("Maximum retries reached. Network request failed.");
+                // [Fix] GET_ 및 SAVE_FULL_TEST_DATA는 no-cors 금지 (응답 확인 필수)
+                if (payload.type && (payload.type.startsWith('GET_') || payload.type === 'SAVE_FULL_TEST_DATA')) {
+                    throw new Error("저장 실패: 네트워크 오류. 빌더 내용은 유지됩니다.");
                 }
 
                 // This allows data to reach the server even if we can't read the response (Fire & Forget)
@@ -9421,9 +9421,11 @@ function sanitizePastedHtml(html) {
     tmp.innerHTML = cleaned;
     // 허용 태그 (굵게, 밑줄만)
     const allowedTags = new Set(['B', 'STRONG', 'U', 'EM', 'I', 'BR']);
+    // 블록 요소: unwrap 시 앞에 <br> 삽입 (줄바꿈 보존)
+    const blockTags = new Set(['P', 'DIV', 'LI', 'H1', 'H2', 'H3', 'H4', 'BLOCKQUOTE', 'TR', 'TD']);
     // 역순으로 unwrap 처리 (인덱스 오류 방지)
     const allEls = Array.from(tmp.querySelectorAll('*')).reverse();
-    allEls.forEach(el => {
+    allEls.forEach(function(el) {
         // 인라인 스타일·클래스 모두 제거
         el.removeAttribute('style');
         el.removeAttribute('class');
@@ -9434,12 +9436,28 @@ function sanitizePastedHtml(html) {
         if (!allowedTags.has(el.tagName)) {
             const parent = el.parentNode;
             if (parent) {
+                // 블록 요소이고 바로 앞에 실제 내용이 있는 노드가 있으면 <br> 삽입 (줄 구분 보존)
+                if (blockTags.has(el.tagName)) {
+                    var prev = el.previousSibling;
+                    var hasMeaningfulPrev = prev && (
+                        prev.nodeType === 1 || // 요소 노드
+                        (prev.nodeType === 3 && prev.textContent.trim() !== '') // 내용 있는 텍스트 노드
+                    );
+                    if (hasMeaningfulPrev) {
+                        var br = document.createElement('br');
+                        parent.insertBefore(br, el);
+                    }
+                }
                 while (el.firstChild) parent.insertBefore(el.firstChild, el);
                 parent.removeChild(el);
             }
         }
     });
-    return tmp.innerHTML;
+    // &nbsp; → 일반 공백, 연속 공백 하나로 정규화
+    let result = tmp.innerHTML;
+    result = result.replace(/\u00a0/g, ' ');      // non-breaking space → 일반 공백
+    result = result.replace(/[ \t]{2,}/g, ' ');   // 연속 공백 하나로
+    return result;
 }
 
 // 전역 paste 이벤트: contenteditable에서만 적용

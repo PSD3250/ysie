@@ -805,9 +805,7 @@ else if (data.type === "GET_AUDIO_B64") {
             dbSpreadsheet.deleteSheet(defaultSheet);
         }
         
-        // 5. 이전 데이터 클리어 (Overwrite Mode)
-        if (sheetQ.getLastRow() > 1) sheetQ.deleteRows(2, sheetQ.getLastRow() - 1);
-        if (sheetB.getLastRow() > 1) sheetB.deleteRows(2, sheetB.getLastRow() - 1);
+        // 5. [Safe] 오디오 컬럼 헤더 자동 추가 (기존 시트에 없는 경우 - deleteRows 제거, 저장 후 잔여 행 삭제로 변경)
         // 오디오 컬럼 헤더 자동 추가 (기존 시트에 없는 경우)
         if (sheetB.getLastColumn() < 6) {
             sheetB.getRange(1, 6).setValue("오디오URL").setFontWeight("bold").setBackground("#EA580C").setFontColor("#FFFFFF");
@@ -841,7 +839,12 @@ else if (data.type === "GET_AUDIO_B64") {
                     b.audioMaxPlay || 1
                 ];
             });
+            var bExistingLastRow = sheetB.getLastRow();
             sheetB.getRange(2, 1, bRows.length, 8).setValues(bRows);
+            // [Safe] 저장 성공 후 잔여 행만 삭제
+            if (bExistingLastRow > bRows.length + 1) {
+                sheetB.deleteRows(bRows.length + 2, bExistingLastRow - bRows.length - 1);
+            }
         }
         
         // 7. 데이터 저장: 문항 (Questions)
@@ -871,6 +874,8 @@ else if (data.type === "GET_AUDIO_B64") {
                     q.labelType || "number" // [Fix] 라벨타입 (number/alpha)
                 ];
             });
+            var qExistingLastRow = sheetQ.getLastRow();
+            var qDataRange = sheetQ.getRange(2, 1, qRows.length, 14);
             qDataRange.clearFormat();
             qDataRange.setValues(qRows);
             qDataRange.setBackground("#ffffff");
@@ -878,6 +883,10 @@ else if (data.type === "GET_AUDIO_B64") {
             qDataRange.setFontWeight("normal");
             // [Fix] K열(정답) 텍스트 형식 강제 지정 - 날짜 자동변환 방지
             sheetQ.getRange(2, 11, qRows.length, 1).setNumberFormat('@');
+            // [Safe] 저장 성공 후 잔여 행만 삭제
+            if (qExistingLastRow > qRows.length + 1) {
+                sheetQ.deleteRows(qRows.length + 2, qExistingLastRow - qRows.length - 1);
+            }
         }
         
         return ContentService.createTextOutput(JSON.stringify({
