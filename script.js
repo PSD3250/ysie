@@ -7570,7 +7570,13 @@ function getComponentHtml(type, id, data) {
                  <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 mt-4">
                     ${isObj
                     ? `<div class="flex justify-between items-center mb-3">
-                               <label class="text-[14px] font-bold text-slate-700">보기 및 정답</label>
+                               <div class="flex items-center gap-2">
+                                   <label class="text-[14px] font-bold text-slate-700">보기 및 정답</label>
+                                   <div class="flex gap-1" onmousedown="event.preventDefault()">
+                                       <button onclick="execCmd('bold')" class="p-1 hover:bg-slate-200 rounded text-[13px] font-bold w-6 h-6 flex items-center justify-center" title="굵게">B</button>
+                                       <button onclick="execCmd('underline')" class="p-1 hover:bg-slate-200 rounded text-[13px] underline w-6 h-6 flex items-center justify-center" title="밑줄">U</button>
+                                   </div>
+                               </div>
                                <div class="flex items-center gap-2">
                                    <select id="${id}-label-type" data-field="labelType" onchange="convertAnswerOnLabelChange('${id}', this.value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500 bg-white">
                                        <option value="number" ${labelType === 'number' ? 'selected' : ''}>1~5</option>
@@ -7587,15 +7593,11 @@ function getComponentHtml(type, id, data) {
                            <div id="${id}-choices" class="grid grid-cols-2 gap-2 mb-4">
                                 ${optArr.map(n => {
                                     const _lbl = labelType === 'alpha' ? _alphaLabels[n-1] : String(n);
-                                    return `<div class="flex items-start gap-1 group">
+                                     return `<div class="flex items-start gap-1">
                                        <span class="text-[14px] w-5 font-bold text-slate-400 mt-2.5">${_lbl}.</span>
                                        <div id="${id}-choice-${n}" data-field="choice" data-index="${n}"
                                             class="flex-1 p-2 text-[14px] bg-slate-50 border border-slate-200 rounded-lg outline-none min-h-[40px]"
                                             contenteditable="true" style="white-space:pre-wrap">${(d.options && d.options[n - 1]) || ''}</div>
-                                       <div class="flex-shrink-0 flex flex-col gap-0.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity" onmousedown="event.preventDefault()">
-                                           <button onclick="execCmd('bold')" class="p-0.5 hover:bg-slate-200 rounded text-[11px] font-bold w-5 h-5 flex items-center justify-center" title="굵게">B</button>
-                                           <button onclick="execCmd('underline')" class="p-0.5 hover:bg-slate-200 rounded text-[11px] underline w-5 h-5 flex items-center justify-center" title="밑줄">U</button>
-                                       </div>
                                     </div>`;
                                 }).join('')}
                            </div>
