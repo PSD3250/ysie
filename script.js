@@ -3530,7 +3530,11 @@ function updatePage(delta) {
     // [경고 2] 미답변 문항 확인
     const _curUnit = units[examSession.currentPage];
     if (_curUnit) {
-        const _qs = (_curUnit.type === 'bundle') ? (Array.isArray(_curUnit.data) ? _curUnit.data : [_curUnit.data]) : [_curUnit.data];
+        const _qs = (_curUnit.type === 'bundle')
+            ? (Array.isArray(_curUnit.data) ? _curUnit.data : [_curUnit.data])
+            : (_curUnit.type === 'columns')
+                ? [...(_curUnit.left || []), ...(_curUnit.right || [])]
+                : [_curUnit.data];
         const _unanswered = [];
         _qs.forEach(function(q){ if (!q) return; const _ans = examSession.answers ? examSession.answers[q.id] : null; if (_ans === undefined || _ans === null || _ans === '') _unanswered.push(q.no); });
         if (_unanswered.length > 0) {
@@ -3611,6 +3615,26 @@ function renderStudentSidebar() {
     `;
 }
 
+// [Helper] 단독형 문항 1개 HTML 렌더링 (발문=q.title, 지문=q.text)
+function renderSingleQHtml(q) {
+    const questionText = q.title || '';
+    const passageText = q.text || '';
+    const passageHtml = passageText.trim() !== ''
+        ? `<div class="mb-3 p-3 bg-slate-100/50 border border-black rounded-lg text-[14px] leading-relaxed font-serif text-slate-700">${passageText}</div>`
+        : '';
+    return `
+        <div>
+            <div class="flex items-start gap-3 mb-2">
+                <div class="flex-shrink-0 w-7 h-7 rounded bg-indigo-600 text-white flex items-center justify-center font-bold text-[15px] pt-0.5 shadow-sm">${q.displayIndex}</div>
+                <h4 class="text-[15px] font-normal text-slate-800 leading-snug pt-0.5 break-keep select-text">${questionText}</h4>
+            </div>
+            ${passageHtml}
+            ${getMediaHtml(q)}
+            <div class="text-[14px]">${getInputHtml(q)}</div>
+        </div>
+    `;
+}
+
 // [Sub-function] Render Content Grid
 // [Refactor] Render Exam Content (Column Distribution)
 function renderExamContent() {
@@ -3644,43 +3668,20 @@ function renderExamContent() {
         container.appendChild(leftCol);
         container.appendChild(rightCol);
 
-    } else if (currentUnit.type === 'pair') {
-        // Left: Q1, Right: Q2
-        currentUnit.data.forEach(q => {
-            const col = document.createElement('div');
-            col.className = 'h-full overflow-y-auto p-6';
-            col.innerHTML = `
-                <div class="flex items-start gap-3 mb-2">
-                    <div class="flex-shrink-0 w-7 h-7 rounded bg-indigo-600 text-white flex items-center justify-center font-bold text-[15px] pt-0.5 shadow-sm">${q.displayIndex}</div>
-                    <h4 class="text-[15px] font-normal text-slate-800 leading-snug pt-0.5 break-keep select-text">${q.text || ''}</h4>
-                </div>
-                ${q.passage1 && q.passage1.trim() !== '' ? '<div class="mb-3 p-3 bg-slate-100/50 border border-black rounded-lg text-[14px] leading-relaxed font-serif text-slate-700">' + q.passage1 + '</div>' : ''}
-                ${getMediaHtml(q)}
-                <div class="text-[14px]">${getInputHtml(q)}</div>
-            `;
-            container.appendChild(col);
-        });
-
-    } else if (currentUnit.type === 'solo') {
-        // Left: single question
-        const q = currentUnit.data;
+    } else if (currentUnit.type === 'columns') {
+        // 단독형: 좌/우 컬럼 각각 2개 이하 (큰 문항은 1개)
         const leftCol = document.createElement('div');
-        leftCol.className = 'h-full overflow-y-auto p-6';
-        leftCol.innerHTML = `
-            <div class="flex items-start gap-3 mb-2">
-                <div class="flex-shrink-0 w-7 h-7 rounded bg-indigo-600 text-white flex items-center justify-center font-bold text-[15px] pt-0.5 shadow-sm">${q.displayIndex}</div>
-                <h4 class="text-[15px] font-normal text-slate-800 leading-snug pt-0.5 break-keep select-text">${q.text || ''}</h4>
-            </div>
-            ${q.passage1 && q.passage1.trim() !== '' ? '<div class="mb-3 p-3 bg-slate-100/50 border border-black rounded-lg text-[14px] leading-relaxed font-serif text-slate-700">' + q.passage1 + '</div>' : ''}
-            ${getMediaHtml(q)}
-            <div class="text-[14px]">${getInputHtml(q)}</div>
-        `;
+        leftCol.className = 'h-full overflow-y-auto p-6 custom-scroll-wrapper';
+        leftCol.innerHTML = (currentUnit.left || []).map(q => renderSingleQHtml(q)).join('<hr class="border-t border-slate-200 my-6">');
 
-        // Right: continue message
         const rightCol = document.createElement('div');
-        rightCol.className = 'h-full flex items-center justify-center bg-slate-50/30';
-        rightCol.innerHTML = '<div class="text-center text-slate-400"><span class="text-4xl block mb-3">📄</span><span class="text-[16px] font-medium">\ub2e4\uc74c \ud654\uba74\uc5d0 \ubb38\ud56d\uc774 \uacc4\uc18d\ub429\ub2c8\ub2e4.</span></div>';
-
+        if (currentUnit.right && currentUnit.right.length > 0) {
+            rightCol.className = 'h-full overflow-y-auto p-6 custom-scroll-wrapper';
+            rightCol.innerHTML = currentUnit.right.map(q => renderSingleQHtml(q)).join('<hr class="border-t border-slate-200 my-6">');
+        } else {
+            rightCol.className = 'h-full flex items-center justify-center bg-slate-50/30';
+            rightCol.innerHTML = '<div class="text-center text-slate-400"><span class="text-4xl block mb-3">📄</span><span class="text-[16px] font-medium">마지막 페이지입니다.</span></div>';
+        }
         container.appendChild(leftCol);
         container.appendChild(rightCol);
     }
@@ -9931,31 +9932,40 @@ function renderExamPaper(list) {
     // 문항이 "큰" 문항인지 판별 (이미지 있음 or 발문 1000자 이상)
     function isLargeQuestion(q) {
         if (q.imgUrl && q.imgUrl !== "" && q.imgUrl !== "undefined" && q.imgUrl !== "null") return true;
-        const textLen = (q.text || "").length + (q.passage1 || "").length;
+        const textLen = (q.title || "").length + (q.text || "").length;
         if (textLen >= 1000) return true;
         return false;
     }
 
     function flushSingles() {
-        while (singleBuffer.length > 0) {
-            const first = singleBuffer[0];
-            if (isLargeQuestion(first)) {
-                // 큰 문항 → 무조건 혼자 1열 사용
-                pageUnits.push({ type: 'solo', data: singleBuffer.shift() });
-            } else if (singleBuffer.length >= 2) {
-                const second = singleBuffer[1];
-                if (isLargeQuestion(second)) {
-                    // 다음 문항이 큰 문항이면 현재 문항도 solo
-                    pageUnits.push({ type: 'solo', data: singleBuffer.shift() });
-                } else {
-                    // 둘 다 작은 문항 → pair
-                    pageUnits.push({ type: 'pair', data: [singleBuffer.shift(), singleBuffer.shift()] });
-                }
+        const MAX_SMALL = 2; // 작은 문항 최대 개수/컬럼
+        let i = 0;
+        while (i < singleBuffer.length) {
+            // 왼쪽 컬럼 채우기
+            const leftGroup = [];
+            if (isLargeQuestion(singleBuffer[i])) {
+                // 큰 문항 → 컬럼 1개 독점
+                leftGroup.push(singleBuffer[i++]);
             } else {
-                // 1개만 남음 → solo
-                pageUnits.push({ type: 'solo', data: singleBuffer.shift() });
+                // 작은 문항 → 최대 MAX_SMALL개
+                while (i < singleBuffer.length && !isLargeQuestion(singleBuffer[i]) && leftGroup.length < MAX_SMALL) {
+                    leftGroup.push(singleBuffer[i++]);
+                }
             }
+            // 오른쪽 컬럼 채우기
+            const rightGroup = [];
+            if (i < singleBuffer.length) {
+                if (isLargeQuestion(singleBuffer[i])) {
+                    rightGroup.push(singleBuffer[i++]);
+                } else {
+                    while (i < singleBuffer.length && !isLargeQuestion(singleBuffer[i]) && rightGroup.length < MAX_SMALL) {
+                        rightGroup.push(singleBuffer[i++]);
+                    }
+                }
+            }
+            pageUnits.push({ type: 'columns', left: leftGroup, right: rightGroup });
         }
+        singleBuffer.length = 0;
     }
 
     rawUnits.forEach(unit => {
@@ -10059,38 +10069,29 @@ function renderSplitBundle(data) {
 }
 
 // [Refactor] Render Sub Question (Seamless Style)
+// 발문=q.title, 개별지문=q.text (GAS 필드 매핑 기준)
 function renderSubQuestion(q) {
+    const questionText = q.title || '';
+    const passageText = q.text || '';
     const mediaHtml = getMediaHtml(q);
     const inputHtml = getInputHtml(q);
 
-    let subPassageHtml = "";
-    // [Fix] Reverted to ensure individual passage logic ALWAYS works (as requested by user)
-    if (q.passage1 && q.passage1.trim() !== "") {
-        subPassageHtml = `
-            <div class="mb-3 p-3 bg-slate-100/50 border border-black rounded-lg text-[14px] leading-relaxed font-serif text-slate-700">
-                ${q.passage1}
-            </div>
-         `;
-    }
+    const subPassageHtml = passageText.trim() !== ''
+        ? `<div class="mb-3 p-3 bg-slate-100/50 border border-black rounded-lg text-[14px] leading-relaxed font-serif text-slate-700">${passageText}</div>`
+        : '';
 
-    // [Fix] Remove "Card" Style (No shadow/border/bg-white), Just Layout
     return `
         <div class="mb-0">
             <div class="flex items-start gap-3 mb-2">
-                 <!-- Number Box -->
                  <div class="flex-shrink-0 w-7 h-7 rounded bg-indigo-600 text-white flex items-center justify-center font-bold text-[15px] pt-0.5 shadow-sm">
                     ${q.displayIndex}
                  </div>
-                 <!-- Question Text (Aligned) -->
-                 <h4 class="text-[15px] font-normal text-slate-800 leading-snug pt-0.5 break-keep select-text">${q.text}</h4>
+                 <h4 class="text-[15px] font-normal text-slate-800 leading-snug pt-0.5 break-keep select-text">${questionText}</h4>
             </div>
-            
             <div class="space-y-3 pl-0">
                 ${subPassageHtml}
                 ${mediaHtml}
-                <div class="text-[14px]">
-                    ${inputHtml}
-                </div>
+                <div class="text-[14px]">${inputHtml}</div>
             </div>
         </div>
     `;
@@ -10099,15 +10100,22 @@ function renderSubQuestion(q) {
 // [Refactor] Input HTML (Compact & Grid Choices)
 function getInputHtml(q) {
     if (q.type === '객관형') {
-        const choices = [q.choice1, q.choice2, q.choice3, q.choice4, q.choice5].filter(c => c && c.trim() !== "");
+        // GAS에서 choices(배열) 우선, 없으면 choice1/2/3... 폴백
+        let choices = [];
+        if (Array.isArray(q.choices) && q.choices.length > 0) {
+            choices = q.choices;
+        } else {
+            choices = [q.choice1, q.choice2, q.choice3, q.choice4, q.choice5].filter(c => c && String(c).trim() !== '');
+        }
+        if (choices.length === 0) return '<div class="text-slate-400 text-[14px] py-2">보기 데이터 없음</div>';
         return renderChoices(q, choices);
     } else {
-        // Subjective: Compact 1-Line
+        // Subjective
         const saved = examSession.answers[q.id] || "";
         return `
             <div class="mt-1">
                 <textarea 
-                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'; saveAnswer('${q.id}', this.value)"
+                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'; updateAnswer('${q.id}', this.value)"
                     class="w-full p-2 bg-white border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-serif text-[14px] leading-relaxed resize-none overflow-hidden min-h-[40px]"
                     rows="1"
                     placeholder="답안을 입력하세요">${saved}</textarea>
