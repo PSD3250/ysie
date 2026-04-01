@@ -10002,8 +10002,14 @@ function renderExamPaper(list) {
         const prev = list[i - 1];
         const currTitle = String(q.commonTitle || "").trim().toLowerCase();
         let prevTitle = prev ? String(prev.commonTitle || "").trim().toLowerCase() : "";
+        const currSetId = q.setId || "";
+        const prevSetId = prev ? (prev.setId || "") : "";
 
-        if (currTitle !== "" && currTitle === prevTitle) {
+        // commonTitle이 같거나 setId가 같으면 같은 묶음으로 처리
+        const sameGroup = (currTitle !== "" && currTitle === prevTitle) ||
+                          (currSetId !== "" && currSetId === prevSetId);
+
+        if (sameGroup) {
             currentGroup.push(q);
         } else {
             if (currentGroup.length > 0) {
