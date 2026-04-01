@@ -3768,8 +3768,14 @@ function getInputHtml(q) {
         }
         if (!options || options.length === 0) return '<div class="text-red-500">보기 데이터 없음</div>';
 
+        const _isMultiple = q.answer && String(q.answer).includes(',');
+        const _maxCount = _isMultiple ? String(q.answer).split(',').filter(function(s){return s.trim();}).length : 1;
+        const _guideHtml = _isMultiple ? `<div class="text-[13px] text-indigo-600 font-bold mb-2">※ ${_maxCount}개를 선택하세요.</div>` : '';
+        const _savedArr = _isMultiple ? savedAns.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+
         return `
             <div class="flex flex-col gap-3">
+                ${_guideHtml}
                 ${options.map((opt, idx) => {
             // [Fix] q.labelType 없으면 answer 값으로 추론
         const _inferredObjLT = (q.answer && /^[A-Ea-e]$/.test(String(q.answer).trim())) ? 'alpha' : 'number';
@@ -3777,10 +3783,10 @@ function getInputHtml(q) {
             const _alphaCircled = ['Ⓐ','Ⓑ','Ⓒ','Ⓓ','Ⓔ'];
             const _numCircled   = ['①','②','③','④','⑤','⑥'];
             const _v = _lType === 'alpha' ? ['A','B','C','D','E'][idx] : (idx + 1).toString();
-            const _sel = savedAns === _v;
+            const _sel = _isMultiple ? _savedArr.includes(_v) : (savedAns === _v);
             const _cnum = _lType === 'alpha' ? (_alphaCircled[idx] || _v) : (_numCircled[idx] || _v);
             return `<button type="button" data-qid="${q.id}" data-val="${_v}"
-                onclick="selectObjAnswer('${q.id}','${_v}')"
+                onclick="selectObjAnswer('${q.id}','${_v}',${_isMultiple},${_maxCount})"
                 class="exam-choice-btn flex items-center gap-3 p-2 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
                 style="border-color:${_sel?'#4f46e5':'#e2e8f0'};background:${_sel?'#eef2ff':'#ffffff'}">
                 <span class="exam-circle-num flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center text-[20px] font-bold transition-all"
@@ -7682,6 +7688,7 @@ function serializeBuilderState() {
                     sub: block.querySelector('[data-field="subtype"]')?.value || '기타', // SubType Fixed
                     diff: block.querySelector('[data-field="difficulty"]')?.value || '중',
                     score: block.querySelector('[data-field="score"]')?.value || 3,
+                    title: (() => { const el = block.querySelector('[data-field="title"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
                     text: (() => { const el = block.querySelector('[data-field="text"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
                     answer: block.querySelector('[data-field="answer"]')?.value || '',
                     modelAnswer: block.querySelector('[data-field="modelAnswer"]')?.value || '', // Collect Model Answer
@@ -8928,7 +8935,7 @@ async function collectBuilderData() {
         if (type === 'bundle' || type === 'passage') {
             const groupId = block.getAttribute('data-group-id') || block.id || generateUUID(); // [Fix] block.id = 원본 UUID 우선
             // Use data-field selectors
-            const title = block.querySelector('[data-field="title"]')?.value || '';
+            const title = (() => { const el = block.querySelector('[data-field="title"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : stripTwStyles(el.innerHTML || '')) : ''; })();
             const html = stripTwStyles(block.querySelector('[data-field="html"]')?.innerHTML || '');
 
             const fileInput = block.querySelector('[data-field="file"]');
@@ -9032,7 +9039,7 @@ async function collectBuilderData() {
         const subInput = block.querySelector('[data-field="subtype"]'); // Add capture for subtype
         const diffInput = block.querySelector('[data-field="difficulty"]');
         const scoreInput = block.querySelector('[data-field="score"]');
-        const titleInput = block.querySelector('[data-field="text"]'); // Question Title
+        const titleInput = block.querySelector('[data-field="title"]'); // Question Title (발문, data-field="title")
         const contentInput = block.querySelector('[data-field="innerPassage"]'); // Passage Content (Fixed: innerPassage)
         const answerInput = block.querySelector('[data-field="answer"]');
         const modelInput = block.querySelector('[data-field="modelAnswer"]'); // New Field
@@ -10155,7 +10162,7 @@ function renderBundleLeft(data) {
     }
 
     return `
-        ${title ? `<div class="px-0 pb-3 bg-white border-b border-slate-200 flex items-center"><h3 class="font-bold text-slate-700 text-[15px] flex items-center gap-2 m-0 leading-tight"><span class="text-indigo-600 text-[17px] font-bold shrink-0">${range}</span><span>${title}</span></h3></div>` : ''}
+        <div class="px-0 pb-3 bg-white border-b border-slate-200 flex items-center"><h3 class="font-bold text-slate-700 text-[15px] flex items-center gap-2 m-0 leading-tight"><span class="text-indigo-600 text-[17px] font-bold shrink-0">${range}</span>${title ? `<span>${title}</span>` : ''}</h3></div>
         ${passage ? `<div class="mt-3 mb-0 p-4 border border-black rounded shadow-sm bg-white"><div class="prose prose-sm max-w-none text-slate-700 leading-relaxed font-serif text-[15px]">${passage}</div></div>` : ''}
         ${bundleAudioHtml}
         ${bundleImgHtml}
