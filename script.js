@@ -3801,22 +3801,53 @@ function getInputHtml(q) {
     }
 }
 
-function selectObjAnswer(qId, val) {
-    updateAnswer(qId, val);
-    document.querySelectorAll('.exam-choice-btn').forEach(function(btn) {
-        if (btn.dataset.qid !== qId) return;
-        const isSel = btn.dataset.val === val;
-        btn.style.borderColor = isSel ? '#4f46e5' : '#e2e8f0';
-        btn.style.background = isSel ? '#eef2ff' : '#ffffff';
-        const circle = btn.querySelector('.exam-circle-num');
-        if (circle) {
-            circle.style.background = isSel ? '#4f46e5' : '#ffffff';
-            circle.style.color = isSel ? '#ffffff' : '#4f46e5';
-            circle.style.borderColor = isSel ? '#4f46e5' : '#c7d2fe';
+function selectObjAnswer(qId, val, isMultiple) {
+    if (isMultiple) {
+        // 복수 정답 모드: 토글 방식
+        const cur = (examSession.answers && examSession.answers[qId]) || '';
+        const selected = cur ? cur.split(',').map(function(s){ return s.trim(); }).filter(Boolean) : [];
+        const idx = selected.indexOf(val);
+        if (idx >= 0) {
+            selected.splice(idx, 1); // 이미 선택 → 해제
+        } else {
+            selected.push(val); // 새로 추가
         }
-        const txt = btn.querySelector('span:last-child');
-        if (txt) txt.style.color = isSel ? '#3730a3' : '#374151';
-    });
+        selected.sort();
+        const newVal = selected.join(',');
+        updateAnswer(qId, newVal);
+        // UI 업데이트
+        document.querySelectorAll('.exam-choice-btn').forEach(function(btn) {
+            if (btn.dataset.qid !== qId) return;
+            const isSel = selected.includes(btn.dataset.val);
+            btn.style.borderColor = isSel ? '#4f46e5' : '#e2e8f0';
+            btn.style.background = isSel ? '#eef2ff' : '#ffffff';
+            const circle = btn.querySelector('.exam-circle-num');
+            if (circle) {
+                circle.style.background = isSel ? '#4f46e5' : '#ffffff';
+                circle.style.color = isSel ? '#ffffff' : '#4f46e5';
+                circle.style.borderColor = isSel ? '#4f46e5' : '#c7d2fe';
+            }
+            const txt = btn.querySelector('span:last-child');
+            if (txt) txt.style.color = isSel ? '#3730a3' : '#374151';
+        });
+    } else {
+        // 단일 정답 모드: 기존 방식
+        updateAnswer(qId, val);
+        document.querySelectorAll('.exam-choice-btn').forEach(function(btn) {
+            if (btn.dataset.qid !== qId) return;
+            const isSel = btn.dataset.val === val;
+            btn.style.borderColor = isSel ? '#4f46e5' : '#e2e8f0';
+            btn.style.background = isSel ? '#eef2ff' : '#ffffff';
+            const circle = btn.querySelector('.exam-circle-num');
+            if (circle) {
+                circle.style.background = isSel ? '#4f46e5' : '#ffffff';
+                circle.style.color = isSel ? '#ffffff' : '#4f46e5';
+                circle.style.borderColor = isSel ? '#4f46e5' : '#c7d2fe';
+            }
+            const txt = btn.querySelector('span:last-child');
+            if (txt) txt.style.color = isSel ? '#3730a3' : '#374151';
+        });
+    }
 }
 
 function updateAnswer(qId, value) {
@@ -3897,8 +3928,9 @@ async function submitExam() {
             const correctAns = String(q.answer || '').trim();
 
             if (q.type === '객관형') {
-                // 객관형: 단순 문자열 비교
-                isCorrect = String(studentAns).trim() === String(q.answer).trim();
+                // 객관형: 쉼표 기준 정렬 후 비교 (복수 정답 지원)
+                const normAns = function(s) { return String(s||'').split(',').map(function(a){return a.trim();}).filter(Boolean).sort().join(','); };
+                isCorrect = normAns(studentAns) === normAns(q.answer);
                 earnedScore = isCorrect ? maxQ : 0;
             } else {
                 // 주관형 1단계: 키워드 매칭 (대소문자·띄어쓰기·구두점·en dash 무시)
@@ -10202,9 +10234,11 @@ function renderChoices(q, choices) {
         <div class="grid ${gridClass} gap-x-6 gap-y-2">
             ${choices.map((choice, idx) => {
         const val = getVal(idx);
-        const isSel = String(savedAns) === val;
+        const isMultipleAns = String(q.answer || '').includes(',');
+        const selectedArr = isMultipleAns ? (savedAns ? String(savedAns).split(',').map(s=>s.trim()) : []) : [];
+        const isSel = isMultipleAns ? selectedArr.includes(val) : String(savedAns) === val;
         const textClass = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700';
-        return `<label class="exam-choice-btn flex items-start gap-2 cursor-pointer p-1 -ml-1 transition-colors" data-qid="${q.id}" data-val="${val}" onclick="selectObjAnswer('${q.id}','${val}')">
+        return `<label class="exam-choice-btn flex items-start gap-2 cursor-pointer p-1 -ml-1 transition-colors" data-qid="${q.id}" data-val="${val}" onclick="selectObjAnswer('${q.id}','${val}',${isMultipleAns})">
                     <span class="exam-circle-num flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-[15px] font-bold mt-0.5"
                         style="background:${isSel?'#4f46e5':'#ffffff'};color:${isSel?'#ffffff':'#4f46e5'};border-color:${isSel?'#4f46e5':'#c7d2fe'}"
                     >${cnums[idx]||val}</span>
