@@ -7719,8 +7719,8 @@ function serializeBuilderState() {
                     sub: block.querySelector('[data-field="subtype"]')?.value || '기타', // SubType Fixed
                     diff: block.querySelector('[data-field="difficulty"]')?.value || '중',
                     score: block.querySelector('[data-field="score"]')?.value || 3,
-                    title: (() => { const el = block.querySelector('[data-field="title"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
-                    text: (() => { const el = block.querySelector('[data-field="text"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
+                    title: (() => { const el = block.querySelector('[data-field="text"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
+                    text: (() => { const el = block.querySelector('[data-field="innerPassage"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
                     answer: Array.from(block.querySelectorAll('[data-role="answer-item"]')).map(function(el){return el.value.trim();}).filter(Boolean).join(',') || '',
                     modelAnswer: block.querySelector('[data-field="modelAnswer"]')?.value || '', // Collect Model Answer
                     options: []
@@ -9113,7 +9113,7 @@ async function collectBuilderData() {
         const subInput = block.querySelector('[data-field="subtype"]'); // Add capture for subtype
         const diffInput = block.querySelector('[data-field="difficulty"]');
         const scoreInput = block.querySelector('[data-field="score"]');
-        const titleInput = block.querySelector('[data-field="title"]'); // Question Title (발문, data-field="title")
+        const titleInput = block.querySelector('[data-field="text"]'); // Question Title (발문, data-field="text" — MD 기준 q.title=발문)
         const contentInput = block.querySelector('[data-field="innerPassage"]'); // Passage Content (Fixed: innerPassage)
         const answerItems = block.querySelectorAll('[data-role="answer-item"]');
         const modelInput = block.querySelector('[data-field="modelAnswer"]'); // New Field
@@ -9135,7 +9135,9 @@ async function collectBuilderData() {
             title: titleInput ? (titleInput.tagName === 'TEXTAREA' ? titleInput.value : stripTwStyles(titleInput.innerHTML)) : '',
             passageText: contentInput ? stripTwStyles(contentInput.innerHTML) : '', // Collect Passage
             score: scoreInput ? scoreInput.value : 3,
-            answer: Array.from(answerItems).map(function(el){return el.value.trim();}).filter(Boolean).join(','),
+            answer: type === 'obj'
+                ? Array.from(answerItems).map(function(el){return el.value.trim();}).filter(Boolean).join(',')
+                : (block.querySelector('[data-field="answer"]') ? block.querySelector('[data-field="answer"]').value.trim() : ''),
             modelAnswer: modelInput ? modelInput.value : '', // Collect Model Answer
             useAiGrading: false,
             choices: [],
