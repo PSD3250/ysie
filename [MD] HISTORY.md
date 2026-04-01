@@ -25,6 +25,29 @@
 - **수정**: `ch.tagName === 'TEXTAREA' ? ch.value : stripTwStyles(ch.innerHTML)`
 - **교훈**: choices 관련 수정 시 `serializeBuilderState` + `parseQuestionBlock` **두 함수 모두** 반드시 확인
 
+## 🛠️ 2026-04-02 오늘 세션 작업 내역
+
+### 복수 정답 지원 (커밋: b616c09, c9f1e0f)
+- 정답 필드에 쉼표 있으면 복수 선택 모드 자동 전환
+- `selectObjAnswer`에 `maxCount` 파라미터 추가 → 정답 개수만큼만 선택 가능
+- 초과 선택 차단, 이미 선택한 보기 재클릭 시 해제 (single/multiple 모두)
+- 보기 UI에 "N개를 선택하세요" 안내문 추가
+- 채점 로직: 쉼표 기준 정렬 후 비교 (`normAns`) → 순서 무관
+
+### 워드/한글 복붙 처리 (커밋: 99d5992)
+- `sanitizePastedHtml`에 HTML 주석, style, meta, link 태그 제거 추가
+
+### 묶음형 그룹핑 버그 수정 (커밋: 6d078c3)
+- **원인**: `displayUnits` 생성 시 `commonTitle`로만 그룹핑 → `bundle.title` 비어있으면 각 하위문항이 개별 페이지로 분리
+- **수정**: `setId`가 같으면 같은 번들로 그룹핑하는 조건 추가
+- **영향**: 1/113 → 1/17로 정상화
+
+### 묶음형 좌측 발문 수정 (커밋: 07df660)
+- `commonTitle`이 없을 때 `setId`로 `globalConfig.bundles`에서 직접 title 조회 fallback 추가
+- ⚠️ **미해결**: `bundle.title` 자체가 DB에서 비어있는 경우 여전히 발문 미표시 → 확인 필요
+
+### ⚠️ 알려진 미해결 이슈
+- 묶음형 좌측 발문이 여전히 안 나오는 경우: `globalConfig.bundles[0].title` 값 브라우저 콘솔에서 확인 필요
 
 ## 2026-04-01 (오후 세션) - 시험화면 렌더링 버그 수정 + 빌더 서식 기능 강화
 
