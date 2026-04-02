@@ -196,7 +196,7 @@ async function loadConfigFromCloud(silent = false) {
             if (c.logo) globalConfig.logo = c.logo;
             if (c.banner) globalConfig.banner = c.banner;
             if (c.classes) {
-                try { globalConfig.classes = typeof c.classes === 'string' ? JSON.parse(c.classes) : c.classes; } catch(e) { console.warn('Classes Parse Error', e); }
+                try { globalConfig.classes = typeof c.classes === 'string' ? JSON.parse(c.classes) : c.classes; } catch (e) { console.warn('Classes Parse Error', e); }
             }
 
             // [Fix] 문항 데이터 로드 추가 (데이터 누락 방지)
@@ -1827,9 +1827,9 @@ function renderMainConfig(c) {
 function renderClassListHtml() {
     const classes = (globalConfig.classes || []).filter(c => typeof c === 'object' && c.grade && c.name);
     if (classes.length === 0) return '<span class="text-slate-400 fs-14">등록된 학급이 없습니다.</span>';
-    const GRADES = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3','고등','기타'];
+    const GRADES = ['초1', '초2', '초3', '초4', '초5', '초6', '중1', '중2', '중3', '고1', '고2', '고3', '고등', '기타'];
     const groups = {};
-    classes.forEach((c, i) => { if (!groups[c.grade]) groups[c.grade] = []; groups[c.grade].push({...c, idx: i}); });
+    classes.forEach((c, i) => { if (!groups[c.grade]) groups[c.grade] = []; groups[c.grade].push({ ...c, idx: i }); });
     return GRADES.filter(g => groups[g])
         .map(g => `
         <div class="flex items-center gap-2 flex-wrap py-1">
@@ -1887,10 +1887,10 @@ function computeClassAvg(className, grade, secMap) {
     if (!records.length) return null;
     const avg = {};
     const totals = records.map(r => parseFloat(r['총점'] || r['완스코어'] || r.totalScore || r.total || 0)).filter(v => !isNaN(v) && v > 0);
-    if (totals.length) avg['총점'] = totals.reduce((s,v)=>s+v,0)/totals.length;
+    if (totals.length) avg['총점'] = totals.reduce((s, v) => s + v, 0) / totals.length;
     if (secMap) Object.keys(secMap).forEach(sec => {
-        const vals = records.map(r => parseFloat(r[sec+'_점수'] || r[secMap[sec]] || 0)).filter(v => !isNaN(v) && v >= 0);
-        if (vals.length) avg[sec+'_점수'] = vals.reduce((s,v)=>s+v,0)/vals.length;
+        const vals = records.map(r => parseFloat(r[sec + '_점수'] || r[secMap[sec]] || 0)).filter(v => !isNaN(v) && v >= 0);
+        if (vals.length) avg[sec + '_점수'] = vals.reduce((s, v) => s + v, 0) / vals.length;
     });
     return avg;
 }
@@ -1898,7 +1898,7 @@ function computeClassAvg(className, grade, secMap) {
 
 // 등록된 학급이 있는 학년만 반환 (순서: 초1~고3)
 function getRegisteredGrades() {
-    const ORDER = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3'];
+    const ORDER = ['초1', '초2', '초3', '초4', '초5', '초6', '중1', '중2', '중3', '고1', '고2', '고3'];
     if (!globalConfig.classes || !globalConfig.classes.length) return ORDER;
     const registered = [...new Set(
         globalConfig.classes
@@ -1906,7 +1906,7 @@ function getRegisteredGrades() {
             .map(c => c.grade)
     )];
     // ORDER 기준 정렬 + ORDER에 없는 학년(고등, 기타 등)은 뒤에 자동 추가
-    const inOrder    = ORDER.filter(g => registered.includes(g));
+    const inOrder = ORDER.filter(g => registered.includes(g));
     const notInOrder = registered.filter(g => !ORDER.includes(g));
     return [...inOrder, ...notInOrder];
 }
@@ -1930,9 +1930,9 @@ function addClassItem() {
     const gradeEl = document.getElementById('new-class-grade');
     const inp = document.getElementById('new-class-input');
     const grade = gradeEl?.value;
-    const name  = inp?.value.trim();
+    const name = inp?.value.trim();
     if (!grade) { showToast('학년을 선택하세요'); return; }
-    if (!name)  { showToast('학급명을 입력하세요'); return; }
+    if (!name) { showToast('학급명을 입력하세요'); return; }
     if (!globalConfig.classes) globalConfig.classes = [];
     // 중복 확인
     if (globalConfig.classes.some(c => typeof c === 'object' && c.grade === grade && c.name === name)) {
@@ -1959,9 +1959,9 @@ async function saveClassConfig() {
 
 // --- 카테고리 관리 별도 뷰 ---
 // ─── 학생 DB 뷰어 (Canvas 09-3) ───────────────────────────────────────────
-let _sdbSort  = { col: 'name', dir: 1 };  // col: name|grade|year|md|score
+let _sdbSort = { col: 'name', dir: 1 };  // col: name|grade|year|md|score
 let _sdbCache = { catId: '', catName: '', records: [] };
-let _sdbList  = [];   // 필터 적용된 현재 목록
+let _sdbList = [];   // 필터 적용된 현재 목록
 
 async function showStudentDBViewer(catId, catName) {
     const cat = globalConfig.categories.find(c => c.id === catId);
@@ -1970,8 +1970,8 @@ async function showStudentDBViewer(catId, catName) {
     setCanvasId('09-3');
 
     _sdbCache = { catId, catName, records: [] };
-    _sdbSort  = { col: 'date', dir: -1 };
-    _sdbList  = [];
+    _sdbSort = { col: 'date', dir: -1 };
+    _sdbList = [];
 
     const bSty = `background:linear-gradient(135deg,#fff 0%,#eef4ff 100%);border:2px solid rgba(1,57,118,0.15);`;
     const tBar = `<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#60a5fa,#6366f1,#a855f7);"></div>`;
@@ -2015,15 +2015,15 @@ async function showStudentDBViewer(catId, catName) {
         _sdbCache.records = rawList;
 
         // 필터 드롭다운 채우기
-        const years  = [...new Set(rawList.map(r => dateToYear(r['응시일']||r.date||'')).filter(y => /^\d{4}$/.test(y)))].sort((a,b) => b.localeCompare(a));
-        const grades = [...new Set(rawList.map(r => String(r['학년']||r.grade||'')).filter(g => g))].sort((a,b) => a.localeCompare(b,'ko'));
+        const years = [...new Set(rawList.map(r => dateToYear(r['응시일'] || r.date || '')).filter(y => /^\d{4}$/.test(y)))].sort((a, b) => b.localeCompare(a));
+        const grades = [...new Set(rawList.map(r => String(r['학년'] || r.grade || '')).filter(g => g))].sort((a, b) => a.localeCompare(b, 'ko'));
         const ySel = document.getElementById('sdb-year');
         const gSel = document.getElementById('sdb-grade');
-        if (ySel) ySel.innerHTML = '<option value="전체">전체</option>' + years.map(y  => `<option value="${y}">${y}년</option>`).join('');
+        if (ySel) ySel.innerHTML = '<option value="전체">전체</option>' + years.map(y => `<option value="${y}">${y}년</option>`).join('');
         if (gSel) gSel.innerHTML = '<option value="전체">전체</option>' + grades.map(g => `<option value="${g}">${g}</option>`).join('');
 
         applyStudentDBFilters();
-    } catch(e) {
+    } catch (e) {
         const w = document.getElementById('sdb-table-wrap');
         if (w) w.innerHTML = `<p class="text-red-400 text-center py-6">오류: ${e.message}</p>`;
     } finally { toggleLoading(false); }
@@ -2038,11 +2038,11 @@ function dateToYear(raw) {
 }
 
 function applyStudentDBFilters() {
-    const year  = document.getElementById('sdb-year')?.value  || '전체';
+    const year = document.getElementById('sdb-year')?.value || '전체';
     const grade = document.getElementById('sdb-grade')?.value || '전체';
     let list = (_sdbCache.records || []).slice();
-    if (year  !== '전체') list = list.filter(r => dateToYear(r['응시일']||r.date||'') === year);
-    if (grade !== '전체') list = list.filter(r => String(r['학년']||r.grade||'') === grade);
+    if (year !== '전체') list = list.filter(r => dateToYear(r['응시일'] || r.date || '') === year);
+    if (grade !== '전체') list = list.filter(r => String(r['학년'] || r.grade || '') === grade);
     _sdbList = list;
     _renderStudentDBTable();
 }
@@ -2059,12 +2059,12 @@ function _renderStudentDBTable() {
     const { col, dir } = _sdbSort;
     const catId = _sdbCache.catId;
     const sorted = _sdbList.slice().sort((a, b) => {
-        const dA = String(a['응시일']||a.date||''), dB = String(b['응시일']||b.date||'');
-        switch(col) {
-            case 'name':  return dir * String(a['학생명']||a.name||'').localeCompare(String(b['학생명']||b.name||''), 'ko');
-            case 'grade': return dir * String(a['학년']||a.grade||'').localeCompare(String(b['학년']||b.grade||''), 'ko');
-            case 'date':  return dir * dA.localeCompare(dB);
-            case 'score': return dir * ((parseFloat(a['총점']??a.totalScore??0)||0) - (parseFloat(b['총점']??b.totalScore??0)||0));
+        const dA = String(a['응시일'] || a.date || ''), dB = String(b['응시일'] || b.date || '');
+        switch (col) {
+            case 'name': return dir * String(a['학생명'] || a.name || '').localeCompare(String(b['학생명'] || b.name || ''), 'ko');
+            case 'grade': return dir * String(a['학년'] || a.grade || '').localeCompare(String(b['학년'] || b.grade || ''), 'ko');
+            case 'date': return dir * dA.localeCompare(dB);
+            case 'score': return dir * ((parseFloat(a['총점'] ?? a.totalScore ?? 0) || 0) - (parseFloat(b['총점'] ?? b.totalScore ?? 0) || 0));
             default: return 0;
         }
     });
@@ -2088,35 +2088,35 @@ function _renderStudentDBTable() {
                 <th class="px-2 py-3 bg-[#013976] text-center" style="width:44px;">
                     <input type="checkbox" id="sdb-chk-all" onchange="toggleAllSdbCheck(this)" class="w-4 h-4 accent-blue-400 cursor-pointer">
                 </th>
-                ${th('name','이름')}${th('class','등록학급')}${th('grade','학년')}${th('date','응시년월일')}${th('score','점수')}
+                ${th('name', '이름')}${th('class', '등록학급')}${th('grade', '학년')}${th('date', '응시년월일')}${th('score', '점수')}
                 <th class="px-2 py-3 text-white fs-15 font-black text-center bg-[#013976]">삭제</th>
             </tr>
         </thead>
         <tbody>
             ${sorted.map((s, i) => {
-                const sid   = s['학생ID']||s.id||'';
-                const name  = s['학생명']||s.name||'-';
-                const grade = s['학년']||s.grade||'-';
-                const _rawDate = String(s['응시일']||s.date||'-');
-                const full = (() => {
-                    if (!_rawDate || _rawDate === '-') return '-';
-                    if (_rawDate.includes('T')) {
-                        // GAS가 UTC ISO 형식으로 반환 시 로컬 timezone 기준으로 변환 (UTC→KST 날짜 불일치 방지)
-                        const d = new Date(_rawDate);
-                        const y = d.getFullYear();
-                        const m = String(d.getMonth()+1).padStart(2,'0');
-                        const dy = String(d.getDate()).padStart(2,'0');
-                        return `${y}-${m}-${dy}`;
-                    }
-                    return _rawDate.substring(0,10);
-                })();
-                const yr    = full.length >= 4 ? full.substring(0,4) : '-';
-                const md    = full.length >= 10 ? full.substring(5)   : '-';
-                const score = s['총점'] ?? s.totalScore ?? '-';
-                const max   = s['만점'] ?? s.maxScore ?? '';
-                const row   = i % 2 === 0 ? 'bg-white' : 'bg-slate-50';
-                const cls = s['등록학급'] || s['학급'] || s.class || '';
-                return `<tr class="${row} border-b border-slate-100">
+        const sid = s['학생ID'] || s.id || '';
+        const name = s['학생명'] || s.name || '-';
+        const grade = s['학년'] || s.grade || '-';
+        const _rawDate = String(s['응시일'] || s.date || '-');
+        const full = (() => {
+            if (!_rawDate || _rawDate === '-') return '-';
+            if (_rawDate.includes('T')) {
+                // GAS가 UTC ISO 형식으로 반환 시 로컬 timezone 기준으로 변환 (UTC→KST 날짜 불일치 방지)
+                const d = new Date(_rawDate);
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const dy = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${dy}`;
+            }
+            return _rawDate.substring(0, 10);
+        })();
+        const yr = full.length >= 4 ? full.substring(0, 4) : '-';
+        const md = full.length >= 10 ? full.substring(5) : '-';
+        const score = s['총점'] ?? s.totalScore ?? '-';
+        const max = s['만점'] ?? s.maxScore ?? '';
+        const row = i % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+        const cls = s['등록학급'] || s['학급'] || s.class || '';
+        return `<tr class="${row} border-b border-slate-100">
                     <td class="px-2 py-3 text-center" style="width:44px;">
                         <input type="checkbox" class="sdb-chk w-4 h-4 accent-blue-600 cursor-pointer" data-sid="${sid}" data-name="${name}" onchange="_onSdbChkChange()">
                     </td>
@@ -2124,12 +2124,12 @@ function _renderStudentDBTable() {
                     <td class="px-2 py-3 text-slate-600 fs-15 text-center">${cls}</td>
                     <td class="px-2 py-3 text-slate-700 fs-15 text-center">${grade}</td>
                     <td class="px-2 py-3 text-slate-600 fs-15 text-center">${full}</td>
-                    <td class="px-2 py-3 font-bold text-slate-800 fs-15 text-center">${score}${max?'/'+max:''}</td>
+                    <td class="px-2 py-3 font-bold text-slate-800 fs-15 text-center">${score}${max ? '/' + max : ''}</td>
                     <td class="px-2 py-3 text-center">
                         <button onclick="deleteStudentRecord('${catId}','${sid}','${name}')" class="text-red-500 hover:text-red-700 fs-13 font-bold px-3 py-1 rounded-lg border border-red-200 hover:bg-red-50">🗑️ 삭제</button>
                     </td>
                 </tr>`;
-            }).join('')}
+    }).join('')}
         </tbody>
     </table>`;
 }
@@ -2161,7 +2161,7 @@ async function bulkDeleteStudents(catId) {
         await sendReliableRequest({ type: 'BULK_DELETE_STUDENTS', parentFolderId: folderId, studentIds });
         showToast(`✅ ${checked.length}명 삭제 완료`);
         await showStudentDBViewer(_sdbCache.catId, _sdbCache.catName);
-    } catch(e) {
+    } catch (e) {
         showToast(`❌ 삭제 실패: ${e.message}`);
     } finally {
         toggleLoading(false);
@@ -2179,7 +2179,7 @@ async function deleteStudentRecord(catId, studentId, studentName) {
         await sendReliableRequest({ type: 'DELETE_STUDENT', parentFolderId: folderId, studentId });
         showToast(`✅ ${studentName} 데이터 삭제 완료`);
         showStudentDBViewer(catId, cat.name);
-    } catch(e) { showToast('❌ 삭제 실패: ' + e.message); }
+    } catch (e) { showToast('❌ 삭제 실패: ' + e.message); }
     finally { toggleLoading(false); }
 }
 
@@ -2203,8 +2203,8 @@ function renderCatManage(c) {
             <!-- 시험지 목록 컨테이너 (캔버스08 스타일) -->
             <div class="flex-grow overflow-auto bg-white rounded-2xl border border-slate-200 flex flex-col shadow-sm p-4 space-y-3">
                 ${globalConfig.categories.length === 0
-                    ? `<div class="p-20 text-center text-slate-400">📭 등록된 시험지가 없습니다. NEW 버튼으로 추가하세요.</div>`
-                    : globalConfig.categories.map(cat => `
+            ? `<div class="p-20 text-center text-slate-400">📭 등록된 시험지가 없습니다. NEW 버튼으로 추가하세요.</div>`
+            : globalConfig.categories.map(cat => `
                         <div class="flex justify-between items-center bg-slate-50 px-6 py-4 rounded-xl border-2 border-slate-200 hover:shadow-md hover:bg-white hover:border-blue-300 transition-all">
                             <div class="text-[#013976] fs-18 font-bold">${cat.name}</div>
                                                     <div class="flex items-center gap-4">
@@ -2367,15 +2367,15 @@ async function copyCat(srcCatId) {
     const srcCat = globalConfig.categories.find(c => c.id === srcCatId);
     if (!srcCat) return showToast('원본 시험지를 찾을 수 없습니다.');
 
-    const newName  = document.getElementById('copy-cn').value.trim();
-    const cCode    = document.getElementById('copy-cc').value || 'A';
-    const tGrade   = document.getElementById('copy-cgr').value || '';
-    const tLimit   = document.getElementById('copy-ctm').value || 0;
-    const copyQ    = document.getElementById('copy-copyQ').checked;
-    const copyS    = document.getElementById('copy-copyS').checked;
+    const newName = document.getElementById('copy-cn').value.trim();
+    const cCode = document.getElementById('copy-cc').value || 'A';
+    const tGrade = document.getElementById('copy-cgr').value || '';
+    const tLimit = document.getElementById('copy-ctm').value || 0;
+    const copyQ = document.getElementById('copy-copyQ').checked;
+    const copyS = document.getElementById('copy-copyS').checked;
 
     if (!newName) return showToast('새 시험지 이름을 입력해 주세요.');
-    if (!tGrade)  return showToast('권장 평가 학년을 선택해 주세요.');
+    if (!tGrade) return showToast('권장 평가 학년을 선택해 주세요.');
     if (!tLimit || Number(tLimit) <= 0) return showToast('권장 평가 시간(분)을 입력해 주세요.');
     if (!globalConfig.mainServerLink) return showToast('Main Server Folder 설정이 필요합니다.');
 
@@ -2386,14 +2386,14 @@ async function copyCat(srcCatId) {
         toggleLoading(true);
         showToast('⏳ 새 폴더 생성 중...');
         const masterUrl = globalConfig.masterUrl || DEFAULT_MASTER_URL;
-        const rootId    = extractFolderId(globalConfig.mainServerLink);
+        const rootId = extractFolderId(globalConfig.mainServerLink);
         if (!rootId) throw new Error('서버 폴더 ID를 추출할 수 없습니다.');
 
         // 1. 새 폴더 생성
-        const createRes  = await sendReliableRequest({ type: 'CREATE_FOLDER', parentFolderId: rootId, folderName: finalFolderName });
+        const createRes = await sendReliableRequest({ type: 'CREATE_FOLDER', parentFolderId: rootId, folderName: finalFolderName });
         if (createRes.status !== 'Success') throw new Error(createRes.message || '폴더 생성 실패');
         const newFolderUrl = createRes.folderUrl;
-        const newFolderId  = createRes.folderId;
+        const newFolderId = createRes.folderId;
 
         // 2. DB 파일 복사 (선택한 경우)
         if (copyQ || copyS) {
@@ -2401,24 +2401,24 @@ async function copyCat(srcCatId) {
             const srcFolderId = extractFolderId(srcCat.targetFolderUrl);
             const copyRes = await sendReliableRequest({
                 type: 'COPY_EXAM',
-                srcFolderId:   srcFolderId,
-                dstFolderId:   newFolderId,
-                newName:       newName,
+                srcFolderId: srcFolderId,
+                dstFolderId: newFolderId,
+                newName: newName,
                 copyQuestions: copyQ,
-                copyStudents:  copyS
+                copyStudents: copyS
             });
             if (copyRes.status !== 'Success') throw new Error(copyRes.message || '데이터 복사 실패');
         }
 
         // 3. 새 카테고리 로컬 등록
         const newCat = {
-            id:             'cat_' + Date.now(),
-            name:           newName,
-            createdDate:    new Date().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace(/\. /g, '').replace('.', ''),
+            id: 'cat_' + Date.now(),
+            name: newName,
+            createdDate: new Date().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace(/\. /g, '').replace('.', ''),
             targetFolderUrl: newFolderUrl,
             classification: cCode,
-            targetGrade:    tGrade,
-            timeLimit:      tLimit
+            targetGrade: tGrade,
+            timeLimit: tLimit
         };
         globalConfig.categories.push(newCat);
         save();
@@ -2450,9 +2450,9 @@ async function saveCat(editId = '') {
         const cat = globalConfig.categories.find(c => c.id === editId);
         if (cat) {
             const noChange = (n === cat.name) &&
-                             (cCode === (cat.classification || 'A')) &&
-                             (tGrade === (cat.targetGrade || '')) &&
-                             (String(tLimit) === String(cat.timeLimit || 0));
+                (cCode === (cat.classification || 'A')) &&
+                (tGrade === (cat.targetGrade || '')) &&
+                (String(tLimit) === String(cat.timeLimit || 0));
             if (noChange) return showToast('수정된 사항이 없습니다.');
         }
         if (!confirm('💾 수정된 시험지 정보를 저장하시겠습니까?')) return;
@@ -2916,11 +2916,11 @@ async function handleScoreCategoryChange(catId) {
             const studentRes = await sendReliableRequest({ type: 'GET_STUDENT_LIST', parentFolderId: folderId, categoryName: category.name });
             window.cachedStudentRecords = studentRes.data || [];
             calcAndRecommendClass06(); // [Fix] 새 데이터 반영하여 재추천
-        } catch(e2) {
+        } catch (e2) {
             console.warn('[Canvas 06] 학생 DB 로드 실패 (학급 추천 비활성화):', e2.message);
         }
 
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         showToast('\u26a0\ufe0f \ubb38\ud56d \ubd88\ub7ec\uc624\uae30 \uc2e4\ud328: ' + e.message);
         catQuestions = (globalConfig.questions || [])
@@ -2962,13 +2962,13 @@ async function handleScoreCategoryChange(catId) {
         }
     };
     const cqs = catQuestions;
-    const sm = (sec) => cqs.filter(q => q.section === sec).reduce((s,q) => s+(parseInt(q.score)||0), 0);
-    const dm = (dif) => cqs.filter(q => q.difficulty === dif).reduce((s,q) => s+(parseInt(q.score)||0), 0);
-    setMax('max-grammar',       sm('Grammar'));
-    setMax('max-writing',       sm('Writing'));
-    setMax('max-reading',       sm('Reading'));
-    setMax('max-listening',     sm('Listening'));
-    setMax('max-vocab',         sm('Vocabulary'));
+    const sm = (sec) => cqs.filter(q => q.section === sec).reduce((s, q) => s + (parseInt(q.score) || 0), 0);
+    const dm = (dif) => cqs.filter(q => q.difficulty === dif).reduce((s, q) => s + (parseInt(q.score) || 0), 0);
+    setMax('max-grammar', sm('Grammar'));
+    setMax('max-writing', sm('Writing'));
+    setMax('max-reading', sm('Reading'));
+    setMax('max-listening', sm('Listening'));
+    setMax('max-vocab', sm('Vocabulary'));
 
     if (catQuestions.length === 0) {
         listEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">등록된 문항이 없습니다. 문항 리스트에서 먼저 문항을 등록해 주세요.</p>';
@@ -2992,7 +2992,7 @@ async function handleScoreCategoryChange(catId) {
         const typeCells = chunk.map(q => `<td class="text-center text-sm text-slate-500 px-2 py-1.5 truncate" title="${q.type || ''}">${q.type || '-'}</td>`).join('') + emptyTd.repeat(padLen);
         const subTypeCells = chunk.map(q => `<td class="text-center text-sm text-slate-500 px-2 py-1.5 truncate" title="${q.subType || ''}">${q.subType || '-'}</td>`).join('') + emptyTd.repeat(padLen);
         const difficultyCells = chunk.map(q => `<td class="text-center text-sm text-slate-500 px-2 py-1.5 truncate" title="${q.difficulty || ''}">${q.difficulty || '-'}</td>`).join('') + emptyTd.repeat(padLen);
-        const maxCells = chunk.map(q => `<td class="text-center text-sm font-bold text-slate-600 px-2 py-1.5">${parseInt(q.score)||0}<span class="text-sm font-normal text-slate-400">점</span></td>`).join('') + emptyTd.repeat(padLen);
+        const maxCells = chunk.map(q => `<td class="text-center text-sm font-bold text-slate-600 px-2 py-1.5">${parseInt(q.score) || 0}<span class="text-sm font-normal text-slate-400">점</span></td>`).join('') + emptyTd.repeat(padLen);
         const inputCells = chunk.map(q => {
             const maxQ = parseInt(q.score) || 0;
             return `<td class="px-1 py-1.5"><input type="number" id="q-score-${q.id}" data-qid="${q.id}" data-max="${maxQ}" class="w-full ys-field !py-0.5 text-center font-bold !text-[#013976] !text-[15px]" placeholder="0" min="0" max="${maxQ}" value="" oninput="clampQScore(this); calculateTotalScore();"></td>`;
@@ -3068,10 +3068,10 @@ function applyYsDatePicker(selector, extraOpts = {}) {
         altFormat: 'Y-m-d (D)',
         defaultDate: new Date(),
         monthSelectorType: 'dropdown',
-        onReady:      (_, __, i) => updateYear(i),
-        onMonthChange:(_, __, i) => setTimeout(() => updateYear(i), 0),
+        onReady: (_, __, i) => updateYear(i),
+        onMonthChange: (_, __, i) => setTimeout(() => updateYear(i), 0),
         onYearChange: (_, __, i) => setTimeout(() => updateYear(i), 10),
-        onOpen:       (_, __, i) => setTimeout(() => updateYear(i), 0),
+        onOpen: (_, __, i) => setTimeout(() => updateYear(i), 0),
     }, extraOpts));
 }
 
@@ -3097,11 +3097,11 @@ function warnClassChange05(sel) {
 // 성적표 평균 표시 모드 변경
 function setReportAvgMode(mode) {
     window._reportAvgMode = mode;
-    ['all','overall','class'].forEach(function(m) {
-        const btn = document.getElementById('avg-btn-'+m);
+    ['all', 'overall', 'class'].forEach(function (m) {
+        const btn = document.getElementById('avg-btn-' + m);
         if (!btn) return;
-        btn.style.background = m===mode ? '#013976' : '#e2e8f0';
-        btn.style.color = m===mode ? 'white' : '#64748b';
+        btn.style.background = m === mode ? '#013976' : '#e2e8f0';
+        btn.style.color = m === mode ? 'white' : '#64748b';
     });
     rerenderReportCharts();
 }
@@ -3109,9 +3109,9 @@ function setReportAvgMode(mode) {
 function rerenderReportCharts() {
     const d = window.currentReportData;
     if (!d || !d.secMap) return;
-    const selCls = document.getElementById('report-student-class')?.value||'';
-    const clsAvg = (selCls&&selCls!=='__RECOMMEND__') ? computeClassAvg(selCls, d.sGrade, d.secMap) : null;
-    const mode = window._reportAvgMode||'all';
+    const selCls = document.getElementById('report-student-class')?.value || '';
+    const clsAvg = (selCls && selCls !== '__RECOMMEND__') ? computeClassAvg(selCls, d.sGrade, d.secMap) : null;
+    const mode = window._reportAvgMode || 'all';
     renderTotalChart(d.record, d.averages, d.sTotal, d.sMax, clsAvg, mode);
     renderSectionsBarChart(d.record, d.averages, d.activeSections, d.secMap, d.maxMap, clsAvg, mode);
     renderRadarChart(d.record, d.averages, d.activeSections, d.secMap, d.maxMap, clsAvg, mode);
@@ -3157,11 +3157,11 @@ function updateClassDropdown06(grade) {
     const list = getClassesForGrade(grade);
     sel.innerHTML = '<option value="">' + (list.length ? '점수입력 시 자동 추천' : '등록된 학급 없음') + '</option>'
         + '<option value="__RECOMMEND__" style="font-weight:bold;color:#6366f1;">⭐ 추천</option>'
-        + list.map(function(n) { return '<option value="' + n + '">' + n + '</option>'; }).join('')
+        + list.map(function (n) { return '<option value="' + n + '">' + n + '</option>'; }).join('')
         + '<option value="달성미달" style="color:#ef4444;font-weight:bold;">⛔ 달성미달</option>';
     sel.dataset.recommendedClass = '';
     sel.dataset.autoSelected = '0';
-    sel.onchange = function() {
+    sel.onchange = function () {
         const rec = this.dataset.recommendedClass || '';
         if (this.value === '__RECOMMEND__') {
             if (rec) { this.value = rec; }
@@ -3237,9 +3237,9 @@ function toggleAccordion(id) {
 
 function toggleQScoreMode(checked) {
     const wrapper = document.getElementById('accordion-wrapper');
-    const qList   = document.getElementById('question-score-list');
+    const qList = document.getElementById('question-score-list');
     if (wrapper) wrapper.classList.toggle('hidden', !checked);
-    if (qList)   qList.classList.toggle('hidden', checked);
+    if (qList) qList.classList.toggle('hidden', checked);
     calculateTotalScore();
 }
 
@@ -3259,12 +3259,12 @@ function calculateTotalScore() {
         return;
     }
 
-    const grammar   = parseInt(document.getElementById('input-grammar')?.value) || 0;
-    const writing   = parseInt(document.getElementById('input-writing')?.value) || 0;
-    const reading   = parseInt(document.getElementById('input-reading')?.value) || 0;
+    const grammar = parseInt(document.getElementById('input-grammar')?.value) || 0;
+    const writing = parseInt(document.getElementById('input-writing')?.value) || 0;
+    const reading = parseInt(document.getElementById('input-reading')?.value) || 0;
     const listening = parseInt(document.getElementById('input-listening')?.value) || 0;
-    const vocab     = parseInt(document.getElementById('input-vocab')?.value) || 0;
-    const sumSec    = grammar + writing + reading + listening + vocab;
+    const vocab = parseInt(document.getElementById('input-vocab')?.value) || 0;
+    const sumSec = grammar + writing + reading + listening + vocab;
 
     const finalTotal = sumSec;
 
@@ -3274,8 +3274,8 @@ function calculateTotalScore() {
 }
 
 function clearScoreInputs(resetCat = true, showMsg = true) {
-    ['input-student-id','input-student-name',
-     'input-grammar','input-writing','input-reading','input-listening','input-vocab',
+    ['input-student-id', 'input-student-name',
+        'input-grammar', 'input-writing', 'input-reading', 'input-listening', 'input-vocab',
 
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.querySelectorAll('[id^="q-score-"]').forEach(inp => inp.value = '');
@@ -3299,14 +3299,14 @@ async function saveStudentScore() {
     if (!categoryId) { showToast('\u26A0\uFE0F \uCE74\uD14C\uACE0\uB9AC\uB97C \uC120\uD0DD\uD558\uC138\uC694'); return; }
     const category = globalConfig.categories.find(c => c.id === categoryId);
 
-    const studentName  = document.getElementById('input-student-name').value.trim();
-    const grade        = document.getElementById('input-grade').value;
+    const studentName = document.getElementById('input-student-name').value.trim();
+    const grade = document.getElementById('input-grade').value;
     let studentClass = document.getElementById('input-student-class')?.value.trim() || '';
-    if (studentClass === '__RECOMMEND__') { const sel=document.getElementById('input-student-class'); studentClass = sel?.dataset?.recommendedClass||''; }
-    const testDate     = document.getElementById('input-test-date').value;
+    if (studentClass === '__RECOMMEND__') { const sel = document.getElementById('input-student-class'); studentClass = sel?.dataset?.recommendedClass || ''; }
+    const testDate = document.getElementById('input-test-date').value;
 
     if (!studentName) { showToast('\u26A0\uFE0F \uD559\uC0DD\uBA85\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694'); return; }
-    if (!grade)       { showToast('\u26A0\uFE0F \uD559\uB144\uC744 \uC120\uD0DD\uD574\uC8FC\uC138\uC694'); return; }
+    if (!grade) { showToast('\u26A0\uFE0F \uD559\uB144\uC744 \uC120\uD0DD\uD574\uC8FC\uC138\uC694'); return; }
 
     toggleLoading(true);
     try {
@@ -3317,15 +3317,17 @@ async function saveStudentScore() {
         const questionScores = [];
         let totalFromQ = 0, maxFromQ = 0;
         document.querySelectorAll('[id^="q-score-"]').forEach(inp => {
-            const qid  = inp.dataset.qid;
+            const qid = inp.dataset.qid;
             const maxQ = parseInt(inp.dataset.max) || 0;
-            const sc   = parseInt(inp.value) || 0;
+            const sc = parseInt(inp.value) || 0;
             totalFromQ += sc;
-            maxFromQ   += maxQ;
+            maxFromQ += maxQ;
             const q = (globalConfig.questions || []).find(q => String(q.id) === String(qid));
-            questionScores.push({ no: q?.no||'', id: qid, type: q?.type||'',
+            questionScores.push({
+                no: q?.no || '', id: qid, type: q?.type || '',
                 correct: null, studentAnswer: null, correctAnswer: null,
-                score: sc, maxScore: maxQ });
+                score: sc, maxScore: maxQ
+            });
         });
 
         // ── 영역별·난이도별 점수 계산 ──
@@ -3342,46 +3344,46 @@ async function saveStudentScore() {
                 const q = (globalConfig.questions || []).find(q => String(q.id) === String(qs.id));
                 return sum + (q?.section === sec ? (qs.score || 0) : 0);
             }, 0);
-            grammarScore   = calcS('Grammar');
-            writingScore   = calcS('Writing');
-            readingScore   = calcS('Reading');
+            grammarScore = calcS('Grammar');
+            writingScore = calcS('Writing');
+            readingScore = calcS('Reading');
             listeningScore = calcS('Listening');
-            vocabScore     = calcS('Vocabulary');
+            vocabScore = calcS('Vocabulary');
         } else {
             // 아코디언 직접 입력 → 해당 값 사용
-            grammarScore   = parseInt(document.getElementById('input-grammar')?.value)       || 0;
-            writingScore   = parseInt(document.getElementById('input-writing')?.value)        || 0;
-            readingScore   = parseInt(document.getElementById('input-reading')?.value)        || 0;
-            listeningScore = parseInt(document.getElementById('input-listening')?.value)      || 0;
-            vocabScore     = parseInt(document.getElementById('input-vocab')?.value)          || 0;
+            grammarScore = parseInt(document.getElementById('input-grammar')?.value) || 0;
+            writingScore = parseInt(document.getElementById('input-writing')?.value) || 0;
+            readingScore = parseInt(document.getElementById('input-reading')?.value) || 0;
+            listeningScore = parseInt(document.getElementById('input-listening')?.value) || 0;
+            vocabScore = parseInt(document.getElementById('input-vocab')?.value) || 0;
         }
 
         // ── 영역별 만점: 문항 배점 합산 ──
         const catQs = (globalConfig.questions || []).filter(q => String(q.catId) === String(categoryId));
         const calcMax = (field, val) => catQs.filter(q => q[field] === val).reduce((s, q) => s + (parseInt(q.score) || 0), 0);
-        const grammarMax   = calcMax('section', 'Grammar');
-        const writingMax   = calcMax('section', 'Writing');
-        const readingMax   = calcMax('section', 'Reading');
+        const grammarMax = calcMax('section', 'Grammar');
+        const writingMax = calcMax('section', 'Writing');
+        const readingMax = calcMax('section', 'Reading');
         const listeningMax = calcMax('section', 'Listening');
-        const vocabMax     = calcMax('section', 'Vocabulary');
+        const vocabMax = calcMax('section', 'Vocabulary');
 
         const totalScore = !noQScoreMode
             ? totalFromQ
             : (grammarScore + writingScore + readingScore + listeningScore + vocabScore)
-              || 0;
+            || 0;
         const maxScore = !noQScoreMode
             ? maxFromQ
             : parseInt(document.getElementById('score-max-display')?.textContent) || 100;
 
         // ── 난이도별 점수 계산 (문항별 입력 모드에서만) ──
-        const difficulties = { '최상':{score:0,max:0}, '상':{score:0,max:0}, '중':{score:0,max:0}, '하':{score:0,max:0}, '기초':{score:0,max:0} };
+        const difficulties = { '최상': { score: 0, max: 0 }, '상': { score: 0, max: 0 }, '중': { score: 0, max: 0 }, '하': { score: 0, max: 0 }, '기초': { score: 0, max: 0 } };
         if (!noQScoreMode) {
             questionScores.forEach(qs => {
                 const q = catQs.find(q => String(q.id) === String(qs.id));
                 const diff = q?.difficulty || '중';
                 if (difficulties[diff]) {
                     difficulties[diff].score += (qs.score || 0);
-                    difficulties[diff].max   += (parseInt(q?.score) || 0);
+                    difficulties[diff].max += (parseInt(q?.score) || 0);
                 }
             });
         }
@@ -3392,16 +3394,16 @@ async function saveStudentScore() {
             categoryId, categoryName: category.name,
             studentId, studentName, grade, studentClass, testDate,
             questionScores: JSON.stringify(questionScores),
-            grammarScore,   grammarMax,
-            writingScore,   writingMax,
-            readingScore,   readingMax,
+            grammarScore, grammarMax,
+            writingScore, writingMax,
+            readingScore, readingMax,
             listeningScore, listeningMax,
-            vocabScore,     vocabMax,
+            vocabScore, vocabMax,
             difficulty_highest: difficulties['최상'].score, difficulty_highest_max: difficulties['최상'].max,
-            difficulty_high:    difficulties['상'].score,   difficulty_high_max:    difficulties['상'].max,
-            difficulty_mid:     difficulties['중'].score,   difficulty_mid_max:     difficulties['중'].max,
-            difficulty_low:     difficulties['하'].score,   difficulty_low_max:     difficulties['하'].max,
-            difficulty_basic:   difficulties['기초'].score, difficulty_basic_max:   difficulties['기초'].max,
+            difficulty_high: difficulties['상'].score, difficulty_high_max: difficulties['상'].max,
+            difficulty_mid: difficulties['중'].score, difficulty_mid_max: difficulties['중'].max,
+            difficulty_low: difficulties['하'].score, difficulty_low_max: difficulties['하'].max,
+            difficulty_basic: difficulties['기초'].score, difficulty_basic_max: difficulties['기초'].max,
             inputMode: noQScoreMode ? 'section' : 'question',
             totalScore, maxScore
         };
@@ -3521,10 +3523,10 @@ function updatePage(delta) {
     }
 
     // [경고 1] 오디오 재생 중 이동 확인
-    const _playingAudios = Array.from(document.querySelectorAll('audio')).filter(function(a){ return !a.paused && !a.ended; });
+    const _playingAudios = Array.from(document.querySelectorAll('audio')).filter(function (a) { return !a.paused && !a.ended; });
     if (_playingAudios.length > 0) {
         if (!confirm('듣기가 재생 중입니다. 페이지를 이동하면 재생이 중단됩니다. 계속하시겠습니까?')) return;
-        _playingAudios.forEach(function(a){ a.pause(); });
+        _playingAudios.forEach(function (a) { a.pause(); });
     }
 
     // [경고 2] 미답변 문항 확인
@@ -3536,7 +3538,7 @@ function updatePage(delta) {
                 ? [...(_curUnit.left || []), ...(_curUnit.right || [])]
                 : [_curUnit.data];
         const _unanswered = [];
-        _qs.forEach(function(q){ if (!q) return; const _ans = examSession.answers ? examSession.answers[q.id] : null; if (_ans === undefined || _ans === null || _ans === '') _unanswered.push(q.no); });
+        _qs.forEach(function (q) { if (!q) return; const _ans = examSession.answers ? examSession.answers[q.id] : null; if (_ans === undefined || _ans === null || _ans === '') _unanswered.push(q.no); });
         if (_unanswered.length > 0) {
             if (!confirm('이 페이지에 아직 답하지 않은 문항이 있습니다 (No. ' + _unanswered.join(', ') + '). 계속 이동하시겠습니까?')) return;
         }
@@ -3619,7 +3621,7 @@ function renderStudentSidebar() {
 function renderSingleQHtml(q) {
     const questionText = (q.title || '').replace(/\n/g, '<br>');
     const _qIsMultiple = q.type === '객관형' && q.answer && String(q.answer).includes(',');
-    const _qMaxCount = _qIsMultiple ? String(q.answer).split(',').filter(function(s){return s.trim();}).length : 0;
+    const _qMaxCount = _qIsMultiple ? String(q.answer).split(',').filter(function (s) { return s.trim(); }).length : 0;
     const _multipleHint = _qIsMultiple ? ` <span class="text-indigo-600">(정답 ${_qMaxCount}개)</span>` : '';
     const passageText = q.text || '';
     const passageHtml = passageText.trim() !== ''
@@ -3696,21 +3698,21 @@ function renderExamContent() {
 // [Restored Feature] updateProgressUI
 function updateProgressUI() {
     const allQs = globalConfig.questions
-        ? globalConfig.questions.filter(function(q){ return String(q.catId) === String(examSession.categoryId); })
+        ? globalConfig.questions.filter(function (q) { return String(q.catId) === String(examSession.categoryId); })
         : [];
     const total = allQs.length;
     const answersMap = examSession.answers || {};
 
     let answered = 0;
-    allQs.forEach(function(q) {
+    allQs.forEach(function (q) {
         const ans = answersMap[q.id] || '';
         if (!ans) return; // 미선택
         const isSubjective = q.type === '주관형';
         const isMultiple = !isSubjective && q.answer && String(q.answer).includes(',');
         if (isMultiple) {
             // 복수정답: 정답 개수만큼 다 선택해야 카운팅
-            const maxCount = String(q.answer).split(',').filter(function(s){ return s.trim(); }).length;
-            const selectedCount = ans.split(',').filter(function(s){ return s.trim(); }).length;
+            const maxCount = String(q.answer).split(',').filter(function (s) { return s.trim(); }).length;
+            const selectedCount = ans.split(',').filter(function (s) { return s.trim(); }).length;
             if (selectedCount >= maxCount) answered++;
         } else {
             answered++; // 단일정답: 1개라도 선택하면 카운팅
@@ -3788,30 +3790,30 @@ function getInputHtml(q) {
         if (!options || options.length === 0) return '<div class="text-red-500">보기 데이터 없음</div>';
 
         const _isMultiple = q.answer && String(q.answer).includes(',');
-        const _maxCount = _isMultiple ? String(q.answer).split(',').filter(function(s){return s.trim();}).length : 1;
+        const _maxCount = _isMultiple ? String(q.answer).split(',').filter(function (s) { return s.trim(); }).length : 1;
         const _guideHtml = _isMultiple ? `<div class="text-[13px] text-indigo-600 font-bold mb-2">※ ${_maxCount}개를 선택하세요.</div>` : '';
-        const _savedArr = _isMultiple ? savedAns.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+        const _savedArr = _isMultiple ? savedAns.split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
 
         return `
             <div class="flex flex-col gap-3">
                 ${_guideHtml}
                 ${options.map((opt, idx) => {
             // [Fix] q.labelType 없으면 answer 값으로 추론
-        const _inferredObjLT = (q.answer && /^[A-Ea-e]$/.test(String(q.answer).trim())) ? 'alpha' : 'number';
-        const _lType = q.labelType || _inferredObjLT;
-            const _alphaCircled = ['Ⓐ','Ⓑ','Ⓒ','Ⓓ','Ⓔ'];
-            const _numCircled   = ['①','②','③','④','⑤','⑥'];
-            const _v = _lType === 'alpha' ? ['A','B','C','D','E'][idx] : (idx + 1).toString();
+            const _inferredObjLT = (q.answer && /^[A-Ea-e]$/.test(String(q.answer).trim())) ? 'alpha' : 'number';
+            const _lType = q.labelType || _inferredObjLT;
+            const _alphaCircled = ['Ⓐ', 'Ⓑ', 'Ⓒ', 'Ⓓ', 'Ⓔ'];
+            const _numCircled = ['①', '②', '③', '④', '⑤', '⑥'];
+            const _v = _lType === 'alpha' ? ['A', 'B', 'C', 'D', 'E'][idx] : (idx + 1).toString();
             const _sel = _isMultiple ? _savedArr.includes(_v) : (savedAns === _v);
             const _cnum = _lType === 'alpha' ? (_alphaCircled[idx] || _v) : (_numCircled[idx] || _v);
             return `<button type="button" data-qid="${q.id}" data-val="${_v}"
                 onclick="selectObjAnswer('${q.id}','${_v}',${_isMultiple},${_maxCount})"
                 class="exam-choice-btn flex items-center gap-3 p-2 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left w-full"
-                style="border-color:${_sel?'#4f46e5':'#e2e8f0'};background:${_sel?'#eef2ff':'#ffffff'}">
+                style="border-color:${_sel ? '#4f46e5' : '#e2e8f0'};background:${_sel ? '#eef2ff' : '#ffffff'}">
                 <span class="exam-circle-num flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center text-[20px] font-bold transition-all"
-                    style="background:${_sel?'#4f46e5':'#ffffff'};color:${_sel?'#ffffff':'#4f46e5'};border-color:${_sel?'#4f46e5':'#c7d2fe'}"
+                    style="background:${_sel ? '#4f46e5' : '#ffffff'};color:${_sel ? '#ffffff' : '#4f46e5'};border-color:${_sel ? '#4f46e5' : '#c7d2fe'}"
                 >${_cnum}</span>
-                <span class="text-[14px] font-medium" style="color:${_sel?'#3730a3':'#374151'}">${opt}</span>
+                <span class="text-[14px] font-medium" style="color:${_sel ? '#3730a3' : '#374151'}">${opt}</span>
             </button>`;
         }).join('')}
             </div>
@@ -3830,7 +3832,7 @@ function selectObjAnswer(qId, val, isMultiple, maxCount) {
     if (isMultiple) {
         // 복수 정답 모드: 토글 + maxCount 초과 시 신규 선택 차단
         const cur = (examSession.answers && examSession.answers[qId]) || '';
-        const selected = cur ? cur.split(',').map(function(s){ return s.trim(); }).filter(Boolean) : [];
+        const selected = cur ? cur.split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
         const idx = selected.indexOf(val);
         if (idx >= 0) {
             selected.splice(idx, 1); // 이미 선택 → 해제
@@ -3841,7 +3843,7 @@ function selectObjAnswer(qId, val, isMultiple, maxCount) {
         selected.sort();
         const newVal = selected.join(',');
         updateAnswer(qId, newVal);
-        document.querySelectorAll('.exam-choice-btn').forEach(function(btn) {
+        document.querySelectorAll('.exam-choice-btn').forEach(function (btn) {
             if (btn.dataset.qid !== qId) return;
             const isSel = selected.includes(btn.dataset.val);
             btn.style.borderColor = isSel ? '#4f46e5' : '#e2e8f0';
@@ -3860,7 +3862,7 @@ function selectObjAnswer(qId, val, isMultiple, maxCount) {
         const cur = (examSession.answers && examSession.answers[qId]) || '';
         const newVal = cur === val ? '' : val;
         updateAnswer(qId, newVal);
-        document.querySelectorAll('.exam-choice-btn').forEach(function(btn) {
+        document.querySelectorAll('.exam-choice-btn').forEach(function (btn) {
             if (btn.dataset.qid !== qId) return;
             const isSel = btn.dataset.val === newVal && newVal !== '';
             btn.style.borderColor = isSel ? '#4f46e5' : '#e2e8f0';
@@ -3960,7 +3962,7 @@ async function submitExam() {
 
             if (q.type === '객관형') {
                 // 객관형: 쉼표 기준 정렬 후 비교 (복수 정답 지원)
-                const normAns = function(s) { return String(s||'').split(',').map(function(a){return a.trim();}).filter(Boolean).sort().join(','); };
+                const normAns = function (s) { return String(s || '').split(',').map(function (a) { return a.trim(); }).filter(Boolean).sort().join(','); };
                 isCorrect = normAns(studentAns) === normAns(q.answer);
                 earnedScore = isCorrect ? maxQ : 0;
             } else {
@@ -4040,17 +4042,17 @@ async function submitExam() {
 
             questionScores: JSON.stringify(questionScores),
 
-            grammarScore: sections['Grammar'].score,   grammarMax: sections['Grammar'].max,
-            writingScore: sections['Writing'].score,   writingMax: sections['Writing'].max,
-            readingScore: sections['Reading'].score,   readingMax: sections['Reading'].max,
+            grammarScore: sections['Grammar'].score, grammarMax: sections['Grammar'].max,
+            writingScore: sections['Writing'].score, writingMax: sections['Writing'].max,
+            readingScore: sections['Reading'].score, readingMax: sections['Reading'].max,
             listeningScore: sections['Listening'].score, listeningMax: sections['Listening'].max,
-            vocabScore: sections['Vocabulary'].score,  vocabMax: sections['Vocabulary'].max,
+            vocabScore: sections['Vocabulary'].score, vocabMax: sections['Vocabulary'].max,
 
             difficulty_highest: difficulties['최상'].score, difficulty_highest_max: difficulties['최상'].max,
-            difficulty_high:    difficulties['상'].score,   difficulty_high_max:    difficulties['상'].max,
-            difficulty_mid:     difficulties['중'].score,   difficulty_mid_max:     difficulties['중'].max,
-            difficulty_low:     difficulties['하'].score,   difficulty_low_max:     difficulties['하'].max,
-            difficulty_basic:   difficulties['기초'].score, difficulty_basic_max:   difficulties['기초'].max,
+            difficulty_high: difficulties['상'].score, difficulty_high_max: difficulties['상'].max,
+            difficulty_mid: difficulties['중'].score, difficulty_mid_max: difficulties['중'].max,
+            difficulty_low: difficulties['하'].score, difficulty_low_max: difficulties['하'].max,
+            difficulty_basic: difficulties['기초'].score, difficulty_basic_max: difficulties['기초'].max,
 
             totalScore: totalScore,
             maxScore: maxScore
@@ -4206,12 +4208,12 @@ async function loadStudentList() {
 
 // ── 시험지 선택 시 호출 (reset + load)
 async function onReportCategoryChange() {
-    const yearSel  = document.getElementById('report-year');
+    const yearSel = document.getElementById('report-year');
     const gradeSel = document.getElementById('report-grade');
-    const stuSel   = document.getElementById('report-student');
-    if (yearSel)  { yearSel.innerHTML  = '<option value="" disabled selected hidden>불러오는 중...</option>'; yearSel.disabled  = true; }
-    if (gradeSel) { gradeSel.innerHTML = '<option value="" disabled selected hidden>시험지를 먼저 선택</option>';  gradeSel.disabled = true; }
-    if (stuSel)   { stuSel.innerHTML   = '<option value="" disabled selected hidden>학생을 선택하세요</option>'; stuSel.disabled   = true; }
+    const stuSel = document.getElementById('report-student');
+    if (yearSel) { yearSel.innerHTML = '<option value="" disabled selected hidden>불러오는 중...</option>'; yearSel.disabled = true; }
+    if (gradeSel) { gradeSel.innerHTML = '<option value="" disabled selected hidden>시험지를 먼저 선택</option>'; gradeSel.disabled = true; }
+    if (stuSel) { stuSel.innerHTML = '<option value="" disabled selected hidden>학생을 선택하세요</option>'; stuSel.disabled = true; }
     const rpt = document.getElementById('report-display');
     if (rpt) rpt.innerHTML = '';
     await loadStudentList();
@@ -4223,7 +4225,7 @@ function populateYearDropdown(records) {
     if (!yearSel) return;
     const years = [...new Set(
         records.map(r => dateToYear(r['응시일'] || r.date || ''))
-               .filter(y => /^\d{4}$/.test(y))
+            .filter(y => /^\d{4}$/.test(y))
     )].sort((a, b) => b.localeCompare(a)); // 최신년도 먼저
     yearSel.innerHTML = '<option value="전체">전체</option>' +
         years.map(y => `<option value="${y}">${y}년</option>`).join('');
@@ -4234,13 +4236,13 @@ function populateYearDropdown(records) {
 
 // ── 년도 선택 시 → 학년 드롭다운 채우기
 function onReportYearChange() {
-    const year    = document.getElementById('report-year')?.value;
+    const year = document.getElementById('report-year')?.value;
     const records = window.cachedStudentRecords || [];
     const filtered = (!year || year === '전체') ? records
         : records.filter(r => dateToYear(r['응시일'] || r.date || '') === year);
 
     const gradeSel = document.getElementById('report-grade');
-    const stuSel   = document.getElementById('report-student');
+    const stuSel = document.getElementById('report-student');
     if (!gradeSel) return;
 
     const grades = [...new Set(
@@ -4260,18 +4262,18 @@ function onReportYearChange() {
 
 // ── 학년 선택 시 → 학생 드롭다운 채우기
 function onReportGradeChange() {
-    const year  = document.getElementById('report-year')?.value;
+    const year = document.getElementById('report-year')?.value;
     const grade = document.getElementById('report-grade')?.value;
     const records = window.cachedStudentRecords || [];
 
     let filtered = records;
-    if (year  && year  !== '전체') filtered = filtered.filter(r => dateToYear(r['응시일'] || r.date || '') === year);
+    if (year && year !== '전체') filtered = filtered.filter(r => dateToYear(r['응시일'] || r.date || '') === year);
     if (grade && grade !== '전체') filtered = filtered.filter(r => String(r['학년'] || r.grade || '') === grade);
 
     const stuSel = document.getElementById('report-student');
     if (!stuSel) return;
 
-    const idKeys   = ['학생ID', 'studentId', 'id'];
+    const idKeys = ['학생ID', 'studentId', 'id'];
     const nameKeys = ['학생명', 'studentName', 'name', '이름'];
     const getV = (rec, keys) => { for (const k of keys) { if (rec[k] !== undefined && rec[k] !== '') return rec[k]; } return null; };
 
@@ -4325,18 +4327,18 @@ async function generateOverallComment(record, averages, activeSections, sectionC
     };
 
     const totalScore = parseFloat(record['총점'] || record.totalScore || 0);
-    const totalMax   = parseFloat(record['만점'] || record.maxScore || 100);
-    const totalAvg   = parseFloat(averages['총점'] || 0);
-    const totalRate  = totalMax > 0 ? (totalScore / totalMax * 100).toFixed(1) : '?';
+    const totalMax = parseFloat(record['만점'] || record.maxScore || 100);
+    const totalAvg = parseFloat(averages['총점'] || 0);
+    const totalRate = totalMax > 0 ? (totalScore / totalMax * 100).toFixed(1) : '?';
     const totalLevel = (totalScore / totalMax * 100) >= 90 ? '우수' : (totalScore / totalMax * 100) >= 70 ? '보통' : '부진';
 
     const gradeTone = getGradeTone(record.grade || record['학년']);
 
     const sectionSummary = activeSections.map(s => {
         const score = parseFloat(record[s + '_점수'] || record[secMap[s]] || 0);
-        const max   = parseFloat(record[s + '_만점'] || record[maxMap[s]] || averages[maxMap[s]] || 0);
-        const avg   = parseFloat(averages[s + '_점수'] || averages[secMap[s]] || 0);
-        const cmt   = sectionComments[s] || '(코멘트 없음)';
+        const max = parseFloat(record[s + '_만점'] || record[maxMap[s]] || averages[maxMap[s]] || 0);
+        const avg = parseFloat(averages[s + '_점수'] || averages[secMap[s]] || 0);
+        const cmt = sectionComments[s] || '(코멘트 없음)';
         return `[영역: ${s}] 개인 ${score}점 / 만점 ${max > 0 ? max + '점' : '?'} / 평균 ${avg.toFixed(1)}점\n영역 코멘트: ${cmt}`;
     }).join('\n\n');
 
@@ -4404,12 +4406,12 @@ async function loadStudentReport() {
                         globalConfig.questions = [...others, ...newQuestions];
                         console.log(`✅ 성적표용 문항 ${newQuestions.length}개 로드 완료`);
                     }
-                } catch(qErr) { console.warn('문항 로드 실패 (상세보기 제한될 수 있음):', qErr); }
+                } catch (qErr) { console.warn('문항 로드 실패 (상세보기 제한될 수 있음):', qErr); }
             }
 
             // 평균 계산 (캐시된 전체 학생 데이터 사용)
             const allRecords = window.cachedStudentRecords || [];
-            const validRecs  = allRecords.filter(r => {
+            const validRecs = allRecords.filter(r => {
                 const v = r['총점'] ?? r.totalScore;
                 return v !== undefined && v !== '' && v !== null;
             });
@@ -4424,19 +4426,19 @@ async function loadStudentReport() {
             };
 
             const averages = {
-                '총점':           avgOf('총점', 'totalScore'),
-                '만점':           parseFloat(report['만점'] || report.maxScore || 100),
-                grammarScore:   avgOf('Grammar_점수',   'grammarScore'),
-                writingScore:   avgOf('Writing_점수',   'writingScore'),
-                readingScore:   avgOf('Reading_점수',   'readingScore'),
+                '총점': avgOf('총점', 'totalScore'),
+                '만점': parseFloat(report['만점'] || report.maxScore || 100),
+                grammarScore: avgOf('Grammar_점수', 'grammarScore'),
+                writingScore: avgOf('Writing_점수', 'writingScore'),
+                readingScore: avgOf('Reading_점수', 'readingScore'),
                 listeningScore: avgOf('Listening_점수', 'listeningScore'),
-                vocabScore:     avgOf('Vocabulary_점수','vocabScore'),
+                vocabScore: avgOf('Vocabulary_점수', 'vocabScore'),
             };
-            averages['Grammar_점수']   = averages.grammarScore;
-            averages['Writing_점수']   = averages.writingScore;
-            averages['Reading_점수']   = averages.readingScore;
+            averages['Grammar_점수'] = averages.grammarScore;
+            averages['Writing_점수'] = averages.writingScore;
+            averages['Reading_점수'] = averages.readingScore;
             averages['Listening_점수'] = averages.listeningScore;
-            averages['Vocabulary_점수']= averages.vocabScore;
+            averages['Vocabulary_점수'] = averages.vocabScore;
 
             const activeSections = allSections.filter(section => {
                 const score = report[section + '_점수'] !== undefined
@@ -4446,8 +4448,8 @@ async function loadStudentReport() {
             });
 
             const savedSections = report.aiSectionComments || {};
-            const savedOverall  = report.aiOverallComment  || null;
-            const savedNotes    = report.notes || null; // 수정: DB에서 기타사항 불러오기
+            const savedOverall = report.aiOverallComment || null;
+            const savedNotes = report.notes || null; // 수정: DB에서 기타사항 불러오기
             window.currentReportData = { record: report, averages, activeSections, sectionComments: savedSections, overallComment: savedOverall, notes: savedNotes };
             renderReportCard(report, averages, savedSections, savedOverall, activeSections, savedNotes);
             showToast(`✅ 성적표 로드 완료 (평균 ${validRecs.length}명 기준)`);
@@ -4533,13 +4535,13 @@ async function generateSectionComments(record, averages, activeSections) {
     try {
         const qRaw = record['문항별상세(JSON)'] || record.questionScores || '[]';
         questionScores = typeof qRaw === 'string' ? JSON.parse(qRaw) : (Array.isArray(qRaw) ? qRaw : []);
-    } catch(e) { questionScores = []; }
+    } catch (e) { questionScores = []; }
     const catQs = globalConfig.questions || [];
 
     for (let section of activeSections) {
         const studentScore = parseFloat(record[section + '_점수'] || record[secMap[section]] || 0);
-        const avgScore    = parseFloat(averages[section + '_점수'] || averages[secMap[section]] || 0);
-        const maxScore    = parseFloat(record[section + '_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
+        const avgScore = parseFloat(averages[section + '_점수'] || averages[secMap[section]] || 0);
+        const maxScore = parseFloat(record[section + '_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
 
         // 성취레벨 계산
         const rate = maxScore > 0 ? (studentScore / maxScore * 100) : 0;
@@ -4561,10 +4563,10 @@ async function generateSectionComments(record, averages, activeSections) {
                     const sub = cq?.subType || '기타';
                     if (!subMap[sub]) subMap[sub] = { score: 0, max: 0 };
                     subMap[sub].score += parseFloat(q.score || 0);
-                    subMap[sub].max   += parseFloat(q.maxScore || 0);
+                    subMap[sub].max += parseFloat(q.maxScore || 0);
                     // 오답 문항 수집
                     const isWrong = (q.correct === false || q.correct === 'X') ||
-                                    (parseFloat(q.score || 0) < parseFloat(q.maxScore || 0));
+                        (parseFloat(q.score || 0) < parseFloat(q.maxScore || 0));
                     if (isWrong) wrongItems.push(`${q.no || '?'}번(${sub})`);
                 });
                 const subLines = Object.entries(subMap)
@@ -4659,19 +4661,19 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         return '';
     }
 
-    const sName  = getVal(record, ['이름','name','studentName']);
-    const sGrade = getVal(record, ['학년','grade']);
-    const sDateRaw = getVal(record, ['응시일','testDate','date']);
-    const sDate  = sDateRaw ? String(sDateRaw).split('T')[0] : '';
-    const sTotal = parseFloat(getVal(record, ['총점','totalScore','total']) || 0);
-    const sMax   = parseFloat(getVal(record, ['만점','maxScore','max']) || 100);
-    let sRate    = getVal(record, ['정답률(%)','정답률','rate']);
+    const sName = getVal(record, ['이름', 'name', 'studentName']);
+    const sGrade = getVal(record, ['학년', 'grade']);
+    const sDateRaw = getVal(record, ['응시일', 'testDate', 'date']);
+    const sDate = sDateRaw ? String(sDateRaw).split('T')[0] : '';
+    const sTotal = parseFloat(getVal(record, ['총점', 'totalScore', 'total']) || 0);
+    const sMax = parseFloat(getVal(record, ['만점', 'maxScore', 'max']) || 100);
+    let sRate = getVal(record, ['정답률(%)', '정답률', 'rate']);
     if (!sRate && sMax) sRate = ((sTotal / sMax) * 100).toFixed(1);
     const recCls05 = recommendClassByScore(sTotal, sGrade);
     const defaultCls05 = record.studentClass || record['등록학급'] || recCls05 || '';
 
-    const secMap = { Grammar:'grammarScore', Writing:'writingScore', Reading:'readingScore', Listening:'listeningScore', Vocabulary:'vocabScore' };
-    const maxMap  = { Grammar:'grammarMax',   Writing:'writingMax',   Reading:'readingMax',   Listening:'listeningMax',  Vocabulary:'vocabMax'   };
+    const secMap = { Grammar: 'grammarScore', Writing: 'writingScore', Reading: 'readingScore', Listening: 'listeningScore', Vocabulary: 'vocabScore' };
+    const maxMap = { Grammar: 'grammarMax', Writing: 'writingMax', Reading: 'readingMax', Listening: 'listeningMax', Vocabulary: 'vocabMax' };
 
     display.innerHTML = `
     <div class="card space-y-8 animate-fade-in mt-5">
@@ -4703,14 +4705,14 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                     <!-- 드롭다운 박스 -->
                     <div style="border:2px solid #013976;border-left:none;border-radius:0 1rem 1rem 0;height:65px;min-width:100px;display:flex;align-items:center;justify-content:center;">
                         <select id="report-student-class"
-                            data-rec="${recCls05||''}"
+                            data-rec="${recCls05 || ''}"
                             onchange="warnClassChange05(this)"
                             style="border:none;outline:none;font-size:20px;font-weight:900;color:#013976;background:transparent;text-align:center;text-align-last:center;cursor:pointer;-webkit-appearance:none;padding:0 12px;width:100%;">
                             <option value="" style="font-size:16px;">선택</option>
-                            <option value="__RECOMMEND__" style="font-size:16px;font-weight:bold;color:#6366f1;">${recCls05 ? '⭐ 추천: '+recCls05 : '⭐ 추천 없음'}</option>
-                            ${(getClassesForGrade(record['학년']||record.grade||'') || []).map(c =>
-                                `<option value="${c}" style="font-size:16px;" ${defaultCls05===c?'selected':''}>${c}</option>`
-                            ).join('')}
+                            <option value="__RECOMMEND__" style="font-size:16px;font-weight:bold;color:#6366f1;">${recCls05 ? '⭐ 추천: ' + recCls05 : '⭐ 추천 없음'}</option>
+                            ${(getClassesForGrade(record['학년'] || record.grade || '') || []).map(c =>
+        `<option value="${c}" style="font-size:16px;" ${defaultCls05 === c ? 'selected' : ''}>${c}</option>`
+    ).join('')}
                         </select>
                     </div>
                 </div>
@@ -4766,29 +4768,29 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         <div class="space-y-4 w-full !mt-4">
             <div class="space-y-4" id="sections-container">
             ${activeSections.map(section => {
-                const sScore = parseFloat(record[section+'_점수'] || record[secMap[section]] || 0);
-                const sMaxV  = parseFloat(record[section+'_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
-                const aScore = parseFloat(averages[section+'_점수'] || averages[secMap[section]] || 0);
-                const comment = sectionComments?.[section];
-                return `<div class="bg-slate-50 rounded-2xl border overflow-hidden">
+        const sScore = parseFloat(record[section + '_점수'] || record[secMap[section]] || 0);
+        const sMaxV = parseFloat(record[section + '_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
+        const aScore = parseFloat(averages[section + '_점수'] || averages[secMap[section]] || 0);
+        const comment = sectionComments?.[section];
+        return `<div class="bg-slate-50 rounded-2xl border overflow-hidden">
                     <div class="px-6 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-3 flex-wrap">
                             <h5 class="font-black text-[#013976] fs-18">${section} 영역</h5>
-                            <span class="text-slate-500" style="font-size:15px;">개인: ${sScore}점 | 평균: ${aScore.toFixed(1)}점${sMaxV>0?' | 만점: '+sMaxV+'점':''}</span>
+                            <span class="text-slate-500" style="font-size:15px;">개인: ${sScore}점 | 평균: ${aScore.toFixed(1)}점${sMaxV > 0 ? ' | 만점: ' + sMaxV + '점' : ''}</span>
                         </div>
                         <button onclick="regenerateSectionComment('${section}')" class="no-print text-xl px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all" title="이 영역 코멘트 재생성">🔄</button>
                     </div>
                     ${comment
-                        ? `<div class="px-6 pb-4 border-t border-slate-200 pt-3" id="sec-comment-wrap-${section}">
-                            <p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${comment.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p>
+                ? `<div class="px-6 pb-4 border-t border-slate-200 pt-3" id="sec-comment-wrap-${section}">
+                            <p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${comment.split('\n').map(l => l.trim()).filter(l => l).join('<br>')}</p>
                            </div>`
-                        : `<div class="px-6 pb-4 border-t border-slate-200 pt-3"><p class="text-slate-400 fs-14 italic text-center py-2">분석 대기 중...</p></div>`
-                    }
+                : `<div class="px-6 pb-4 border-t border-slate-200 pt-3"><p class="text-slate-400 fs-14 italic text-center py-2">분석 대기 중...</p></div>`
+            }
                     <div id="qdetail-${section}" class="hidden px-6 pb-6 border-t border-slate-100">
                         <p class="text-slate-400 fs-14 text-center py-4">로딩 중...</p>
                     </div>
                 </div>`;
-            }).join('')}
+    }).join('')}
         </div>
 
         <!-- 5. 종합분석 코멘트 -->
@@ -4798,14 +4800,14 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                 <button onclick="regenerateOverallComment()" class="no-print text-xl px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-500 transition-all border border-slate-200" title="종합 코멘트 재생성">🔄</button>
             </div>
             ${overallComment
-                ? `<div id="overall-comment-wrap">
-                    <p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${overallComment.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>
+            ? `<div id="overall-comment-wrap">
+                    <p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${overallComment.split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>
                    </div>`
-                : `<div class="text-center py-4">
+            : `<div class="text-center py-4">
                     <p class="text-slate-500 mb-4 fs-15">AI 심층 분석을 통해 학생의 강점과 약점을 파악해보세요.</p>
                     <button onclick="triggerAIAnalysis()" class="btn-ys !bg-[#013976] !text-white !py-3 !px-8 shadow-lg hover:scale-105 transition-all fs-16 font-bold flex items-center gap-2 mx-auto">✨ AI 분석 생성하기</button>
                   </div>`
-            }
+        }
         </div>
 
         <!-- 6. 기타사항 -->
@@ -4817,9 +4819,9 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                 </div>
                 <div id="notes-content-wrap">
                     ${notes
-                        ? `<p class="text-amber-900 leading-relaxed fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">${notes.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`
-                        : `<p class="text-amber-600/50 italic fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">내용이 없습니다. 클릭하여 새로 작성하세요.</p>`
-                    }
+            ? `<p class="text-amber-900 leading-relaxed fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">${notes.split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>`
+            : `<p class="text-amber-600/50 italic fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">내용이 없습니다. 클릭하여 새로 작성하세요.</p>`
+        }
                 </div>
             </div>
             </div>
@@ -4827,16 +4829,16 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
 
         <!-- Logo -->
         <div class="mt-8 border-t pt-8 text-center">
-            <img src="${globalConfig.logoUrl||''}" alt="Logo" class="inline-block max-h-16 object-contain" onerror="this.style.display='none'">
+            <img src="${globalConfig.logoUrl || ''}" alt="Logo" class="inline-block max-h-16 object-contain" onerror="this.style.display='none'">
         </div>
     </div>`;
 
     // 차트 렌더링
-    if (window.currentReportData) { window.currentReportData.secMap=secMap; window.currentReportData.maxMap=maxMap; window.currentReportData.sTotal=sTotal; window.currentReportData.sMax=sMax; window.currentReportData.sGrade=sGrade; }
+    if (window.currentReportData) { window.currentReportData.secMap = secMap; window.currentReportData.maxMap = maxMap; window.currentReportData.sTotal = sTotal; window.currentReportData.sMax = sMax; window.currentReportData.sGrade = sGrade; }
     setTimeout(() => {
-        const selCls = document.getElementById('report-student-class')?.value||'';
-        const clsAvg = (selCls&&selCls!=='__RECOMMEND__') ? computeClassAvg(selCls,sGrade,secMap) : null;
-        const mode = window._reportAvgMode||'all';
+        const selCls = document.getElementById('report-student-class')?.value || '';
+        const clsAvg = (selCls && selCls !== '__RECOMMEND__') ? computeClassAvg(selCls, sGrade, secMap) : null;
+        const mode = window._reportAvgMode || 'all';
         renderTotalChart(record, averages, sTotal, sMax, clsAvg, mode);
         renderSectionsBarChart(record, averages, activeSections, secMap, maxMap, clsAvg, mode);
         renderRadarChart(record, averages, activeSections, secMap, maxMap, clsAvg, mode);
@@ -4865,7 +4867,7 @@ function toggleAllQuestionDetail(checked) {
         const qs = JSON.parse(record['문항별상세(JSON)'] || record.questionScores || '[]');
         const catQs = globalConfig.questions || [];
         const mark = (q) => {
-            if (q.correct === true  || q.correct === 'O') return '<span class="text-green-600 font-black">O</span>';
+            if (q.correct === true || q.correct === 'O') return '<span class="text-green-600 font-black">O</span>';
             if (q.correct === false || q.correct === 'X') return '<span class="text-red-500 font-black">X</span>';
             if (q.score > 0 && q.maxScore > 0 && q.score === q.maxScore) return '<span class="text-green-600 font-black">O</span>';
             if (q.score === 0 && q.maxScore > 0) return '<span class="text-red-500 font-black">X</span>';
@@ -4889,30 +4891,30 @@ function toggleAllQuestionDetail(checked) {
                 const cols = chunk.length;
                 gridHtml += `<table class="w-full fs-14 mt-3 border-collapse" style="table-layout:fixed;">
                     <tr class="bg-[#013976] text-white">${chunk.map(q =>
-                        `<th class="py-1 px-1 text-center font-bold border border-[#013976]" style="width:10%">${q.no||'-'}</th>`
-                    ).join('')}${'<th class="py-1 border border-[#013976]" style="width:10%"></th>'.repeat(10 - cols)}</tr>
+                    `<th class="py-1 px-1 text-center font-bold border border-[#013976]" style="width:10%">${q.no || '-'}</th>`
+                ).join('')}${'<th class="py-1 border border-[#013976]" style="width:10%"></th>'.repeat(10 - cols)}</tr>
                     <tr class="bg-slate-50">${chunk.map(q =>
-                        `<td class="py-1 px-1 text-center text-slate-500 border border-slate-200 text-[14px]">${q.maxScore||0}점</td>`
-                    ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
+                    `<td class="py-1 px-1 text-center text-slate-500 border border-slate-200 text-[14px]">${q.maxScore || 0}점</td>`
+                ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-white">${chunk.map(q => {
-                        const cq = catQs.find(cq => String(cq.no) === String(q.no));
-                        const diff = q.difficulty || cq?.difficulty || '-';
-                        const diffColor = {'최상':'text-red-600','상':'text-orange-500','중':'text-blue-500','하':'text-green-500','기초':'text-slate-400'}[diff] || 'text-slate-500';
-                        return `<td class="py-1 px-1 text-center border border-slate-200 text-[14px] ${diffColor}">${diff}</td>`;
-                    }).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
+                    const cq = catQs.find(cq => String(cq.no) === String(q.no));
+                    const diff = q.difficulty || cq?.difficulty || '-';
+                    const diffColor = { '최상': 'text-red-600', '상': 'text-orange-500', '중': 'text-blue-500', '하': 'text-green-500', '기초': 'text-slate-400' }[diff] || 'text-slate-500';
+                    return `<td class="py-1 px-1 text-center border border-slate-200 text-[14px] ${diffColor}">${diff}</td>`;
+                }).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-slate-50">${chunk.map(q =>
-                        `<td class="py-1 px-1 text-center font-bold border border-slate-200 text-[14px]">${q.score||0}점</td>`
-                    ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
+                    `<td class="py-1 px-1 text-center font-bold border border-slate-200 text-[14px]">${q.score || 0}점</td>`
+                ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-white">${chunk.map(q =>
-                        `<td class="py-1 px-1 text-center font-black border border-slate-200 text-[14px]">${mark(q)}</td>`
-                    ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
+                    `<td class="py-1 px-1 text-center font-black border border-slate-200 text-[14px]">${mark(q)}</td>`
+                ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                 </table>`;
             }
             el.innerHTML = `<div class="mt-3 space-y-1">
                 ${gridHtml}
             </div>`;
         });
-    } catch(e) { showToast('❌ 문항 데이터 오류: ' + e.message); }
+    } catch (e) { showToast('❌ 문항 데이터 오류: ' + e.message); }
 }
 
 function renderTotalChart(record, averages, sTotal, sMax, classAvg, mode) {
@@ -4922,22 +4924,22 @@ function renderTotalChart(record, averages, sTotal, sMax, classAvg, mode) {
     const avgTotal = averages['총점'] || 0;
     const DL = window.ChartDataLabels;
     if (DL && !Chart._dlRegistered) { Chart.register(DL); Chart._dlRegistered = true; }
-    const clPlugin={id:'cl',afterDatasetsDraw(ch){const c=ch.ctx,FS=15;ch.data.datasets.forEach((ds,di)=>{ch.getDatasetMeta(di).data.forEach((bar,bi)=>{const v=ds.data[bi];if(!v||v<=0)return;const h=Math.abs(bar.base-bar.y),txt=parseFloat(v).toFixed(1);c.save();c.font=`bold ${FS}px sans-serif`;c.textAlign='center';if(h>=FS*2+4){c.textBaseline='middle';c.fillStyle='white';c.fillText(txt,bar.x,(bar.y+bar.base)/2);}else{c.textBaseline='bottom';c.fillStyle='#013976';c.fillText(txt,bar.x,bar.y-4);}c.restore();});});}};
+    const clPlugin = { id: 'cl', afterDatasetsDraw(ch) { const c = ch.ctx, FS = 15; ch.data.datasets.forEach((ds, di) => { ch.getDatasetMeta(di).data.forEach((bar, bi) => { const v = ds.data[bi]; if (!v || v <= 0) return; const h = Math.abs(bar.base - bar.y), txt = parseFloat(v).toFixed(1); c.save(); c.font = `bold ${FS}px sans-serif`; c.textAlign = 'center'; if (h >= FS * 2 + 4) { c.textBaseline = 'middle'; c.fillStyle = 'white'; c.fillText(txt, bar.x, (bar.y + bar.base) / 2); } else { c.textBaseline = 'bottom'; c.fillStyle = '#013976'; c.fillText(txt, bar.x, bar.y - 4); } c.restore(); }); }); } };
     ctx._chartInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
         plugins: [clPlugin],
         data: {
             labels: ['총점'],
-            datasets: (() => { const _ds=[{label:'개인 점수',data:[sTotal],backgroundColor:'#e74c3c',borderRadius:8}]; if((mode||'all')!=='class') _ds.push({label:'전체 평균',data:[avgTotal],backgroundColor:'#94a3b8',borderRadius:8}); if(classAvg&&(mode||'all')!=='overall') _ds.push({label:'학급 평균',data:[parseFloat((classAvg['총점']||0).toFixed(1))],backgroundColor:'#22c55e',borderRadius:8}); _ds.push({label:'만점',data:[sMax],backgroundColor:'#013976',borderRadius:8}); return _ds; })()
+            datasets: (() => { const _ds = [{ label: '개인 점수', data: [sTotal], backgroundColor: '#e74c3c', borderRadius: 8 }]; if ((mode || 'all') !== 'class') _ds.push({ label: '전체 평균', data: [avgTotal], backgroundColor: '#94a3b8', borderRadius: 8 }); if (classAvg && (mode || 'all') !== 'overall') _ds.push({ label: '학급 평균', data: [parseFloat((classAvg['총점'] || 0).toFixed(1))], backgroundColor: '#22c55e', borderRadius: 8 }); _ds.push({ label: '만점', data: [sMax], backgroundColor: '#013976', borderRadius: 8 }); return _ds; })()
         },
         options: {
             responsive: true, maintainAspectRatio: false,
             clip: false,
             layout: { padding: { top: 50 } },
-            scales: { y: { beginAtZero:true, max:sMax, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)} }, x:{ticks:{font:{size:16}}} },
+            scales: { y: { beginAtZero: true, max: sMax, ticks: { font: { size: 16 }, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1) } }, x: { ticks: { font: { size: 16 } } } },
             plugins: {
-                legend: { position: 'right', labels:{font:{size:16}, padding:15} },
-                tooltip: { bodyFont:{size:16}, titleFont:{size:16}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
+                legend: { position: 'right', labels: { font: { size: 16 }, padding: 15 } },
+                tooltip: { bodyFont: { size: 16 }, titleFont: { size: 16 }, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
                 datalabels: { display: false }
             }
         }
@@ -4951,25 +4953,25 @@ function renderSectionsBarChart(record, averages, activeSections, secMap, maxMap
     if (ctx._chartInstance) ctx._chartInstance.destroy();
     const DL = window.ChartDataLabels;
     const labels = activeSections.map(s => s);
-    const personal = activeSections.map(s => parseFloat(record[s+'_점수'] || record[secMap[s]] || 0));
-    const avg      = activeSections.map(s => parseFloat(averages[s+'_점수'] || averages[secMap[s]] || 0));
-    const maxV     = activeSections.map(s => parseFloat(record[s+'_만점'] || record[maxMap[s]] || averages[maxMap[s]] || 0));
-    const clPlugin2={id:'cl2',afterDatasetsDraw(ch){const c=ch.ctx,FS=15;ch.data.datasets.forEach((ds,di)=>{ch.getDatasetMeta(di).data.forEach((bar,bi)=>{const v=ds.data[bi];if(!v||v<=0)return;const h=Math.abs(bar.base-bar.y),txt=parseFloat(v).toFixed(1);c.save();c.font=`bold ${FS}px sans-serif`;c.textAlign='center';if(h>=FS*2+4){c.textBaseline='middle';c.fillStyle='white';c.fillText(txt,bar.x,(bar.y+bar.base)/2);}else{c.textBaseline='bottom';c.fillStyle='#013976';c.fillText(txt,bar.x,bar.y-4);}c.restore();});});}};
+    const personal = activeSections.map(s => parseFloat(record[s + '_점수'] || record[secMap[s]] || 0));
+    const avg = activeSections.map(s => parseFloat(averages[s + '_점수'] || averages[secMap[s]] || 0));
+    const maxV = activeSections.map(s => parseFloat(record[s + '_만점'] || record[maxMap[s]] || averages[maxMap[s]] || 0));
+    const clPlugin2 = { id: 'cl2', afterDatasetsDraw(ch) { const c = ch.ctx, FS = 15; ch.data.datasets.forEach((ds, di) => { ch.getDatasetMeta(di).data.forEach((bar, bi) => { const v = ds.data[bi]; if (!v || v <= 0) return; const h = Math.abs(bar.base - bar.y), txt = parseFloat(v).toFixed(1); c.save(); c.font = `bold ${FS}px sans-serif`; c.textAlign = 'center'; if (h >= FS * 2 + 4) { c.textBaseline = 'middle'; c.fillStyle = 'white'; c.fillText(txt, bar.x, (bar.y + bar.base) / 2); } else { c.textBaseline = 'bottom'; c.fillStyle = '#013976'; c.fillText(txt, bar.x, bar.y - 4); } c.restore(); }); }); } };
     ctx._chartInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
         plugins: [clPlugin2],
         data: {
             labels,
-            datasets: (() => { const _ds=[{label:'개인 점수',data:personal,backgroundColor:'#e74c3c',borderRadius:6}]; if((mode||'all')!=='class') _ds.push({label:'전체 평균',data:avg.map(v=>+parseFloat(v).toFixed(1)),backgroundColor:'#94a3b8',borderRadius:6}); if(classAvg&&(mode||'all')!=='overall') _ds.push({label:'학급 평균',data:activeSections.map(s=>parseFloat((classAvg[s+'_점수']||0).toFixed(1))),backgroundColor:'#22c55e',borderRadius:6}); _ds.push({label:'만점',data:maxV,backgroundColor:'#013976',borderRadius:6}); return _ds; })()
+            datasets: (() => { const _ds = [{ label: '개인 점수', data: personal, backgroundColor: '#e74c3c', borderRadius: 6 }]; if ((mode || 'all') !== 'class') _ds.push({ label: '전체 평균', data: avg.map(v => +parseFloat(v).toFixed(1)), backgroundColor: '#94a3b8', borderRadius: 6 }); if (classAvg && (mode || 'all') !== 'overall') _ds.push({ label: '학급 평균', data: activeSections.map(s => parseFloat((classAvg[s + '_점수'] || 0).toFixed(1))), backgroundColor: '#22c55e', borderRadius: 6 }); _ds.push({ label: '만점', data: maxV, backgroundColor: '#013976', borderRadius: 6 }); return _ds; })()
         },
         options: {
             responsive: true, maintainAspectRatio: false,
             clip: false,
             layout: { padding: { top: 50 } },
-            scales: { y:{beginAtZero:true, ticks:{font:{size:16}, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1)}}, x:{ticks:{font:{size:16}}} },
+            scales: { y: { beginAtZero: true, ticks: { font: { size: 16 }, callback: v => Number.isInteger(v) ? v : parseFloat(v).toFixed(1) } }, x: { ticks: { font: { size: 16 } } } },
             plugins: {
-                legend: { position: 'right', labels:{font:{size:16}, padding:15} },
-                tooltip: { bodyFont:{size:16}, titleFont:{size:16}, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
+                legend: { position: 'right', labels: { font: { size: 16 }, padding: 15 } },
+                tooltip: { bodyFont: { size: 16 }, titleFont: { size: 16 }, callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + parseFloat(ctx.raw).toFixed(1) } },
                 datalabels: { display: false }
             }
         }
@@ -5010,7 +5012,7 @@ function saveReportData() {
     }
     Promise.all(promises)
         .then(() => { window._dirtyClass = false; window._dirtyComment = false; showToast('💾 저장 완료!'); })
-        .catch(e  => { console.warn('저장 실패:', e); showToast('❌ 저장 실패. 다시 시도해주세요.'); })
+        .catch(e => { console.warn('저장 실패:', e); showToast('❌ 저장 실패. 다시 시도해주세요.'); })
         .finally(() => { if (btn) { btn.disabled = false; btn.textContent = '💾 저장'; } });
 }
 
@@ -5027,8 +5029,8 @@ function printReport() {
     }
 
     // 등록학급 필수 체크
-    const clsEl  = document.getElementById('report-student-class');
-    let   clsVal = clsEl?.value?.trim() || '';
+    const clsEl = document.getElementById('report-student-class');
+    let clsVal = clsEl?.value?.trim() || '';
     if (clsVal === '__RECOMMEND__') { clsVal = clsEl?.dataset?.rec || ''; if (clsEl) clsEl.value = clsVal; }
     if (!clsVal) {
         showToast('⚠️ 등록학급을 선택해야 출력할 수 있습니다.');
@@ -5052,7 +5054,7 @@ function printReport() {
     // 1. 현재 페이지의 CSS 수집
     const styles = Array.from(document.styleSheets).map(ss => {
         try { return Array.from(ss.cssRules).map(r => r.cssText).join('\n'); }
-        catch(e) { return ''; }
+        catch (e) { return ''; }
     }).join('\n');
 
     // 2. 모든 chart canvas를 PNG 이미지 데이터로 변환
@@ -5117,7 +5119,7 @@ function printReport() {
 
     // 3c. 영역별 코멘트 앞 페이지 강제 분리
     const sectionsWrapper = clone.querySelector('#sections-container')?.parentElement;
-    if (sectionsWrapper) sectionsWrapper.style.cssText = (sectionsWrapper.style.cssText||'') + ';page-break-before:always;break-before:page;';
+    if (sectionsWrapper) sectionsWrapper.style.cssText = (sectionsWrapper.style.cssText || '') + ';page-break-before:always;break-before:page;';
 
     // 3d. AI 종합 분석 섹션 앞 페이지 강제 분리
     const aiHeader = Array.from(clone.querySelectorAll('h4')).find(h => h.textContent.includes('종합분석'));
@@ -5142,7 +5144,7 @@ function printReport() {
 
     // 5. 팝업 열기
     const _dispW = display.offsetWidth || 900;
-    const _popW  = 794;
+    const _popW = 794;
     const win = window.open('', '_blank', `width=${_popW},height=1200`);
     if (!win) { showToast('⚠️ 팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.'); return; }
     win.document.write(`<!DOCTYPE html>
@@ -5193,22 +5195,22 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
 
     // 각 영역 만점 구하기 (record 우선, 없으면 globalConfig.questions 합산)
     const getSectionMax = (s) => {
-        const fromRecord = parseFloat(record[s+'_만점'] || record[maxMap?.[s]] || 0);
+        const fromRecord = parseFloat(record[s + '_만점'] || record[maxMap?.[s]] || 0);
         if (fromRecord > 0) return fromRecord;
         // globalConfig에서 해당 영역 문항 배점 합산
         const catQs = globalConfig?.questions || [];
-        return catQs.filter(q => q.section === s).reduce((sum, q) => sum + (parseInt(q.score)||0), 0) || 100;
+        return catQs.filter(q => q.section === s).reduce((sum, q) => sum + (parseInt(q.score) || 0), 0) || 100;
     };
 
-    const rawPersonal = activeSections.map(s => parseFloat(record[s+'_점수'] || record[secMap[s]] || 0));
-    const rawAvg      = activeSections.map(s => parseFloat(averages[s+'_점수'] || averages[secMap[s]] || 0));
-    const maxScores   = activeSections.map(s => getSectionMax(s));
+    const rawPersonal = activeSections.map(s => parseFloat(record[s + '_점수'] || record[secMap[s]] || 0));
+    const rawAvg = activeSections.map(s => parseFloat(averages[s + '_점수'] || averages[secMap[s]] || 0));
+    const maxScores = activeSections.map(s => getSectionMax(s));
 
     // 정답률(%) 변환
     const pctPersonal = rawPersonal.map((v, i) => maxScores[i] > 0 ? +((v / maxScores[i]) * 100).toFixed(1) : 0);
-    const pctAvg      = rawAvg.map((v, i)      => maxScores[i] > 0 ? +((v / maxScores[i]) * 100).toFixed(1) : 0);
-    const rawClass    = classAvg ? activeSections.map(s => parseFloat(classAvg[s+'_점수'] || 0)) : null;
-    const pctClass    = rawClass ? rawClass.map((v, i) => maxScores[i] > 0 ? +((v / maxScores[i]) * 100).toFixed(1) : 0) : null;
+    const pctAvg = rawAvg.map((v, i) => maxScores[i] > 0 ? +((v / maxScores[i]) * 100).toFixed(1) : 0);
+    const rawClass = classAvg ? activeSections.map(s => parseFloat(classAvg[s + '_점수'] || 0)) : null;
+    const pctClass = rawClass ? rawClass.map((v, i) => maxScores[i] > 0 ? +((v / maxScores[i]) * 100).toFixed(1) : 0) : null;
 
     const DL = window.ChartDataLabels;
     if (DL && !Chart._dlRegistered) { Chart.register(DL); Chart._dlRegistered = true; }
@@ -5227,9 +5229,9 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
 
             const rr = (x, y, rw, rh, r) => {
                 c2.beginPath();
-                c2.moveTo(x+r, y); c2.arcTo(x+rw, y, x+rw, y+rh, r);
-                c2.arcTo(x+rw, y+rh, x, y+rh, r); c2.arcTo(x, y+rh, x, y, r);
-                c2.arcTo(x, y, x+r, y, r); c2.closePath();
+                c2.moveTo(x + r, y); c2.arcTo(x + rw, y, x + rw, y + rh, r);
+                c2.arcTo(x + rw, y + rh, x, y + rh, r); c2.arcTo(x, y + rh, x, y, r);
+                c2.arcTo(x, y, x + r, y, r); c2.closePath();
             };
 
             c2.save();
@@ -5244,30 +5246,30 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
             // 타이틀
             c2.textAlign = 'center'; c2.textBaseline = 'middle';
             c2.fillStyle = '#013976'; c2.font = 'bold 16px sans-serif';
-            c2.fillText('개인 정답률', pX + pW/2, pY + 22);
-            c2.beginPath(); c2.moveTo(pX+14, pY+40); c2.lineTo(pX+pW-14, pY+40);
+            c2.fillText('개인 정답률', pX + pW / 2, pY + 22);
+            c2.beginPath(); c2.moveTo(pX + 14, pY + 40); c2.lineTo(pX + pW - 14, pY + 40);
             c2.strokeStyle = '#e2e8f0'; c2.stroke();
 
             // 행 목록
             let cy = pY + 56;
             activeSections.forEach(s => {
-                const score = parseFloat(record[s+'_점수'] || record[secMap[s]] || 0);
-                let maxS = parseFloat(record[s+'_만점'] || record[maxMap?.[s]] || 0);
+                const score = parseFloat(record[s + '_점수'] || record[secMap[s]] || 0);
+                let maxS = parseFloat(record[s + '_만점'] || record[maxMap?.[s]] || 0);
                 if (!maxS) {
-                    maxS = (globalConfig?.questions||[]).filter(q=>q.section===s)
-                           .reduce((a,q)=>a+(parseInt(q.score)||0),0) || 100;
+                    maxS = (globalConfig?.questions || []).filter(q => q.section === s)
+                        .reduce((a, q) => a + (parseInt(q.score) || 0), 0) || 100;
                 }
-                const pct = maxS > 0 ? (score/maxS*100).toFixed(1)+'%' : '0%';
+                const pct = maxS > 0 ? (score / maxS * 100).toFixed(1) + '%' : '0%';
 
                 c2.font = '600 16px sans-serif';
                 c2.fillStyle = '#334155'; c2.textAlign = 'left';
-                c2.fillText(s, pX+14, cy);
+                c2.fillText(s, pX + 14, cy);
 
                 const tw = c2.measureText(pct).width;
                 c2.fillStyle = '#fef2f2';
-                rr(pX+pW-14-tw-10, cy-9, tw+20, 18, 5); c2.fill();
+                rr(pX + pW - 14 - tw - 10, cy - 9, tw + 20, 18, 5); c2.fill();
                 c2.fillStyle = '#e74c3c'; c2.textAlign = 'right';
-                c2.fillText(pct, pX+pW-14, cy);
+                c2.fillText(pct, pX + pW - 14, cy);
                 cy += rowH;
             });
             c2.restore();
@@ -5279,7 +5281,7 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
         plugins: [radarTablePlugin],
         data: {
             labels: activeSections,
-            datasets: (() => { const _rds=[{ label:'개인 정답률(%)', data:pctPersonal, borderColor:'#e74c3c', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0 }]; if((mode||'all')!=='class') _rds.push({ label:'평균 정답률(%)', data:pctAvg, borderColor:'#94a3b8', backgroundColor:'transparent', borderWidth:2, pointRadius:0 }); if(pctClass&&(mode||'all')!=='overall') _rds.push({ label:'학급 평균 정답률(%)', data:pctClass, borderColor:'#22c55e', backgroundColor:'transparent', borderWidth:2, pointRadius:0 }); return _rds; })()
+            datasets: (() => { const _rds = [{ label: '개인 정답률(%)', data: pctPersonal, borderColor: '#e74c3c', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 0 }]; if ((mode || 'all') !== 'class') _rds.push({ label: '평균 정답률(%)', data: pctAvg, borderColor: '#94a3b8', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0 }); if (pctClass && (mode || 'all') !== 'overall') _rds.push({ label: '학급 평균 정답률(%)', data: pctClass, borderColor: '#22c55e', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0 }); return _rds; })()
         },
         options: {
             responsive: true, maintainAspectRatio: false,
@@ -5288,20 +5290,20 @@ function renderRadarChart(record, averages, activeSections, secMap, maxMap, clas
             scales: {
                 r: {
                     min: 0, max: 100,
-                    ticks: { stepSize: 20, font:{size:16}, backdropColor:'transparent', callback: v => v+'%' },
-                    pointLabels: { font:{size:16}, padding: 10 }
+                    ticks: { stepSize: 20, font: { size: 16 }, backdropColor: 'transparent', callback: v => v + '%' },
+                    pointLabels: { font: { size: 16 }, padding: 10 }
                 }
             },
             plugins: {
                 datalabels: { display: false },
-                legend: { position: 'right', labels: { font:{size:16}, padding:15 } },
+                legend: { position: 'right', labels: { font: { size: 16 }, padding: 15 } },
                 tooltip: {
-                    bodyFont:{size:16}, titleFont:{size:16},
+                    bodyFont: { size: 16 }, titleFont: { size: 16 },
                     callbacks: {
                         label: (ctx) => {
                             const i = ctx.dataIndex, ds = ctx.datasetIndex;
                             const raw = ds === 0 ? rawPersonal[i] : rawAvg[i];
-                            const mx  = maxScores[i];
+                            const mx = maxScores[i];
                             return ` ${ctx.dataset.label}: ${parseFloat(ctx.raw).toFixed(1)}% (${parseFloat(raw).toFixed(1)}/${mx}점)`;
                         }
                     }
@@ -5334,7 +5336,7 @@ async function regenerateSectionComment(section) {
         renderReportCard(record, averages, updated, overallComment, activeSections);
         window._dirtyComment = true;
         showToast(`✅ ${section} 코멘트 재생성 완료!`);
-    } catch(e) {
+    } catch (e) {
         showToast('❌ 재생성 실패: ' + e.message);
         if (btn) { btn.disabled = false; btn.textContent = '🔄 재생성'; }
     }
@@ -5346,7 +5348,7 @@ function editComment(type, section) {
     if (type === 'overall') {
         const el = document.getElementById('overall-comment-text');
         if (!el) return;
-        const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
+        const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
         const wrap = document.getElementById('overall-comment-wrap');
         const overallRows = Math.max(5, cur.split('\n').length + 1);
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
@@ -5356,11 +5358,11 @@ function editComment(type, section) {
                     <button onclick="cancelCommentEdit('overall')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
                 </div>
             </div>`;
-        setTimeout(()=>{const ta=document.getElementById('overall-comment-edit');if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}},0);
+        setTimeout(() => { const ta = document.getElementById('overall-comment-edit'); if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; } }, 0);
     } else if (type === 'section' && section) {
         const el = document.getElementById('sec-comment-text-' + section);
         if (!el) return;
-        const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim();
+        const cur = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
         const wrap = document.getElementById('sec-comment-wrap-' + section);
         const sectionRows = Math.max(4, cur.split('\n').length + 1);
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
@@ -5370,10 +5372,10 @@ function editComment(type, section) {
                     <button onclick="cancelCommentEdit('section','${section}')" class="btn-ys !py-1.5 !px-4 !text-sm">취소</button>
                 </div>
             </div>`;
-        setTimeout(()=>{const ta=document.getElementById('sec-comment-edit-'+section);if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}},0);
+        setTimeout(() => { const ta = document.getElementById('sec-comment-edit-' + section); if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; } }, 0);
     } else if (type === 'notes') {
         const el = document.getElementById('notes-text');
-        const cur = el ? el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : (window.currentReportData?.notes || '');
+        const cur = el ? el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim() : (window.currentReportData?.notes || '');
         const wrap = document.getElementById('notes-content-wrap');
         wrap.innerHTML = `<div class="flex gap-3 items-start no-print">
                 <textarea id="notes-edit" class="flex-1 ys-field !bg-white resize-none fs-15 border-amber-300" rows="3" placeholder="담당 교사 메모, 특이사항 등 자유롭게 입력하세요.">${cur}</textarea>
@@ -5391,14 +5393,14 @@ function saveCommentEdit(type, section) {
         const newText = ta.value.trim();
         if (window.currentReportData) window.currentReportData.overallComment = newText;
         const wrap = document.getElementById('overall-comment-wrap');
-        wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${newText.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+        wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${newText.split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
     } else if (type === 'section' && section) {
         const ta = document.getElementById('sec-comment-edit-' + section);
         if (!ta) return;
         const newText = ta.value.trim();
         if (window.currentReportData && window.currentReportData.sectionComments) window.currentReportData.sectionComments[section] = newText;
         const wrap = document.getElementById('sec-comment-wrap-' + section);
-        wrap.innerHTML = `<p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${newText.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+        wrap.innerHTML = `<p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${newText.split('\n').map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
     } else if (type === 'notes') {
         const ta = document.getElementById('notes-edit');
         if (!ta) return;
@@ -5406,7 +5408,7 @@ function saveCommentEdit(type, section) {
         if (window.currentReportData) window.currentReportData.notes = newText;
         const wrap = document.getElementById('notes-content-wrap');
         if (newText) {
-            wrap.innerHTML = `<p class="text-amber-900 leading-relaxed fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">${newText.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+            wrap.innerHTML = `<p class="text-amber-900 leading-relaxed fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">${newText.split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
         } else {
             wrap.innerHTML = `<p class="text-amber-600/50 italic fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">내용이 없습니다. 클릭하여 새로 작성하세요.</p>`;
         }
@@ -5428,7 +5430,7 @@ function saveCommentEdit(type, section) {
                 sectionComments: window.currentReportData.sectionComments,
                 notes: window.currentReportData.notes // 비고란 추가
             }).then(() => { window._dirtyComment = false; showToast('💾 서버에 저장되었습니다.'); })
-              .catch(e => console.warn('개별 저장 중 GAS 통신 실패:', e));
+                .catch(e => console.warn('개별 저장 중 GAS 통신 실패:', e));
         }
     }
 }
@@ -5437,16 +5439,16 @@ function cancelCommentEdit(type, section) {
     if (type === 'overall') {
         const txt = window.currentReportData && window.currentReportData.overallComment || '';
         const wrap = document.getElementById('overall-comment-wrap');
-        if (wrap) wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${txt.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+        if (wrap) wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${txt.split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
     } else if (type === 'section' && section) {
         const txt = (window.currentReportData && window.currentReportData.sectionComments && window.currentReportData.sectionComments[section]) || '';
         const wrap = document.getElementById('sec-comment-wrap-' + section);
-        if (wrap) wrap.innerHTML = `<p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${txt.split('\n').map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+        if (wrap) wrap.innerHTML = `<p class="fs-15 text-slate-600 leading-relaxed" id="sec-comment-text-${section}" style="cursor:pointer;" onclick="editComment('section','${section}')" title="클릭하여 수정">${txt.split('\n').map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
     } else if (type === 'notes') {
         const txt = window.currentReportData?.notes || '';
         const wrap = document.getElementById('notes-content-wrap');
         if (wrap) {
-            if (txt) wrap.innerHTML = `<p class="text-amber-900 leading-relaxed fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">${txt.split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+            if (txt) wrap.innerHTML = `<p class="text-amber-900 leading-relaxed fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">${txt.split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
             else wrap.innerHTML = `<p class="text-amber-600/50 italic fs-15" id="notes-text" style="cursor:pointer;" onclick="editComment('notes')" title="클릭하여 수정">내용이 없습니다. 클릭하여 새로 작성하세요.</p>`;
         }
     }
@@ -5462,10 +5464,10 @@ async function regenerateOverallComment() {
         const newComment = await generateOverallComment(record, averages, activeSections, sectionComments || {});
         window.currentReportData.overallComment = newComment;
         const wrap = document.getElementById('overall-comment-wrap');
-        if (wrap) wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${(newComment||'').split(/\n+/).map(l=>l.trim()).filter(l=>l).join('<br>')}</p>`;
+        if (wrap) wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${(newComment || '').split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
         window._dirtyComment = true;
         showToast('✅ 종합 코멘트가 재생성되었습니다.');
-    } catch(e) { showToast('❌ 재생성 실패: ' + e.message); }
+    } catch (e) { showToast('❌ 재생성 실패: ' + e.message); }
     finally { if (btn) { btn.disabled = false; btn.textContent = '🔄'; } }
 }
 
@@ -5501,7 +5503,7 @@ async function triggerAIAnalysis() {
 
         // 코멘트 저장
         window.currentReportData.sectionComments = sectionComments;
-        window.currentReportData.overallComment   = overallComment;
+        window.currentReportData.overallComment = overallComment;
         renderReportCard(record, averages, sectionComments, overallComment, activeSections);
         window._dirtyComment = true;
         showToast('✅ AI 분석 완료!');
@@ -5510,7 +5512,7 @@ async function triggerAIAnalysis() {
         const catVal2 = document.getElementById('report-category')?.value;
         const stuVal2 = document.getElementById('report-student')?.value;
         if (catVal2 && stuVal2) {
-            const _aiCat   = globalConfig.categories?.find(c => c.id === catVal2);
+            const _aiCat = globalConfig.categories?.find(c => c.id === catVal2);
             const _aiFolId = _aiCat ? extractFolderId(_aiCat.targetFolderUrl) : null;
             if (_aiFolId) {
                 sendReliableRequest({
@@ -5521,7 +5523,7 @@ async function triggerAIAnalysis() {
                     sectionComments,
                     notes: window.currentReportData?.notes
                 }).then(() => showToast('💾 AI 코멘트 및 기타사항 저장 완료'))
-                  .catch(e => console.warn('AI 코멘트 GAS 저장 실패:', e));
+                    .catch(e => console.warn('AI 코멘트 GAS 저장 실패:', e));
             }
         }
     } catch (e) {
@@ -5579,10 +5581,10 @@ function switchStatsMode(mode) {
     window._statsMode = mode;
     const qBtn = document.getElementById('btn-q-stats');
     const sBtn = document.getElementById('btn-s-stats');
-    const ON  = 'btn-ys !bg-[#013976] !text-white hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex items-center gap-2';
+    const ON = 'btn-ys !bg-[#013976] !text-white hover:brightness-110 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl shadow-md whitespace-nowrap flex items-center gap-2';
     const OFF = 'btn-ys !bg-white !text-slate-500 !border-2 !border-slate-300 hover:!border-purple-500 hover:!text-purple-700 !px-5 !py-2.5 !text-[15px] !font-black rounded-xl whitespace-nowrap flex items-center gap-2';
     if (qBtn) qBtn.className = mode === 'question' ? ON : OFF;
-    if (sBtn) sBtn.className = mode === 'student'  ? ON : OFF;
+    if (sBtn) sBtn.className = mode === 'student' ? ON : OFF;
     if (mode === 'question') { setCanvasId('07-1'); loadQuestionStats(); }
     else { setCanvasId('07-2'); loadStudentStats(); }
 }
@@ -5609,7 +5611,7 @@ async function loadStudentStats() {
         });
         window._allStudentStatsData = result.data || [];
         renderStudentStatsUI(window._allStudentStatsData, '');
-    } catch(e) {
+    } catch (e) {
         document.getElementById('stats-display').innerHTML =
             `<div class="card text-center text-red-400">오류: ${e.message}</div>`;
     } finally { toggleLoading(false); }
@@ -5618,8 +5620,8 @@ async function loadStudentStats() {
 // 년도 필터 변경 시 로컬 재필터링
 function onStudentStatsYearChange(sel) {
     const year = sel.value;
-    const all  = window._allStudentStatsData || [];
-    const filtered = year ? all.filter(s => dateToYear(s['응시일']||s.testDate||s.date||'') === year) : all;
+    const all = window._allStudentStatsData || [];
+    const filtered = year ? all.filter(s => dateToYear(s['응시일'] || s.testDate || s.date || '') === year) : all;
     renderStudentStatsUI(filtered, year);
     const newSel = document.getElementById('stats-year-inline');
     if (newSel) newSel.value = year;
@@ -5629,23 +5631,23 @@ function renderStudentStatsUI(students, _unused) {
     const display = document.getElementById('stats-display');
     const all = window._allStudentStatsData || students;
     const SECTIONS = ['Grammar', 'Writing', 'Reading', 'Listening', 'Vocabulary'];
-    const scoreKey = { Grammar:'grammarScore', Writing:'writingScore', Reading:'readingScore', Listening:'listeningScore', Vocabulary:'vocabScore' };
-    const maxKey   = { Grammar:'grammarMax',   Writing:'writingMax',   Reading:'readingMax',   Listening:'listeningMax',  Vocabulary:'vocabMax' };
+    const scoreKey = { Grammar: 'grammarScore', Writing: 'writingScore', Reading: 'readingScore', Listening: 'listeningScore', Vocabulary: 'vocabScore' };
+    const maxKey = { Grammar: 'grammarMax', Writing: 'writingMax', Reading: 'readingMax', Listening: 'listeningMax', Vocabulary: 'vocabMax' };
 
     const calcAvg = (list, sec) => {
-        const vals = list.map(s => { const v = parseFloat(s[scoreKey[sec]] ?? s[sec+'_점수'] ?? ''); return isNaN(v) ? null : v; }).filter(v => v !== null);
-        return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '-';
+        const vals = list.map(s => { const v = parseFloat(s[scoreKey[sec]] ?? s[sec + '_점수'] ?? ''); return isNaN(v) ? null : v; }).filter(v => v !== null);
+        return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '-';
     };
     const calcMax = (list, sec) => {
-        const vals = list.map(s => { const v = parseFloat(s[maxKey[sec]] ?? s[sec+'_만점'] ?? ''); return isNaN(v) ? null : v; }).filter(v => v !== null && v > 0);
+        const vals = list.map(s => { const v = parseFloat(s[maxKey[sec]] ?? s[sec + '_만점'] ?? ''); return isNaN(v) ? null : v; }).filter(v => v !== null && v > 0);
         if (!vals.length) return '-';
-        const freq = {}; vals.forEach(v => freq[v] = (freq[v]||0)+1);
-        return String(Object.entries(freq).sort((a,b)=>b[1]-a[1])[0][0]);
+        const freq = {}; vals.forEach(v => freq[v] = (freq[v] || 0) + 1);
+        return String(Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0]);
     };
     const calcTotalMax = (list) => SECTIONS.reduce((sum, s) => { const mx = calcMax(list, s); return sum + (mx !== '-' ? parseFloat(mx) : 0); }, 0);
 
     // 년도 목록 (실제 데이터 기반)
-    const years = [...new Set(all.map(s => dateToYear(s['응시일']||s.testDate||s.date||'')).filter(y => /^\d{4}$/.test(y)))].sort((a,b)=>b-a);
+    const years = [...new Set(all.map(s => dateToYear(s['응시일'] || s.testDate || s.date || '')).filter(y => /^\d{4}$/.test(y)))].sort((a, b) => b - a);
     const yearSelect = (id, onChange) => `
         <select id="${id}" onchange="${onChange}" class="ys-field !w-36 !py-0.5 !text-[14px] !font-normal !bg-white ml-3" style="height:32px;">
             <option value="">전체</option>
@@ -5663,14 +5665,14 @@ function renderStudentStatsUI(students, _unused) {
             <th class="px-2 py-2.5 text-center" ${colW}>응시자수<br><span ${sub14}>(명)</span></th>
             <th class="px-2 py-2.5 text-center" ${colW}>점수<br><span ${sub14}>${mxStr}</span></th>
             ${SECTIONS.map(s => {
-                const smx = calcMax(list, s);
-                const sub = smx !== '-' ? `(${smx}\uc810)` : '(\uc601\uc5ed \uc5c6\uc74c)';
-                return `<th class="px-2 py-2.5 text-center" ${colW}>${s}<br><span ${sub14}>${sub}</span></th>`;
-            }).join('')}
+            const smx = calcMax(list, s);
+            const sub = smx !== '-' ? `(${smx}\uc810)` : '(\uc601\uc5ed \uc5c6\uc74c)';
+            return `<th class="px-2 py-2.5 text-center" ${colW}>${s}<br><span ${sub14}>${sub}</span></th>`;
+        }).join('')}
         </tr></thead>`;
     };
 
-    const dataRow = (label, count, list, extraClass='') => {
+    const dataRow = (label, count, list, extraClass = '') => {
         const totalScore = SECTIONS.reduce((sum, s) => { const a = calcAvg(list, s); return sum + (a !== '-' ? parseFloat(a) : 0); }, 0);
         const scoreStr = totalScore > 0 ? totalScore.toFixed(1) : '-';
         const colW = 'style="width:12.5%;font-size:16px;"';
@@ -5684,7 +5686,7 @@ function renderStudentStatsUI(students, _unused) {
 
     // 전체 통계 렌더 함수
     const renderOverall = (yrVal) => {
-        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일']||s.testDate||s.date||'') === yrVal) : all;
+        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일'] || s.testDate || s.date || '') === yrVal) : all;
         const mx = calcTotalMax(filtered);
         return filtered.length === 0
             ? `<p class="text-slate-400 text-center py-6" style="font-size:14px;">해당 년도의 학생 데이터가 없습니다.</p>`
@@ -5697,13 +5699,13 @@ function renderStudentStatsUI(students, _unused) {
 
     // 학급별 통계 렌더 함수
     const renderClass = (yrVal) => {
-        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일']||s.testDate||s.date||'') === yrVal) : all;
+        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일'] || s.testDate || s.date || '') === yrVal) : all;
         const mx = calcTotalMax(filtered);
         const groups = {};
         filtered.forEach(s => { const cls = s.studentClass || s['등록학급'] || '(미입력)'; if (!groups[cls]) groups[cls] = []; groups[cls].push(s); });
         if (Object.keys(groups).length === 0) return `<p class="text-slate-400 text-center py-6" style="font-size:14px;">등록학급 정보가 없습니다.</p>`;
-        const rows = Object.entries(groups).sort(([a],[b])=>a.localeCompare(b))
-            .map(([cls, list], i) => dataRow(`<span class="text-purple-700">${cls}</span>`, list.length, list, i%2===0?'bg-purple-50/30':'')).join('');
+        const rows = Object.entries(groups).sort(([a], [b]) => a.localeCompare(b))
+            .map(([cls, list], i) => dataRow(`<span class="text-purple-700">${cls}</span>`, list.length, list, i % 2 === 0 ? 'bg-purple-50/30' : '')).join('');
         return `<div class="overflow-x-auto rounded-xl border border-slate-200">
             <table class="w-full table-fixed" style="font-size:16px;">
                 ${makeHeader(filtered, 'bg-purple-700', '학급')}
@@ -5731,34 +5733,34 @@ function renderStudentStatsUI(students, _unused) {
             </div>
         </div>`;
 
-    window._renderOverall    = renderOverall;
+    window._renderOverall = renderOverall;
     window._renderClassStats = renderClass;
 
     // === 영역별 평균+없는영역제외 바차트 ===
     window._drawStudentChart = (yrVal) => {
         const DL = window.ChartDataLabels;
         if (DL && !Chart._dlRegistered) { Chart.register(DL); Chart._dlRegistered = true; }
-        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일']||s.testDate||s.date||'') === yrVal) : all;
+        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일'] || s.testDate || s.date || '') === yrVal) : all;
         // 데이터 있는 영역만
         const validSecs = SECTIONS.filter(s => calcMax(filtered, s) !== '-');
-        const avgs     = validSecs.map(s => { const v = parseFloat(calcAvg(filtered, s)); return isNaN(v) ? 0 : v; });
-        const maxes    = validSecs.map(s => parseFloat(calcMax(filtered, s)));
-        const totalAvg = avgs.reduce((a,b)=>a+b, 0);
-        const totalMax2 = maxes.reduce((a,b)=>a+b, 0);
+        const avgs = validSecs.map(s => { const v = parseFloat(calcAvg(filtered, s)); return isNaN(v) ? 0 : v; });
+        const maxes = validSecs.map(s => parseFloat(calcMax(filtered, s)));
+        const totalAvg = avgs.reduce((a, b) => a + b, 0);
+        const totalMax2 = maxes.reduce((a, b) => a + b, 0);
         const allLabels = ['점수 (합산)', ...validSecs];
-        const allAvgs   = [totalAvg, ...avgs].map(Number);
-        const allMaxes  = [totalMax2, ...maxes].map(Number);
+        const allAvgs = [totalAvg, ...avgs].map(Number);
+        const allMaxes = [totalMax2, ...maxes].map(Number);
         const ctx = document.getElementById('student-bar-chart');
         if (!ctx) return;
         if (ctx._chartInstance) ctx._chartInstance.destroy();
-        const clPlugin3={id:'cl3',afterDatasetsDraw(ch){const c=ch.ctx,FS=14;ch.data.datasets.forEach((ds,di)=>{ch.getDatasetMeta(di).data.forEach((bar,bi)=>{const v=ds.data[bi];if(!v||v<=0)return;const h=Math.abs(bar.base-bar.y),txt=parseFloat(v).toFixed(1);c.save();c.font=`bold ${FS}px sans-serif`;c.textAlign='center';if(h>=FS*2+4){c.textBaseline='middle';c.fillStyle='white';c.fillText(txt,bar.x,(bar.y+bar.base)/2);}else{c.textBaseline='bottom';c.fillStyle='#013976';c.fillText(txt,bar.x,bar.y-4);}c.restore();});});}};
+        const clPlugin3 = { id: 'cl3', afterDatasetsDraw(ch) { const c = ch.ctx, FS = 14; ch.data.datasets.forEach((ds, di) => { ch.getDatasetMeta(di).data.forEach((bar, bi) => { const v = ds.data[bi]; if (!v || v <= 0) return; const h = Math.abs(bar.base - bar.y), txt = parseFloat(v).toFixed(1); c.save(); c.font = `bold ${FS}px sans-serif`; c.textAlign = 'center'; if (h >= FS * 2 + 4) { c.textBaseline = 'middle'; c.fillStyle = 'white'; c.fillText(txt, bar.x, (bar.y + bar.base) / 2); } else { c.textBaseline = 'bottom'; c.fillStyle = '#013976'; c.fillText(txt, bar.x, bar.y - 4); } c.restore(); }); }); } };
         ctx._chartInstance = new Chart(ctx.getContext('2d'), {
             type: 'bar',
             plugins: [clPlugin3],
             data: {
                 labels: allLabels,
                 datasets: [
-                    { label: '\ud3c9\uade0 \uc810\uc218', data: allAvgs, backgroundColor: allLabels.map((_,i)=>i===0?'rgba(1,57,118,0.9)':'rgba(1,57,118,0.65)'), borderRadius: 6 }
+                    { label: '\ud3c9\uade0 \uc810\uc218', data: allAvgs, backgroundColor: allLabels.map((_, i) => i === 0 ? 'rgba(1,57,118,0.9)' : 'rgba(1,57,118,0.65)'), borderRadius: 6 }
                 ]
             },
             options: {
@@ -5781,9 +5783,9 @@ function renderStudentStatsUI(students, _unused) {
 
     // === 학급별 평균점수 + 학생수 도닛 — 학년별 그룹 ===
     window._drawClassCharts = (yrVal) => {
-        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일']||s.testDate||s.date||'') === yrVal) : all;
+        const filtered = yrVal ? all.filter(s => dateToYear(s['응시일'] || s.testDate || s.date || '') === yrVal) : all;
         const groups = {};
-        filtered.forEach(s => { const cls = s.studentClass || s['등록학급'] || '(미입력)'; if(!groups[cls]) groups[cls]=[]; groups[cls].push(s); });
+        filtered.forEach(s => { const cls = s.studentClass || s['등록학급'] || '(미입력)'; if (!groups[cls]) groups[cls] = []; groups[cls].push(s); });
 
         // 학년별 그룹uc218 (학급명 앞 숫자 = 학년)
         const gradeMap = {};
@@ -5799,7 +5801,7 @@ function renderStudentStatsUI(students, _unused) {
         if (!container) return;
 
         // 이전 차트 인스턴스 정리
-        container.querySelectorAll('canvas').forEach(c => { if(c._chartInstance) c._chartInstance.destroy(); });
+        container.querySelectorAll('canvas').forEach(c => { if (c._chartInstance) c._chartInstance.destroy(); });
 
         let html = '';
         const ts = Date.now();
@@ -5834,22 +5836,22 @@ function renderStudentStatsUI(students, _unused) {
                 // 평균점수 내림차순 정렬
                 const clsScores = clsInGrade.map(cls => ({
                     cls,
-                    avg: parseFloat(SECTIONS.reduce((sum,s)=>{ const a=parseFloat(calcAvg(groups[cls],s)); return sum+(isNaN(a)?0:a); },0).toFixed(1))
-                })).sort((a,b) => b.avg - a.avg);
+                    avg: parseFloat(SECTIONS.reduce((sum, s) => { const a = parseFloat(calcAvg(groups[cls], s)); return sum + (isNaN(a) ? 0 : a); }, 0).toFixed(1))
+                })).sort((a, b) => b.avg - a.avg);
 
                 // 바차트 (가로 막대)
                 const DL = window.ChartDataLabels;
                 if (DL && !Chart._dlRegistered) { Chart.register(DL); Chart._dlRegistered = true; }
                 const ctxBar = document.getElementById(barId);
                 if (ctxBar) {
-                    const PALETTE = ['#4A90E2','#50C878','#FFB84D','#FF6B6B','#9B59B6','#1ABC9C','#E74C3C','#3498DB'];
-                    const clPluginH={id:'clH'+barId,afterDatasetsDraw(ch){const c=ch.ctx,FS=14;ch.data.datasets.forEach((ds,di)=>{ch.getDatasetMeta(di).data.forEach((bar,bi)=>{const v=ds.data[bi];if(!v||v<=0)return;const txt=parseFloat(v).toFixed(1)+'점';const bw=Math.abs(bar.x-bar.base);c.save();c.font=`bold ${FS}px sans-serif`;c.textBaseline='middle';const tw=c.measureText(txt).width;if(bw>=tw+20){c.fillStyle='white';c.textAlign='center';c.fillText(txt,(bar.x+bar.base)/2,bar.y);}else{c.fillStyle='#013976';c.textAlign='left';c.fillText(txt,bar.x+4,bar.y);}c.restore();});});}};
+                    const PALETTE = ['#4A90E2', '#50C878', '#FFB84D', '#FF6B6B', '#9B59B6', '#1ABC9C', '#E74C3C', '#3498DB'];
+                    const clPluginH = { id: 'clH' + barId, afterDatasetsDraw(ch) { const c = ch.ctx, FS = 14; ch.data.datasets.forEach((ds, di) => { ch.getDatasetMeta(di).data.forEach((bar, bi) => { const v = ds.data[bi]; if (!v || v <= 0) return; const txt = parseFloat(v).toFixed(1) + '점'; const bw = Math.abs(bar.x - bar.base); c.save(); c.font = `bold ${FS}px sans-serif`; c.textBaseline = 'middle'; const tw = c.measureText(txt).width; if (bw >= tw + 20) { c.fillStyle = 'white'; c.textAlign = 'center'; c.fillText(txt, (bar.x + bar.base) / 2, bar.y); } else { c.fillStyle = '#013976'; c.textAlign = 'left'; c.fillText(txt, bar.x + 4, bar.y); } c.restore(); }); }); } };
                     ctxBar._chartInstance = new Chart(ctxBar.getContext('2d'), {
                         type: 'bar',
                         plugins: [clPluginH],
                         data: {
-                            labels: clsScores.map(x=>x.cls),
-                            datasets: [{ label: '평균 점수', data: clsScores.map(x=>x.avg), backgroundColor: clsScores.map((_,i)=>PALETTE[i%PALETTE.length]), borderRadius: 6 }]
+                            labels: clsScores.map(x => x.cls),
+                            datasets: [{ label: '평균 점수', data: clsScores.map(x => x.avg), backgroundColor: clsScores.map((_, i) => PALETTE[i % PALETTE.length]), borderRadius: 6 }]
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false,
@@ -5872,7 +5874,7 @@ function renderStudentStatsUI(students, _unused) {
                 // 도닛 (학생수)
                 const countObj = {};
                 clsInGrade.forEach(cls => { countObj[cls] = groups[cls].length; });
-                renderStatDoughnut(dntId, countObj, clsInGrade.reduce((s,c)=>s+groups[c].length,0), '학급', '명');
+                renderStatDoughnut(dntId, countObj, clsInGrade.reduce((s, c) => s + groups[c].length, 0), '학급', '명');
             });
         }, 80);
     };
@@ -5978,13 +5980,13 @@ function renderStatsCharts(stats) {
                 <div class="space-y-8 animate-fade-in-safe">
                     <!-- 요약 정보 바 (한 줄 컴팩트) -->
                     ${(() => {
-                        const totalScore = Object.entries(stats.scores).reduce((sum, [pt, cnt]) => sum + parseFloat(pt) * cnt, 0);
-                        const scoreBreakdown = Object.entries(stats.scores).sort((a,b) => parseFloat(a[0]) - parseFloat(b[0])).map(([pt, cnt]) => `${pt}점×${cnt}`).join(' / ');
-                        const sectionBreakdown = Object.entries(stats.sections).map(([sec, cnt]) => {
-                            const secScore = Math.round(stats.sectionScores?.[sec] || 0);
-                            return `<span style="font-size:14px;"><span class="font-bold text-[#013976]">${sec}</span> ${cnt}개<span class="text-slate-400">(${secScore}점)</span></span>`;
-                        }).join('<span class="text-slate-300 mx-2" style="font-size:14px;">|</span>');
-                        return `
+            const totalScore = Object.entries(stats.scores).reduce((sum, [pt, cnt]) => sum + parseFloat(pt) * cnt, 0);
+            const scoreBreakdown = Object.entries(stats.scores).sort((a, b) => parseFloat(a[0]) - parseFloat(b[0])).map(([pt, cnt]) => `${pt}점×${cnt}`).join(' / ');
+            const sectionBreakdown = Object.entries(stats.sections).map(([sec, cnt]) => {
+                const secScore = Math.round(stats.sectionScores?.[sec] || 0);
+                return `<span style="font-size:14px;"><span class="font-bold text-[#013976]">${sec}</span> ${cnt}개<span class="text-slate-400">(${secScore}점)</span></span>`;
+            }).join('<span class="text-slate-300 mx-2" style="font-size:14px;">|</span>');
+            return `
                         <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-2xl px-6 py-4 flex flex-wrap items-center gap-x-6 gap-y-2">
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="text-slate-500 font-bold" style="font-size:17px;">📋 총 문항</span>
@@ -6001,7 +6003,7 @@ function renderStatsCharts(stats) {
                                 <span class="text-slate-600">${sectionBreakdown}</span>
                             </div>
                         </div>`;
-                    })()}
+        })()}
                     
                     <!-- 차트 그리드 -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -6431,22 +6433,20 @@ function renderBankRows() {
                 
                 <!-- Section -->
                 <div class="text-center">
-                    <span class="px-2.5 py-1 rounded-md fs-16 font-bold border ${
-                        q.section === 'Reading' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                        q.section === 'Grammar' ? 'bg-purple-100 text-purple-700 border-purple-200' :
-                        q.section === 'Vocabulary' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                    <span class="px-2.5 py-1 rounded-md fs-16 font-bold border ${q.section === 'Reading' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                q.section === 'Grammar' ? 'bg-purple-100 text-purple-700 border-purple-200' :
+                    q.section === 'Vocabulary' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
                         q.section === 'Listening' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                        q.section === 'Writing' ? 'bg-pink-100 text-pink-700 border-pink-200' :
-                        'bg-slate-100 text-slate-600 border-slate-200'
-                    }">
+                            q.section === 'Writing' ? 'bg-pink-100 text-pink-700 border-pink-200' :
+                                'bg-slate-100 text-slate-600 border-slate-200'
+            }">
                         ${q.section || '-'}
                     </span>
                 </div>
                 
                 <!-- Type -->
-                <div class="text-center fs-16 truncate px-2 font-bold ${
-                    (q.questionType || q.type || '').includes('객관') ? 'text-blue-600' : 'text-rose-600'
-                }">
+                <div class="text-center fs-16 truncate px-2 font-bold ${(q.questionType || q.type || '').includes('객관') ? 'text-blue-600' : 'text-rose-600'
+            }">
                     ${q.questionType || q.type || '-'}
                 </div>
                 
@@ -6545,9 +6545,9 @@ function _builderGetLabel() {
     const labels = [];
     window._changedItems.forEach(id => {
         const qi = qItems.findIndex(el => el.id === id);
-        if (qi >= 0) { labels.push(`${qi+1}번`); return; }
+        if (qi >= 0) { labels.push(`${qi + 1}번`); return; }
         const bi = bItems.findIndex(el => el.id === id);
-        if (bi >= 0) { labels.push(`SET${bi+1}번`); }
+        if (bi >= 0) { labels.push(`SET${bi + 1}번`); }
     });
     return labels.length ? labels.join(', ') : '일부';
 }
@@ -6560,16 +6560,16 @@ function _builderInitChangeTrack() {
     window._changedItems = new Set();
     const area = document.getElementById('builder-main-area');
     if (!area) return;
-    area.addEventListener('input', function(e) {
+    area.addEventListener('input', function (e) {
         const item = e.target.closest('.builder-item');
         if (item) _builderMarkChanged(item.id);
     }, true);
-    area.addEventListener('change', function(e) {
+    area.addEventListener('change', function (e) {
         const item = e.target.closest('.builder-item');
         if (item) _builderMarkChanged(item.id);
     }, true);
     // 드래그 drop 순서 변경 감지
-    area.addEventListener('drop', function(e) {
+    area.addEventListener('drop', function (e) {
         const item = e.target.closest('.builder-item');
         if (item) _builderMarkChanged(item.id);
     }, true);
@@ -7258,7 +7258,7 @@ function syncBundles(questions) {
                         badge.title = '묶음형 카드로 이동';
                         badge.setAttribute('data-target-bundle', bundle.id);
                         // [New] 클릭 시 zone-bundle의 해당 카드로 스크롤
-                        badge.onclick = function(e) {
+                        badge.onclick = function (e) {
                             e.stopPropagation();
                             const bundleId = this.getAttribute('data-target-bundle');
                             const bundleEl = document.getElementById(bundleId);
@@ -7497,9 +7497,9 @@ function getComponentHtml(type, id, data) {
                         <span>🎵</span> 듣기 추가
                     </button>
                     <select id="${id}-audio-plays" data-field="audioMaxPlay" class="h-[28px] px-2 text-[13px] border border-slate-300 rounded-lg outline-none">
-                        <option value="1" ${(d.audioMaxPlay||1)==1?'selected':''}>1회</option>
-                        <option value="2" ${(d.audioMaxPlay||1)==2?'selected':''}>2회</option>
-                        <option value="3" ${(d.audioMaxPlay||1)==3?'selected':''}>3회</option>
+                        <option value="1" ${(d.audioMaxPlay || 1) == 1 ? 'selected' : ''}>1회</option>
+                        <option value="2" ${(d.audioMaxPlay || 1) == 2 ? 'selected' : ''}>2회</option>
+                        <option value="3" ${(d.audioMaxPlay || 1) == 3 ? 'selected' : ''}>3회</option>
                     </select>
                 </div>
 
@@ -7536,10 +7536,10 @@ function getComponentHtml(type, id, data) {
             const optCount = (d.options && d.options.length >= 2 && d.options.length <= 5) ? d.options.length : 5;
             const optArr = Array.from({ length: optCount }, (_, i) => i + 1);
             // [Fix] d.labelType 없으면 answer 값으로 추론 (GAS 구버전 대응)
-        const _inferredLT = (d.answer && /^[A-Ea-e]$/.test(String(d.answer).trim())) ? 'alpha' : 'number';
-        const labelType = d.labelType || _inferredLT; // 'number' | 'alpha'
-            const _alphaLabels = ['A','B','C','D','E'];
-            const _numLabels   = ['1','2','3','4','5'];
+            const _inferredLT = (d.answer && /^[A-Ea-e]$/.test(String(d.answer).trim())) ? 'alpha' : 'number';
+            const labelType = d.labelType || _inferredLT; // 'number' | 'alpha'
+            const _alphaLabels = ['A', 'B', 'C', 'D', 'E'];
+            const _numLabels = ['1', '2', '3', '4', '5'];
 
             return `
                  <div class="flex items-center justify-between mb-4 ${headerBg} p-3 rounded-xl border ${borderColor}" data-bundle-id="${d.linkedGroupId || ''}" data-original-no="${d.no || ''}">
@@ -7643,7 +7643,7 @@ function getComponentHtml(type, id, data) {
                                <div class="flex items-center gap-2">
                                    <select id="${id}-label-type" data-field="labelType" onchange="convertAnswerOnLabelChange('${id}', this.value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500 bg-white">
                                        <option value="number" ${labelType === 'number' ? 'selected' : ''}>1~5</option>
-                                       <option value="alpha"  ${labelType === 'alpha'  ? 'selected' : ''}>A~E</option>
+                                       <option value="alpha"  ${labelType === 'alpha' ? 'selected' : ''}>A~E</option>
                                    </select>
                                    <select id="${id}-choice-count" onchange="renderBuilderChoices('${id}', this.value)" class="p-1 px-2 text-[14px] border border-slate-300 rounded-lg outline-none focus:border-blue-500">
                                        <option value="2" ${optCount === 2 ? 'selected' : ''}>2개</option>
@@ -7655,14 +7655,14 @@ function getComponentHtml(type, id, data) {
                            </div>
                            <div id="${id}-choices" class="grid grid-cols-2 gap-2 mb-4">
                                 ${optArr.map(n => {
-                                    const _lbl = labelType === 'alpha' ? _alphaLabels[n-1] : String(n);
-                                     return `<div class="flex items-start gap-1">
+                        const _lbl = labelType === 'alpha' ? _alphaLabels[n - 1] : String(n);
+                        return `<div class="flex items-start gap-1">
                                        <span class="text-[14px] w-5 font-bold text-slate-400 mt-2.5">${_lbl}.</span>
                                        <div id="${id}-choice-${n}" data-field="choice" data-index="${n}"
                                             class="flex-1 p-2 text-[14px] bg-slate-50 border border-slate-200 rounded-lg outline-none min-h-[40px]"
                                             contenteditable="true" style="white-space:pre-wrap">${(d.options && d.options[n - 1]) || ''}</div>
                                     </div>`;
-                                }).join('')}
+                    }).join('')}
                            </div>
                            <div class="flex flex-col gap-2 mt-2">
                                <div class="flex items-center gap-2">
@@ -7670,10 +7670,10 @@ function getComponentHtml(type, id, data) {
                                    <span class="text-[14px] text-slate-400">복수 선택 문항은 '+ 정답 추가' 버튼 사용</span>
                                </div>
                                <div id="${id}-answer-list" class="flex flex-wrap gap-2 items-center">
-                                   ${(d.answer ? String(d.answer).split(',') : ['']).map(function(v, i) {
-                                       const _val = v.trim();
-                                       return '<div class="flex items-center gap-1"><input type="text" data-role="answer-item" value="' + _val + '" placeholder="' + (labelType === 'alpha' ? 'A~E' : '1~5') + '" class="w-16 p-1.5 text-center text-[14px] font-bold border-2 border-blue-300 rounded-lg outline-none focus:border-blue-500 bg-white">' + (i > 0 ? '<button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 font-bold text-[18px] leading-none px-1">×</button>' : '') + '</div>';
-                                   }).join('')}
+                                   ${(d.answer ? String(d.answer).split(',') : ['']).map(function (v, i) {
+                        const _val = v.trim();
+                        return '<div class="flex items-center gap-1"><input type="text" data-role="answer-item" value="' + _val + '" placeholder="' + (labelType === 'alpha' ? 'A~E' : '1~5') + '" class="w-16 p-1.5 text-center text-[14px] font-bold border-2 border-blue-300 rounded-lg outline-none focus:border-blue-500 bg-white">' + (i > 0 ? '<button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 font-bold text-[18px] leading-none px-1">×</button>' : '') + '</div>';
+                    }).join('')}
                                    <button type="button" data-role="add-answer" onclick="addBuilderAnswer('${id}')"
                                        class="h-8 px-3 text-[13px] font-bold text-blue-600 border-2 border-blue-300 border-dashed rounded-lg hover:bg-blue-50 transition-colors">
                                        + 정답 추가
@@ -7725,7 +7725,7 @@ function serializeBuilderState() {
                     score: block.querySelector('[data-field="score"]')?.value || 3,
                     title: (() => { const el = block.querySelector('[data-field="text"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
                     text: (() => { const el = block.querySelector('[data-field="innerPassage"]'); return el ? (el.tagName === 'TEXTAREA' ? el.value : (stripTwStyles ? stripTwStyles(el.innerHTML) : el.innerHTML)) : ''; })(),
-                    answer: Array.from(block.querySelectorAll('[data-role="answer-item"]')).map(function(el){return el.value.trim();}).filter(Boolean).join(',') || '',
+                    answer: Array.from(block.querySelectorAll('[data-role="answer-item"]')).map(function (el) { return el.value.trim(); }).filter(Boolean).join(',') || '',
                     modelAnswer: block.querySelector('[data-field="modelAnswer"]')?.value || '', // Collect Model Answer
                     options: []
                 };
@@ -7760,8 +7760,8 @@ function convertAnswerOnLabelChange(itemId, newType) {
     const ansInput = document.getElementById(itemId + '-answer');
     if (ansInput) {
         const cur = ansInput.value.trim();
-        const numToAlpha = { '1':'A','2':'B','3':'C','4':'D','5':'E' };
-        const alphaToNum = { 'A':'1','B':'2','C':'3','D':'4','E':'5' };
+        const numToAlpha = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E' };
+        const alphaToNum = { 'A': '1', 'B': '2', 'C': '3', 'D': '4', 'E': '5' };
         if (newType === 'alpha' && numToAlpha[cur]) {
             ansInput.value = numToAlpha[cur]; // 숫자 → 알파벳
         } else if (newType === 'number' && alphaToNum[cur.toUpperCase()]) {
@@ -7777,7 +7777,7 @@ function renderBuilderChoices(itemId, n) {
     const container = document.getElementById(itemId + '-choices');
     if (!container) return;
 
-    const _alphaLabels = ['A','B','C','D','E'];
+    const _alphaLabels = ['A', 'B', 'C', 'D', 'E'];
     const labelTypeSel = document.getElementById(itemId + '-label-type');
     const lType = labelTypeSel ? labelTypeSel.value : 'number';
 
@@ -7801,21 +7801,21 @@ function renderBuilderChoices(itemId, n) {
     // 정답 입력 validation 갱신 (보기 수 기반 - 모든 answer-item input 적용)
     const answerList = document.getElementById(itemId + '-answer-list');
     if (answerList) {
-        const alphaLabels = ['A','B','C','D','E'];
+        const alphaLabels = ['A', 'B', 'C', 'D', 'E'];
         const maxAlpha = alphaLabels[Number(n) - 1] || 'E';
         const allowed = alphaLabels.slice(0, Number(n)).join('');
         const ansInputs = answerList.querySelectorAll('[data-role="answer-item"]');
-        ansInputs.forEach(function(ansInput) {
+        ansInputs.forEach(function (ansInput) {
             if (lType === 'alpha') {
                 ansInput.maxLength = 1;
                 ansInput.placeholder = 'A~' + maxAlpha;
                 ansInput.setAttribute('data-allowed', allowed);
-                ansInput.oninput = function() {
+                ansInput.oninput = function () {
                     const v = this.value.toUpperCase();
                     if (v && !allowed.includes(v)) {
                         this.value = '';
                         this.classList.add('border-red-400', 'bg-red-50');
-                        setTimeout(function(el){ return function(){ el.classList.remove('border-red-400','bg-red-50'); }; }(ansInput), 800);
+                        setTimeout(function (el) { return function () { el.classList.remove('border-red-400', 'bg-red-50'); }; }(ansInput), 800);
                     } else { this.value = v; }
                 };
                 // 기존 값 범위 초기화
@@ -7852,28 +7852,28 @@ function addBuilderAnswer(itemId) {
     del.type = 'button';
     del.textContent = '×';
     del.className = 'text-red-400 hover:text-red-600 font-bold text-[18px] leading-none px-1';
-    del.onclick = function() { wrap.remove(); };
+    del.onclick = function () { wrap.remove(); };
     // validation 적용
-    const alphaLabels = ['A','B','C','D','E'];
+    const alphaLabels = ['A', 'B', 'C', 'D', 'E'];
     if (lType === 'alpha') {
         inp.maxLength = 1;
         const allowed = alphaLabels.slice(0, n).join('');
         inp.setAttribute('data-allowed', allowed);
-        inp.oninput = function() {
+        inp.oninput = function () {
             const v = this.value.toUpperCase();
             if (v && !allowed.includes(v)) {
                 this.value = '';
-                this.classList.add('border-red-400','bg-red-50');
-                setTimeout(function(){ inp.classList.remove('border-red-400','bg-red-50'); }, 800);
+                this.classList.add('border-red-400', 'bg-red-50');
+                setTimeout(function () { inp.classList.remove('border-red-400', 'bg-red-50'); }, 800);
             } else { this.value = v; }
         };
     } else {
         inp.setAttribute('data-max', n);
-        inp.oninput = function() {
+        inp.oninput = function () {
             const v = Number(this.value);
             if (this.value && (isNaN(v) || v < 1 || v > n)) {
-                this.classList.add('border-red-400','bg-red-50');
-                setTimeout(function(){ inp.classList.remove('border-red-400','bg-red-50'); }, 800);
+                this.classList.add('border-red-400', 'bg-red-50');
+                setTimeout(function () { inp.classList.remove('border-red-400', 'bg-red-50'); }, 800);
             }
         };
     }
@@ -8037,7 +8037,7 @@ function renderAudioUploader(id, d) {
                 <input type="file" id="${id}-audio-file" data-field="audio-file" class="hidden" accept="audio/*" onchange="previewBuilderAudio(this, '${id}')">
             </label>
             <!-- [Fix] 기존 오디오 URL/FileId를 DOM에 보존 (이미지 방식과 동일) -->
-            <input type="hidden" data-field="audioUrl"    value="${d.audioUrl    || ''}">
+            <input type="hidden" data-field="audioUrl"    value="${d.audioUrl || ''}">
             <input type="hidden" data-field="audioFileId" value="${d.audioFileId || ''}">
             <div id="${id}-audio-preview" data-field="audio-preview" class="${d.audioUrl ? '' : 'hidden'} flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded">
                 <span class="text-green-600 text-sm">🎵</span>
@@ -8057,21 +8057,21 @@ function previewBuilderAudio(input, id) {
         input.value = '';
         return;
     }
-    const nameEl = document.getElementById(id+'-audio-name');
-    const prev = document.getElementById(id+'-audio-preview');
+    const nameEl = document.getElementById(id + '-audio-name');
+    const prev = document.getElementById(id + '-audio-preview');
     if (nameEl) nameEl.textContent = file.name;
     if (prev) prev.classList.remove('hidden');
 }
 
 function clearBuilderAudio(id) {
-    const inp = document.getElementById(id+'-audio-file'); if(inp) inp.value='';
-    const prev = document.getElementById(id+'-audio-preview'); if(prev) prev.classList.add('hidden');
-    const n = document.getElementById(id+'-audio-name'); if(n) n.textContent='';
+    const inp = document.getElementById(id + '-audio-file'); if (inp) inp.value = '';
+    const prev = document.getElementById(id + '-audio-preview'); if (prev) prev.classList.add('hidden');
+    const n = document.getElementById(id + '-audio-name'); if (n) n.textContent = '';
     // [Fix] hidden input도 초기화 (✕ 클릭 시 기존 URL 삭제)
-    const urlInp  = prev ? prev.parentElement.querySelector('[data-field="audioUrl"]')    : null;
-    const fidInp  = prev ? prev.parentElement.querySelector('[data-field="audioFileId"]') : null;
-    if(urlInp)  urlInp.value  = '';
-    if(fidInp)  fidInp.value  = '';
+    const urlInp = prev ? prev.parentElement.querySelector('[data-field="audioUrl"]') : null;
+    const fidInp = prev ? prev.parentElement.querySelector('[data-field="audioFileId"]') : null;
+    if (urlInp) urlInp.value = '';
+    if (fidInp) fidInp.value = '';
 }
 
 function playBundleAudio(btn, bundleId) {
@@ -8097,13 +8097,13 @@ function playBundleAudio(btn, bundleId) {
     if (!fileId) { showToast('오디오 파일 ID 없음'); return; }
     if (!audio._audInit) {
         audio._audInit = true;
-        audio.addEventListener('timeupdate', function() {
+        audio.addEventListener('timeupdate', function () {
             if (audio.duration && progressBar) {
                 progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
-                if (timeEl) { const m=Math.floor(audio.currentTime/60),s=Math.floor(audio.currentTime%60); timeEl.textContent=m+':'+(s<10?'0':'')+s; }
+                if (timeEl) { const m = Math.floor(audio.currentTime / 60), s = Math.floor(audio.currentTime % 60); timeEl.textContent = m + ':' + (s < 10 ? '0' : '') + s; }
             }
         });
-        audio.addEventListener('ended', function() {
+        audio.addEventListener('ended', function () {
             if (statusEl) { statusEl.textContent = '✅ 완료'; statusEl.style.color = '#94a3b8'; }
             if (progressBar) progressBar.style.width = '100%';
             window.onbeforeunload = null;
@@ -8116,13 +8116,13 @@ function playBundleAudio(btn, bundleId) {
         audio.src = _cached;
         audio.currentTime = 0;
         const pp = audio.play();
-        if (pp !== undefined) pp.catch(function(e) { showToast('재생 실패: ' + e.message); });
-        window.onbeforeunload = function(e) { e.preventDefault(); return '듣기가 재생 중입니다.'; };
+        if (pp !== undefined) pp.catch(function (e) { showToast('재생 실패: ' + e.message); });
+        window.onbeforeunload = function (e) { e.preventDefault(); return '듣기가 재생 중입니다.'; };
         return;
     }
     // 캐시 미스 → GAS 프록시로 base64 가져와 blob URL 생성
     sendReliableRequest({ type: 'GET_AUDIO_B64', fileId: fileId })
-        .then(function(res) {
+        .then(function (res) {
             if (!res || res.status !== 'Success' || !res.data) {
                 showToast('오디오 로드 실패: ' + (res && res.message || '알 수 없음'));
                 if (statusEl) statusEl.textContent = '⚠️ 오류';
@@ -8138,10 +8138,10 @@ function playBundleAudio(btn, bundleId) {
             audio.currentTime = 0;
             if (statusEl) statusEl.textContent = '▶ 재생중';
             const pp = audio.play();
-            if (pp !== undefined) pp.catch(function(e) { showToast('재생 실패: ' + e.message); });
-            window.onbeforeunload = function(e) { e.preventDefault(); return '듣기가 재생 중입니다.'; };
+            if (pp !== undefined) pp.catch(function (e) { showToast('재생 실패: ' + e.message); });
+            window.onbeforeunload = function (e) { e.preventDefault(); return '듣기가 재생 중입니다.'; };
         })
-        .catch(function(err) {
+        .catch(function (err) {
             showToast('오디오 요청 오류: ' + err.message);
             if (statusEl) statusEl.textContent = '⚠️ 오류';
         });
@@ -8170,10 +8170,10 @@ function renderImageUploader(id, d, size = 'normal') {
 function stripTwStyles(html) {
     if (!html) return html;
     // 1. style 속성 내 --tw-로 시작하는 선언들만 제거 (다른 인라인 스타일은 보존)
-    let cleaned = html.replace(/style="([^"]*)"/gi, function(match, styleContent) {
+    let cleaned = html.replace(/style="([^"]*)"/gi, function (match, styleContent) {
         const filtered = styleContent
             .split(';')
-            .filter(function(decl) { return decl.trim() && !decl.trim().startsWith('--tw-'); })
+            .filter(function (decl) { return decl.trim() && !decl.trim().startsWith('--tw-'); })
             .join(';')
             .replace(/;+$/, '')
             .trim();
@@ -8375,65 +8375,65 @@ function renderEditForm(qId) {
     // [Fix] DOM 렌더링 완료 후 컴포넌트 초기화 (초기 렌더링 지연 방지)
     setTimeout(() => {
 
-    // 1. If part of a Bundle, load Bundle into Zone A
-    let bundleIdToLoad = q.setId;
-    if (bundleIdToLoad && bundleIdToLoad !== "") {
-        const bundleInfo = (globalConfig.bundles || []).find(b => b.id === bundleIdToLoad);
-        if (bundleInfo) {
-            // [Fix] Sanitize Passage (Empty HTML Check) — 07-1과 동일
-            let rawHtml = bundleInfo.text || "";
-            if (rawHtml.replace(/<[^>]*>/g, '').trim() === '' && !rawHtml.includes('<img')) {
-                rawHtml = "";
+        // 1. If part of a Bundle, load Bundle into Zone A
+        let bundleIdToLoad = q.setId;
+        if (bundleIdToLoad && bundleIdToLoad !== "") {
+            const bundleInfo = (globalConfig.bundles || []).find(b => b.id === bundleIdToLoad);
+            if (bundleInfo) {
+                // [Fix] Sanitize Passage (Empty HTML Check) — 07-1과 동일
+                let rawHtml = bundleInfo.text || "";
+                if (rawHtml.replace(/<[^>]*>/g, '').trim() === '' && !rawHtml.includes('<img')) {
+                    rawHtml = "";
+                }
+
+                addComponent('bundle', {
+                    id: bundleInfo.id,
+                    groupId: bundleInfo.id, // [Fix] Preserve Original UUID as Group ID — 07-1과 동일
+                    title: bundleInfo.title || '',
+                    html: rawHtml,
+                    imgUrl: (bundleInfo.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : "",
+                    audioUrl: bundleInfo.audioUrl || "",       // [Fix] 오디오 표시 복원
+                    audioFileId: bundleInfo.audioFileId || "", // [Fix] 오디오 표시 복원
+                    audioMaxPlay: bundleInfo.audioMaxPlay || 1,  // [Fix] 오디오 표시 복원
+                    questionIds: bundleInfo.questionIds || ''  // [Fix] 연결 문항 번호 표시
+                });
             }
-
-            addComponent('bundle', {
-                id: bundleInfo.id,
-                groupId: bundleInfo.id, // [Fix] Preserve Original UUID as Group ID — 07-1과 동일
-                title: bundleInfo.title || '',
-                html: rawHtml,
-                imgUrl: (bundleInfo.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : "",
-                audioUrl: bundleInfo.audioUrl || "",       // [Fix] 오디오 표시 복원
-                audioFileId: bundleInfo.audioFileId || "", // [Fix] 오디오 표시 복원
-                audioMaxPlay: bundleInfo.audioMaxPlay || 1,  // [Fix] 오디오 표시 복원
-                questionIds: bundleInfo.questionIds || ''  // [Fix] 연결 문항 번호 표시
-            });
         }
-    }
 
-    // 2. Load Question into Zone B
-    // [ROOT CAUSE FIX] DB(GET_FULL_DB)가 반환하는 필드: type, choices, title, text, imgUrl
-    // 07-1 패턴: q.type === '객관형' ? 'obj' : 'subj'
-    const qType = q.type || q.questionType || '';
-    let type = (qType.includes('객관') || qType === 'obj') ? 'obj' : 'subj';
-    // fallback: choices 존재 시 무조건 obj
-    if (type === 'subj' && q.choices && Array.isArray(q.choices) && q.choices.length > 0) {
-        type = 'obj';
-    }
+        // 2. Load Question into Zone B
+        // [ROOT CAUSE FIX] DB(GET_FULL_DB)가 반환하는 필드: type, choices, title, text, imgUrl
+        // 07-1 패턴: q.type === '객관형' ? 'obj' : 'subj'
+        const qType = q.type || q.questionType || '';
+        let type = (qType.includes('객관') || qType === 'obj') ? 'obj' : 'subj';
+        // fallback: choices 존재 시 무조건 obj
+        if (type === 'subj' && q.choices && Array.isArray(q.choices) && q.choices.length > 0) {
+            type = 'obj';
+        }
 
 
-    addComponent(type, {
-        id: q.id,
-        no: q.no,        // [Fix] 원본 문항번호 전달 (편집 모드 Q번호 표시용)
-        sec: q.section,
-        sub: q.subType,
-        diff: q.difficulty,
-        score: q.score,
-        text: q.title,
-        innerPassage: (q.text && q.text.replace(/<[^>]*>/g, '').trim() === '' && !q.text.includes('<img')) ? "" : q.text,
-        answer: q.answer,
-        modelAnswer: q.modelAnswer,
-        options: q.choices,
-        imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : "",
-        labelType: q.labelType || 'number',
-        isLinked: bundleIdToLoad ? true : false,
-        linkedGroupId: bundleIdToLoad || ''
-    });
+        addComponent(type, {
+            id: q.id,
+            no: q.no,        // [Fix] 원본 문항번호 전달 (편집 모드 Q번호 표시용)
+            sec: q.section,
+            sub: q.subType,
+            diff: q.difficulty,
+            score: q.score,
+            text: q.title,
+            innerPassage: (q.text && q.text.replace(/<[^>]*>/g, '').trim() === '' && !q.text.includes('<img')) ? "" : q.text,
+            answer: q.answer,
+            modelAnswer: q.modelAnswer,
+            options: q.choices,
+            imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : "",
+            labelType: q.labelType || 'number',
+            isLinked: bundleIdToLoad ? true : false,
+            linkedGroupId: bundleIdToLoad || ''
+        });
 
-    // Link in DOM (07-1과 동일)
-    if (bundleIdToLoad) {
-        const qEl = document.getElementById(q.id);
-        if (qEl) qEl.setAttribute('data-bundle-id', bundleIdToLoad);
-    }
+        // Link in DOM (07-1과 동일)
+        if (bundleIdToLoad) {
+            const qEl = document.getElementById(q.id);
+            if (qEl) qEl.setAttribute('data-bundle-id', bundleIdToLoad);
+        }
 
         // 08-2 변경 감지: DOM 안정화 후 스냅샷 저장
         window._editSnapshot = _editGetSnapshot();
@@ -8572,14 +8572,38 @@ async function updateBuilderQuestion(originalId) {
         const resData = await sendReliableRequest(payload);
 
         if (resData.status === "Success") {
-            // Clear local cache for this category (will re-fetch fresh data)
-            globalConfig.questions = globalConfig.questions.filter(q => q.catId !== result.catId);
-            globalConfig.bundles = (globalConfig.bundles || []).filter(b => b.catId !== result.catId);
+            // [Fix] 전체 캐시 삭제 대신 해당 문항 1개만 메모리 업데이트 (로딩 없이 연속 수정 가능)
+            const qIdx = globalConfig.questions.findIndex(q => q.id === originalId);
+            if (qIdx !== -1) {
+                globalConfig.questions[qIdx] = {
+                    ...globalConfig.questions[qIdx],
+                    section: questionData.section,
+                    subType: questionData.subType,
+                    type: questionData.type,
+                    difficulty: questionData.difficulty,
+                    score: questionData.score,
+                    title: questionData.title,
+                    text: questionData.text,
+                    answer: questionData.answer,
+                    modelAnswer: questionData.modelAnswer,
+                    choices: questionData.choices,
+                    setId: questionData.setId,
+                    labelType: questionData.labelType
+                };
+            }
+            // bundle도 1개만 업데이트
+            if (bundleData) {
+                const bIdx = (globalConfig.bundles || []).findIndex(b => b.id === bundleData.id);
+                if (bIdx !== -1) {
+                    globalConfig.bundles[bIdx] = { ...globalConfig.bundles[bIdx], ...bundleData };
+                }
+            }
             save();
 
             showToast("✅ 해당 문항만 안전하게 수정 완료! (다른 데이터 영향 없음)");
-            window._editSnapshot = null; // 저장 완료 후 스냅샷 초기화
-            exitEditMode(true); // [Fix] 저장 완료 후이므로 확인 팝업 생략
+            window._editSnapshot = null;
+            exitEditMode(true);
+            renderBankRows(); // 08 목록 즉시 갱신 (로딩 없음)
         } else {
             throw new Error(resData.message || "서버 부분 업데이트 실패");
         }
@@ -8690,7 +8714,7 @@ async function loadQuestionsFromCategory(catId) {
                         title: bundleInfo?.title || '',
                         html: rawHtml,
                         imgUrl: (bundleInfo?.imgUrl && bundleInfo.imgUrl !== 'undefined' && bundleInfo.imgUrl !== 'null') ? fixDriveUrl(bundleInfo.imgUrl) : "",
-                        audioUrl:    bundleInfo?.audioUrl    || "",  // [Fix] 오디오 필드 추가
+                        audioUrl: bundleInfo?.audioUrl || "",  // [Fix] 오디오 필드 추가
                         audioFileId: bundleInfo?.audioFileId || "",  // [Fix] 오디오 필드 추가
                         audioMaxPlay: bundleInfo?.audioMaxPlay || 1,  // [Fix] 오디오 필드 추가
                         questions: []
@@ -8704,75 +8728,75 @@ async function loadQuestionsFromCategory(catId) {
 
         // [Fix] DOM 안정화 후 컴포넌트 렌더링 (에디터 초기화 지연 방지)
         setTimeout(() => {
-        // [Fix] no 순서대로 문항 렌더링 (bundle 문항이 orphan보다 앞으로 오는 버그 수정)
-        const renderedBundles = new Set();
-        fetchedQuestions.forEach(q => {
-            // bundle 문항이면, 해당 bundle 카드를 아직 안 추가했을 때 먼저 추가
-            if (q.setId && q.setId !== '' && !renderedBundles.has(q.setId)) {
-                renderedBundles.add(q.setId);
-                const bundleData = bundleMap.get(q.setId);
-                if (bundleData) {
-                    addComponent('bundle', {
-                        id: q.setId,
-                        groupId: q.setId,
-                        title: bundleData.title,
-                        html: bundleData.html,
-                        imgUrl: bundleData.imgUrl,
-                        audioUrl: bundleData.audioUrl || '',
-                        audioFileId: bundleData.audioFileId || '',
-                        audioMaxPlay: bundleData.audioMaxPlay || 1
-                    });
+            // [Fix] no 순서대로 문항 렌더링 (bundle 문항이 orphan보다 앞으로 오는 버그 수정)
+            const renderedBundles = new Set();
+            fetchedQuestions.forEach(q => {
+                // bundle 문항이면, 해당 bundle 카드를 아직 안 추가했을 때 먼저 추가
+                if (q.setId && q.setId !== '' && !renderedBundles.has(q.setId)) {
+                    renderedBundles.add(q.setId);
+                    const bundleData = bundleMap.get(q.setId);
+                    if (bundleData) {
+                        addComponent('bundle', {
+                            id: q.setId,
+                            groupId: q.setId,
+                            title: bundleData.title,
+                            html: bundleData.html,
+                            imgUrl: bundleData.imgUrl,
+                            audioUrl: bundleData.audioUrl || '',
+                            audioFileId: bundleData.audioFileId || '',
+                            audioMaxPlay: bundleData.audioMaxPlay || 1
+                        });
+                    }
                 }
-            }
-            // 문항 카드 추가
-            const type = q.type === '객관형' ? 'obj' : 'subj';
-            addComponent(type, {
-                id: q.id,
-                sec: q.section,
-                sub: q.subType,
-                diff: q.difficulty,
-                score: q.score,
-                text: q.title,
-                innerPassage: (q.text && q.text.replace(/<[^>]*>/g, '').trim() === '' && !q.text.includes('<img')) ? '' : q.text,
-                answer: q.answer,
-                modelAnswer: q.modelAnswer,
-                options: q.choices,
-                imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : '',
-                labelType: q.labelType || 'number',
-                isLinked: !!(q.setId && q.setId !== ''),
-                linkedGroupId: q.setId || ''
+                // 문항 카드 추가
+                const type = q.type === '객관형' ? 'obj' : 'subj';
+                addComponent(type, {
+                    id: q.id,
+                    sec: q.section,
+                    sub: q.subType,
+                    diff: q.difficulty,
+                    score: q.score,
+                    text: q.title,
+                    innerPassage: (q.text && q.text.replace(/<[^>]*>/g, '').trim() === '' && !q.text.includes('<img')) ? '' : q.text,
+                    answer: q.answer,
+                    modelAnswer: q.modelAnswer,
+                    options: q.choices,
+                    imgUrl: (q.imgUrl && q.imgUrl !== 'undefined' && q.imgUrl !== 'null') ? fixDriveUrl(q.imgUrl) : '',
+                    labelType: q.labelType || 'number',
+                    isLinked: !!(q.setId && q.setId !== ''),
+                    linkedGroupId: q.setId || ''
+                });
+                // Link in DOM
+                if (q.setId && q.setId !== '') {
+                    const qEl = document.getElementById(q.id);
+                    if (qEl) qEl.setAttribute('data-bundle-id', q.setId);
+                }
             });
-            // Link in DOM
-            if (q.setId && q.setId !== '') {
-                const qEl = document.getElementById(q.id);
-                if (qEl) qEl.setAttribute('data-bundle-id', q.setId);
-            }
-        });
 
-        // Finalize
-        updateQuestionNumbers();
+            // Finalize
+            updateQuestionNumbers();
 
-        // Sync Bundle Link UI
-        bundleMap.forEach((_, setId) => {
-            const bundleEl = document.getElementById(setId);
-            if (bundleEl) {
-                const linkedQs = document.querySelectorAll(`.builder-item[data-bundle-id="${setId}"]`);
-                const nums = Array.from(linkedQs).map(q => q.getAttribute('data-q-num')).filter(n => n).map(Number).sort((a, b) => a - b);
-                const input = document.getElementById(`${setId}-link-input`);
-                if (input) input.value = nums.join(', ');
+            // Sync Bundle Link UI
+            bundleMap.forEach((_, setId) => {
+                const bundleEl = document.getElementById(setId);
+                if (bundleEl) {
+                    const linkedQs = document.querySelectorAll(`.builder-item[data-bundle-id="${setId}"]`);
+                    const nums = Array.from(linkedQs).map(q => q.getAttribute('data-q-num')).filter(n => n).map(Number).sort((a, b) => a - b);
+                    const input = document.getElementById(`${setId}-link-input`);
+                    if (input) input.value = nums.join(', ');
 
-                const ids = Array.from(linkedQs).map(q => q.id);
-                bundleEl.setAttribute('data-linked-ids', JSON.stringify(ids));
-            }
-        });
+                    const ids = Array.from(linkedQs).map(q => q.id);
+                    bundleEl.setAttribute('data-linked-ids', JSON.stringify(ids));
+                }
+            });
 
-        // Re-sync UI styles
-        const allQs = Array.from(document.querySelectorAll('#zone-question .builder-item'));
-        syncBundles(allQs);
+            // Re-sync UI styles
+            const allQs = Array.from(document.querySelectorAll('#zone-question .builder-item'));
+            syncBundles(allQs);
 
-        showToast(`✅ ${fetchedQuestions.length}개 문항을 불러왔습니다.`);
-        window._builderLoading = false;
-        _builderInitChangeTrack(); // 불러오기 완료 후 변경 감지 초기화
+            showToast(`✅ ${fetchedQuestions.length}개 문항을 불러왔습니다.`);
+            window._builderLoading = false;
+            _builderInitChangeTrack(); // 불러오기 완료 후 변경 감지 초기화
 
         }, 100); // setTimeout end (DOM 안정화 대기)
 
@@ -8829,7 +8853,7 @@ async function saveRegGroup() {
                     imgUrl: group.passage.img || "",
                     imgData: group.passage.imgData,
                     audioData: group.passage.audioData || null,
-                    audioUrl:    group.passage.audioData ? "" : (group.passage.audioUrl    || ""),
+                    audioUrl: group.passage.audioData ? "" : (group.passage.audioUrl || ""),
                     audioFileId: group.passage.audioData ? "" : (group.passage.audioFileId || ""),
                     audioMaxPlay: group.passage.audioMaxPlay || 1,
                     questionIds: linkedNums
@@ -8952,7 +8976,7 @@ async function collectBuilderData() {
 
             // [안전망] 선택 단계에서 차단되었어야 하지만 혹시 모를 경우 대비
             if (file.size > MAX_BYTES) {
-                throw new Error(`이미지 용량 초과! 1MB 이하 파일만 등록 가능합니다. (현재: ${(file.size/1024/1024).toFixed(1)}MB)`);
+                throw new Error(`이미지 용량 초과! 1MB 이하 파일만 등록 가능합니다. (현재: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
             }
 
             const base64 = await new Promise(r => {
@@ -9012,8 +9036,8 @@ async function collectBuilderData() {
                 const aBase64 = await new Promise(r => { const reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(aFile); });
                 audioData = { base64: aBase64.split(',')[1], mimeType: aFile.type, fileName: aFile.name };
             }
-            const existingAudioUrl    = block.querySelector('[data-field="audioUrl"]')?.value    || '';
-            const existingAudioFileId = block.querySelector('[data-field="audioFileId"]')?.value  || '';
+            const existingAudioUrl = block.querySelector('[data-field="audioUrl"]')?.value || '';
+            const existingAudioFileId = block.querySelector('[data-field="audioFileId"]')?.value || '';
             const audioMaxPlayEl = block.querySelector('[data-field="audioMaxPlay"]');
             const audioMaxPlay = parseInt(audioMaxPlayEl?.value) || 1;
 
@@ -9125,7 +9149,7 @@ async function collectBuilderData() {
             passageText: contentInput ? stripTwStyles(contentInput.innerHTML) : '', // Collect Passage
             score: scoreInput ? scoreInput.value : 3,
             answer: type === 'obj'
-                ? Array.from(answerItems).map(function(el){return el.value.trim();}).filter(Boolean).join(',')
+                ? Array.from(answerItems).map(function (el) { return el.value.trim(); }).filter(Boolean).join(',')
                 : (block.querySelector('[data-field="answer"]') ? block.querySelector('[data-field="answer"]').value.trim() : ''),
             modelAnswer: modelInput ? modelInput.value : '', // Collect Model Answer
             useAiGrading: false,
@@ -9416,7 +9440,7 @@ function sanitizePastedHtml(html) {
     const blockTags = new Set(['P', 'DIV', 'LI', 'H1', 'H2', 'H3', 'H4', 'BLOCKQUOTE', 'TR', 'TD']);
     // 역순으로 unwrap 처리 (인덱스 오류 방지)
     const allEls = Array.from(tmp.querySelectorAll('*')).reverse();
-    allEls.forEach(function(el) {
+    allEls.forEach(function (el) {
         // [Fix] style 제거 전에 bold/underline 정보 추출 (스타일로 적용된 서식 보존)
         var fw = el.style ? el.style.fontWeight : '';
         var td = el.style ? el.style.textDecoration : '';
@@ -9481,7 +9505,7 @@ function sanitizePastedHtml(html) {
 }
 
 // 전역 paste 이벤트: contenteditable에서만 적용
-document.addEventListener('paste', function(e) {
+document.addEventListener('paste', function (e) {
     const target = e.target;
     if (!target.isContentEditable) return;
     e.preventDefault();
@@ -9777,7 +9801,7 @@ async function renderStudentLogin() {
         }
     }, 100);
     // 등록된 학년만 학생 로그인 학년 드롭박스에 채우기
-    const gradeLabels = { '초1':'초등 1학년','초2':'초등 2학년','초3':'초등 3학년','초4':'초등 4학년','초5':'초등 5학년','초6':'초등 6학년','중1':'중등 1학년','중2':'중등 2학년','중3':'중등 3학년','고1':'고등 1학년','고2':'고등 2학년','고3':'고등 3학년' };
+    const gradeLabels = { '초1': '초등 1학년', '초2': '초등 2학년', '초3': '초등 3학년', '초4': '초등 4학년', '초5': '초등 5학년', '초6': '초등 6학년', '중1': '중등 1학년', '중2': '중등 2학년', '중3': '중등 3학년', '고1': '고등 1학년', '고2': '고등 2학년', '고3': '고등 3학년' };
     populateGradeSelect(document.getElementById('sgr'), { placeholder: '시험지 먼저 선택', labelFn: g => g });
     // [Fix] 시험지 선택 전까지 학년/시험시간 비활성화
     const sgrEl = document.getElementById('sgr');
@@ -9824,17 +9848,17 @@ function playAudioTest() {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const gain = ctx.createGain(); gain.gain.setValueAtTime(0.4, ctx.currentTime); gain.connect(ctx.destination);
-        const freqs = [261,293,329,349,392,440,494,523,440,392,349,329,293];
+        const freqs = [261, 293, 329, 349, 392, 440, 494, 523, 440, 392, 349, 329, 293];
         let t = ctx.currentTime;
-        freqs.forEach(function(f) {
+        freqs.forEach(function (f) {
             const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.setValueAtTime(f, t);
             osc.connect(gain); osc.start(t); osc.stop(t + 0.4); t += 0.5;
         });
-        setTimeout(function() {
+        setTimeout(function () {
             ctx.close();
-            if (btn) { btn.disabled = false; btn.textContent = '✅ 오디오 정상 확인됨'; btn.style.background='#16a34a'; btn.style.color='#fff'; }
+            if (btn) { btn.disabled = false; btn.textContent = '✅ 오디오 정상 확인됨'; btn.style.background = '#16a34a'; btn.style.color = '#fff'; }
         }, 6800);
-    } catch(e) {
+    } catch (e) {
         if (btn) { btn.disabled = false; btn.textContent = '⚠️ 오디오 오류'; }
         showToast('오디오 API 오류: ' + e.message);
     }
@@ -9863,16 +9887,16 @@ function renderExamInstructions() {
         const fid02 = cat02 ? extractFolderId(cat02.targetFolderUrl) : null;
         if (fid02) {
             sendReliableRequest({ type: 'GET_FULL_DB', parentFolderId: fid02, categoryName: cat02.name })
-                .then(function(res) {
+                .then(function (res) {
                     const fb = (res && res.bundles) ? res.bundles : [];
                     fb.forEach(b => b.catId = catId);
                     globalConfig.bundles = (globalConfig.bundles || []).filter(b => b.catId !== catId);
                     globalConfig.bundles.push(...fb);
                     preloadBundleAudios(catId);
-                }).catch(function() { preloadBundleAudios(catId); });
+                }).catch(function () { preloadBundleAudios(catId); });
         }
     } else {
-        setTimeout(function() { preloadBundleAudios(catId); }, 200);
+        setTimeout(function () { preloadBundleAudios(catId); }, 200);
     }
     const timeTxt = timeLimit > 0 ? timeLimit + '분' : '시간 제한 없음';
     const dynContent = document.getElementById('dynamic-content');
@@ -9915,16 +9939,16 @@ function renderExamInstructions() {
 function preloadBundleAudios(catId) {
     if (!globalConfig.bundles || !Array.isArray(globalConfig.bundles)) return;
     window._preloadedAudioCache = window._preloadedAudioCache || {};
-    const bundles = globalConfig.bundles.filter(function(b) {
+    const bundles = globalConfig.bundles.filter(function (b) {
         return b.audioFileId && b.audioFileId.trim() !== '' && b.catId === catId;
     });
     if (bundles.length === 0) return;
     console.log('[Preload] 오디오 ' + bundles.length + '개 백그라운드 로드 시작');
-    bundles.forEach(function(bundle) {
+    bundles.forEach(function (bundle) {
         const bid = bundle.id;
         if (window._preloadedAudioCache[bid]) { console.log('[Preload] 캐시 히트:', bid); return; }
         sendReliableRequest({ type: 'GET_AUDIO_B64', fileId: bundle.audioFileId })
-            .then(function(res) {
+            .then(function (res) {
                 if (!res || res.status !== 'Success' || !res.data) return;
                 const byteStr = atob(res.data);
                 const ab = new ArrayBuffer(byteStr.length);
@@ -9934,7 +9958,7 @@ function preloadBundleAudios(catId) {
                 window._preloadedAudioCache[bid] = URL.createObjectURL(blob);
                 console.log('[Preload] 완료:', bid);
             })
-            .catch(function(e) { console.warn('[Preload] 실패:', bid, e.message); });
+            .catch(function (e) { console.warn('[Preload] 실패:', bid, e.message); });
     });
 }
 
@@ -9943,7 +9967,7 @@ function startExamFromInstructions() {
     if (!window._audioTestDone) {
         showToast('⚠️ 먼저 오디오 테스트를 시행하세요!');
         const btn = document.getElementById('audio-test-btn');
-        if (btn) { btn.style.animation = 'pulse 0.4s 3'; setTimeout(() => { if(btn) btn.style.animation=''; }, 1200); }
+        if (btn) { btn.style.animation = 'pulse 0.4s 3'; setTimeout(() => { if (btn) btn.style.animation = ''; }, 1200); }
         return;
     }
     startExamSequence();
@@ -10131,7 +10155,7 @@ function renderExamPaper(list) {
 
         // commonTitle이 같거나 setId가 같으면 같은 묶음으로 처리
         const sameGroup = (currTitle !== "" && currTitle === prevTitle) ||
-                          (currSetId !== "" && currSetId === prevSetId);
+            (currSetId !== "" && currSetId === prevSetId);
 
         if (sameGroup) {
             currentGroup.push(q);
@@ -10236,7 +10260,7 @@ function renderBundleLeft(data) {
     let title = (first.commonTitle || "").replace(/\n/g, '<br>');
     // commonTitle이 없으면 setId로 번들에서 직접 제목 조회
     if (!title && first.setId && globalConfig.bundles) {
-        const _b = globalConfig.bundles.find(function(b){ return b.id === first.setId; });
+        const _b = globalConfig.bundles.find(function (b) { return b.id === first.setId; });
         if (_b && _b.title) title = (_b.title || "").replace(/\n/g, '<br>');
     }
     const min = Math.min(...group.map(q => q.displayIndex));
@@ -10256,17 +10280,17 @@ function renderBundleLeft(data) {
     }
 
     let bundleAudioHtml = '';
-    const _bndA2 = first.setId && globalConfig.bundles ? globalConfig.bundles.find(function(b){ return b.id === first.setId; }) : null;
+    const _bndA2 = first.setId && globalConfig.bundles ? globalConfig.bundles.find(function (b) { return b.id === first.setId; }) : null;
     if (_bndA2 && _bndA2.audioFileId) {
-        const _maxP = parseInt(_bndA2.audioMaxPlay)||1;
+        const _maxP = parseInt(_bndA2.audioMaxPlay) || 1;
         const _sid = first.setId;
-        const _used = ((window._audioPlaysUsed||{})[_sid]||0);
+        const _used = ((window._audioPlaysUsed || {})[_sid] || 0);
         const _displayLeft = Math.max(0, _maxP - _used);
         const _dis = _displayLeft <= 0;
         bundleAudioHtml = '<div class="mt-3 mb-2 flex items-center gap-3 flex-wrap">'
             + '<button id="audio-btn-' + _sid + '" data-max-play="' + _maxP + '" data-file-id="' + _bndA2.audioFileId + '" onclick="playBundleAudio(this,\'' + _sid + '\')"'
-            + ' class="exam-audio-btn flex items-center gap-2 bg-[#013976] text-white px-5 py-2 rounded-xl font-bold text-[15px] hover:bg-blue-800 active:scale-95 transition-all shadow-sm flex-shrink-0' + (_dis?' opacity-50 cursor-not-allowed':'') + '"'
-            + (_dis?' disabled':'') + '>'
+            + ' class="exam-audio-btn flex items-center gap-2 bg-[#013976] text-white px-5 py-2 rounded-xl font-bold text-[15px] hover:bg-blue-800 active:scale-95 transition-all shadow-sm flex-shrink-0' + (_dis ? ' opacity-50 cursor-not-allowed' : '') + '"'
+            + (_dis ? ' disabled' : '') + '>'
             + ' 🔊 듣기 &nbsp;<span class="plays-left">' + _displayLeft + '</span>회 남음'
             + '</button>'
             + '<div id="audio-player-' + _sid + '" class="hidden flex items-center gap-2 bg-slate-800 rounded-xl px-4 py-2 flex-1" style="min-width:0;max-width:380px">'
@@ -10303,7 +10327,7 @@ function renderSplitBundle(data) {
 function renderSubQuestion(q) {
     const questionText = (q.title || '').replace(/\n/g, '<br>');
     const _qIsMultiple = q.type === '객관형' && q.answer && String(q.answer).includes(',');
-    const _qMaxCount = _qIsMultiple ? String(q.answer).split(',').filter(function(s){return s.trim();}).length : 0;
+    const _qMaxCount = _qIsMultiple ? String(q.answer).split(',').filter(function (s) { return s.trim(); }).length : 0;
     const _multipleHint = _qIsMultiple ? ` <span class="text-indigo-600">(정답 ${_qMaxCount}개)</span>` : '';
     const passageText = q.text || '';
     const mediaHtml = getMediaHtml(q);
@@ -10362,27 +10386,27 @@ function renderChoices(q, choices) {
     const savedAns = examSession.answers[q.id];
     // [Fix] labelType에 따라 원문자 및 선택값 분기
     const _lType = q.labelType || 'number';
-    const _alphaCircled = ['Ⓐ','Ⓑ','Ⓒ','Ⓓ','Ⓔ'];
-    const _numCircled   = ['①','②','③','④','⑤','⑥'];
+    const _alphaCircled = ['Ⓐ', 'Ⓑ', 'Ⓒ', 'Ⓓ', 'Ⓔ'];
+    const _numCircled = ['①', '②', '③', '④', '⑤', '⑥'];
     const cnums = _lType === 'alpha' ? _alphaCircled : _numCircled;
     // alpha 모드: 선택값 = A/B/C/D/E, number 모드: 선택값 = 1/2/3/4/5
-    const getVal = (idx) => _lType === 'alpha' ? ['A','B','C','D','E'][idx] : (idx + 1).toString();
+    const getVal = (idx) => _lType === 'alpha' ? ['A', 'B', 'C', 'D', 'E'][idx] : (idx + 1).toString();
     // 선택지 길이 기반 레이아웃: 25자 초과 시 1열, 이하 2열
     const isLong = choices.some(c => c.length > 25);
     const gridClass = isLong ? "grid-cols-1" : "grid-cols-2";
     const isMultipleAns = String(q.answer || '').includes(',');
-    const maxCount = isMultipleAns ? String(q.answer || '').split(',').filter(function(a){return a.trim();}).length : 1;
+    const maxCount = isMultipleAns ? String(q.answer || '').split(',').filter(function (a) { return a.trim(); }).length : 1;
     return `
         <div class="grid ${gridClass} gap-x-6 gap-y-2">
             ${choices.map((choice, idx) => {
         const val = getVal(idx);
-        const selectedArr = isMultipleAns ? (savedAns ? String(savedAns).split(',').map(s=>s.trim()) : []) : [];
+        const selectedArr = isMultipleAns ? (savedAns ? String(savedAns).split(',').map(s => s.trim()) : []) : [];
         const isSel = isMultipleAns ? selectedArr.includes(val) : String(savedAns) === val;
         const textClass = isSel ? 'text-indigo-700 font-bold' : 'text-slate-700';
         return `<label class="exam-choice-btn flex items-start gap-2 cursor-pointer p-1 -ml-1 transition-colors" data-qid="${q.id}" data-val="${val}" onclick="selectObjAnswer('${q.id}','${val}',${isMultipleAns},${maxCount})">
                     <span class="exam-circle-num flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-[15px] font-bold mt-0.5"
-                        style="background:${isSel?'#4f46e5':'#ffffff'};color:${isSel?'#ffffff':'#4f46e5'};border-color:${isSel?'#4f46e5':'#c7d2fe'}"
-                    >${cnums[idx]||val}</span>
+                        style="background:${isSel ? '#4f46e5' : '#ffffff'};color:${isSel ? '#ffffff' : '#4f46e5'};border-color:${isSel ? '#4f46e5' : '#c7d2fe'}"
+                    >${cnums[idx] || val}</span>
                     <span class="${textClass} text-[14px] leading-snug hover:text-indigo-600 transition-colors mt-1">${choice}</span>
                 </label>`;
     }).join('')}
