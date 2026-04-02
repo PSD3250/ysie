@@ -6369,7 +6369,7 @@ function renderBankRows() {
     const container = document.getElementById('bank-list-container');
     if (!container) return; // 호출 시점에 컨테이너가 없을 수 있음 (e.g. 탭 전환 직후)
 
-    const list = globalConfig.questions.filter(q => q.catId === curCatId);
+    const list = globalConfig.questions.filter(q => q.catId === curCatId).sort((a, b) => (a.no || 0) - (b.no || 0));
 
     if (list.length === 0) {
         container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-400 p-10">
@@ -6425,7 +6425,7 @@ function renderBankRows() {
                 <!-- Group Indicator -->
                 <div class="flex justify-center">
                     <div class="w-9 h-9 rounded-lg ${isBundle ? groupColorClass : 'bg-[#013976]'} flex items-center justify-center text-white font-bold text-sm shadow-sm transform transition-transform group-hover:scale-110">
-                        ${idx + 1}
+                        ${q.no}
                     </div>
                 </div>
                 
