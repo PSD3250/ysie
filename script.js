@@ -9462,6 +9462,7 @@ function sanitizePastedHtml(html) {
     result = result.replace(/(<br\s*\/?>){2,}/gi, '<br>'); // 연속 <br> 하나로 (발문/보기 공백 방지)
     result = result.replace(/^(<br\s*\/?>)+/i, ''); // 앞쪽 빈 줄 제거
     result = result.replace(/(<br\s*\/?>)+$/i, ''); // 뒤쪽 빈 줄 제거
+    result = result.trim(); // 앞뒤 \n\r 공백 문자 제거
     return result;
 }
 
@@ -9473,8 +9474,9 @@ document.addEventListener('paste', function(e) {
     const html = e.clipboardData && e.clipboardData.getData('text/html');
     if (html && html.trim()) {
         let clean = sanitizePastedHtml(html);
-        // [Fix] 보기(choice) div는 한 줄짜리 → <br> 공백으로 변환 (B/U 서식은 유지)
-        if (target.getAttribute('data-field') === 'choice') {
+        const df = target.getAttribute('data-field');
+        // [Fix] 보기/발문 필드는 <br> → 공백으로 변환 (B/U 서식은 유지)
+        if (df === 'choice' || df === 'title' || df === 'text') {
             clean = clean.replace(/<br\s*\/?>/gi, ' ').replace(/\s{2,}/g, ' ').trim();
         }
         document.execCommand('insertHTML', false, clean);
