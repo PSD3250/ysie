@@ -9432,6 +9432,12 @@ function sanitizePastedHtml(html) {
     // 역순으로 unwrap 처리 (인덱스 오류 방지)
     const allEls = Array.from(tmp.querySelectorAll('*')).reverse();
     allEls.forEach(function(el) {
+        // [Fix] style 제거 전에 bold/underline 정보 추출 (스타일로 적용된 서식 보존)
+        var fw = el.style ? el.style.fontWeight : '';
+        var td = el.style ? el.style.textDecoration : '';
+        var isBold = fw === 'bold' || fw === 'bolder' || (parseInt(fw) >= 600);
+        var isUL = td && td.includes('underline');
+
         // 인라인 스타일·클래스 모두 제거
         el.removeAttribute('style');
         el.removeAttribute('class');
@@ -9442,20 +9448,39 @@ function sanitizePastedHtml(html) {
         if (!allowedTags.has(el.tagName)) {
             const parent = el.parentNode;
             if (parent) {
-                // 블록 요소이고 바로 앞에 실제 내용이 있는 노드가 있으면 <br> 삽입 (줄 구분 보존)
-                if (blockTags.has(el.tagName)) {
-                    var prev = el.previousSibling;
-                    var hasMeaningfulPrev = prev && (
-                        prev.nodeType === 1 || // 요소 노드
-                        (prev.nodeType === 3 && prev.textContent.trim() !== '') // 내용 있는 텍스트 노드
-                    );
-                    if (hasMeaningfulPrev) {
-                        var br = document.createElement('br');
-                        parent.insertBefore(br, el);
+                // [Fix] bold/underline 스타일이 있었으면 해당 태그로 변환 (서식 보존)
+                if (isBold || isUL) {
+                    var frag = document.createDocumentFragment();
+                    while (el.firstChild) frag.appendChild(el.firstChild);
+                    var wrapper = frag;
+                    if (isUL) {
+                        var uEl = document.createElement('u');
+                        uEl.appendChild(wrapper);
+                        wrapper = uEl;
                     }
+                    if (isBold) {
+                        var bEl = document.createElement('b');
+                        bEl.appendChild(wrapper);
+                        wrapper = bEl;
+                    }
+                    parent.insertBefore(wrapper, el);
+                    parent.removeChild(el);
+                } else {
+                    // 블록 요소이고 바로 앞에 실제 내용이 있는 노드가 있으면 <br> 삽입 (줄 구분 보존)
+                    if (blockTags.has(el.tagName)) {
+                        var prev = el.previousSibling;
+                        var hasMeaningfulPrev = prev && (
+                            prev.nodeType === 1 || // 요소 노드
+                            (prev.nodeType === 3 && prev.textContent.trim() !== '') // 내용 있는 텍스트 노드
+                        );
+                        if (hasMeaningfulPrev) {
+                            var br = document.createElement('br');
+                            parent.insertBefore(br, el);
+                        }
+                    }
+                    while (el.firstChild) parent.insertBefore(el.firstChild, el);
+                    parent.removeChild(el);
                 }
-                while (el.firstChild) parent.insertBefore(el.firstChild, el);
-                parent.removeChild(el);
             }
         }
     });
