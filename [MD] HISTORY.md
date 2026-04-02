@@ -47,7 +47,50 @@
 - **수정**: `ch.tagName === 'TEXTAREA' ? ch.value : stripTwStyles(ch.innerHTML)`
 - **교훈**: choices 관련 수정 시 `serializeBuilderState` + `parseQuestionBlock` **두 함수 모두** 반드시 확인
 
+## 🚨 2026-04-02 야간 세션 2차 — 08-2 팝업 + UX 개선
+
+### 5. 08-2 팝업 모달 전환 (커밋: a67e415)
+- 08-2(부분 수정)를 화면 전체 교체 방식 → body fixed 오버레이 팝업 방식으로 변경
+- 수정 후 Cancel/Update 시 모달만 제거, 08 화면 유지
+
+### 6. 08-2 저장 후 문항 메모리 업데이트 (커밋: 1c6ec8e)
+- 저장 후 전체 카테고리 캐시 삭제 → 해당 문항 1개만 메모리 업데이트로 변경
+- 연속으로 여러 문항 수정 시 로딩 없이 즉시 다음 수정 가능
+- exitEditMode 후 renderBankRows() 호출 → 발문 포함 08 목록 즉시 갱신
+
+### 7. 08 리스트 번호 표시 수정 (커밋: b7a2bb5)
+- renderBankRows에서 idx+1 대신 q.no 사용
+- list를 no 순으로 정렬하여 올바른 순서로 표시
+
+### 8. Update confirm + 로딩 UX 개선 (커밋: 2140321)
+- confirm 메시지: "저장 후 창이 닫힙니다. 계속하시겠습니까?"로 변경
+- confirm 직후 즉시 로딩 표시 (GAS 통신 중 화면 정지처럼 보이는 현상 해결)
+- loading-overlay z-index: 9999 → 10000 (팝업 모달 위에 표시되도록)
+
+## 🚨 2026-04-02 야간 세션 — 번호 꼬임 + 08-2 버그 수정
+
+### 1. 불러오기 문항 순서 버그 수정 (커밋: 73d6c01)
+- **원인**: `loadQuestionsFromCategory`에서 `bundleMap.forEach` → `orphans.forEach` 순서로 렌더링 → bundle 문항이 orphan보다 무조건 앞으로 올라옴 (예: 91~92번이 88~90번보다 앞에 렌더링)
+- **수정**: `fetchedQuestions`를 `no` 순서대로 단일 루프로 순회, `renderedBundles` Set으로 bundle 카드 중복 방지. no 순서대로 정확히 렌더링
+
+### 2. 저장 시 문항 번호 꼬임 수정 (커밋: 73d6c01)
+- **원인**: `parseQuestionBlock`에서 `qNum` 미캡처 → `collectBuilderData`가 `qCounter`(순차카운터)로만 `no` 부여 → bundle 그룹 먼저 저장되어 번호 뒤섞임
+- **수정**: `parseQuestionBlock`에 `qNum: parseInt(block.getAttribute('data-q-num'))` 추가. 저장 시 `no: q.qNum || qCounter`로 DOM 실제 번호 우선 사용
+
+### 3. linkedNums 번호 수정 (커밋: ed311f5)
+- **원인**: 묶음 연결 번호(`questionIds`)를 `qCounter + i` 방식으로 계산 → 꼬임
+- **수정**: `group.questions.map(q => q.qNum || ...)` 방식으로 실제 번호 사용
+
+### 4. 08-2 지문 수정 변경 감지 안 되는 버그 수정 (커밋: 17b1898)
+- **원인**: `_editGetSnapshot()`이 `input/textarea/select`만 스냅샷 → `contenteditable div`(발문·지문)는 완전 누락 → 지문 수정해도 "변경된 내용이 없습니다"
+- **수정**: `querySelectorAll('[contenteditable="true"]')` 추가, `innerHTML` 비교
+
+### ⚠️ 미복구 사항
+- 오늘 번호 꼬임 버그로 이미 저장된 DB 데이터의 `no`(문항번호) 값이 잘못되어 있음
+- 복구 방법: 구글 시트 Questions탭 A열(문항번호) 값 직접 수정 (내용 자체는 손상 없음)
+
 ## 🛠️ 2026-04-02 오늘 세션 작업 내역
+
 
 ### 붙여넣기 질문내용/보기 공백 버그 최종 수정 (커밋: ff5e370)
 - **근본 원인**: 클립보드 HTML에 `\n\n` (줄바꿈 문자)가 앞뒤로 붙어옴 → `white-space:pre-wrap` 때문에 공백으로 표시됨 (`<br>` 아님)
