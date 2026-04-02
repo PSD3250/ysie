@@ -49,6 +49,27 @@
 
 ## 🚨 2026-04-02 야간 세션 2차 — 08-2 팝업 + UX 개선
 
+## 🛠️ 2026-04-02 야간 세션 3차 — 08 리스트 헤더 정렬 완성 + style.css 복원
+
+### 발문 내용 굵기 제거 (커밋: 64079b6)
+- bank-row 발문 div: `font-medium` → `font-normal`
+
+### style.css @media print 블록 한글 주석 복원 (커밋: b30a001)
+- @media print 블록 EUC-KR 깨진 주석 → UTF-8로 퍼펙트 복원
+- 인쇄 레포트 스타일, 헤더/사이드바 숨김, 레이아웃 초기화 등
+
+### 08 헤더 통계 badge + 발문 정렬 수정 (커밋: 7bda8cf)
+- renderBankRows에서 hdrStats(bank-hdr-stats) 올바르게 업데이트
+- 발문 헤더: `relative flex justify-center` + 배지 `absolute right-2`로 중앙 고정
+- 배지: 14px, bg-blue-100, text-blue-600으로 명확하게 표시
+
+### 08 헤더-리스트 스크롤바 정렬 완전 수정 (커밋: 720a3c2)
+- **원인**: 헤더(스크롤바 없음)와 리스트(스크롤바 있음) 너비 차이 → 배점/수정 컬럼 어긋남
+- **해결**: 헤더를 bank-list-container 안으로 이동 → 같은 스크롤 영역 공유 → 너비 완전 일치
+- renderBankRows에 `buildHeader(statsText)` 함수 추가 → 헤더 + rows 함께 렌더링
+- 통계(총 N문항 · 총 N점)를 헤더 innerHTML에 직접 삽입
+
+
 ### 5. 08-2 팝업 모달 전환 (커밋: a67e415)
 - 08-2(부분 수정)를 화면 전체 교체 방식 → body fixed 오버레이 팝업 방식으로 변경
 - 수정 후 Cancel/Update 시 모달만 제거, 08 화면 유지
