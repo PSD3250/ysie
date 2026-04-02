@@ -31,6 +31,14 @@
 - 붙여넣기 공백 버그 (커밋: ff5e370) → 브라우저 테스트 통과 ✅
 - 08-1/08-2 모두 전역 paste 핸들러로 적용됨 확인 ✅
 
+### 복붙 시 굵기/밑줄 서식 보존 수정 (커밋: 8811c81)
+- **원인**: `sanitizePastedHtml`에서 `el.removeAttribute('style')` 먼저 실행 → 한글/워드에서 `<span style="font-weight:bold">` 형태로 오는 굵기 정보 소실
+- **수정**: style 제거 전에 `fontWeight`/`textDecoration` 읽어서 bold → `<b>`, underline → `<u>` 태그로 변환 후 style 제거
+
+### 영역/세부영역 드롭박스 고정 너비 추가 (커밋: a6704d8)
+- **원인**: `<select>` 너비 미지정 → 선택된 option 또는 동적 변경되는 options 중 가장 긴 텍스트 기준으로 너비 자동 결정 → 영역 선택 시마다 크기 변동
+- **수정**: 영역 select `w-[120px]`, 세부영역 select `w-[145px]` 고정 너비 추가
+
 ---
 
 ## 🚨 2026-04-02 hotfix — 보기 null 저장 치명적 버그 (커밋: 4c58957)
