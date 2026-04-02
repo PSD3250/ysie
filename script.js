@@ -8478,7 +8478,8 @@ async function updateBuilderQuestion(originalId) {
     if (!_editHasChanged()) {
         return showToast('⚠️ 변경된 내용이 없습니다.');
     }
-    if (!confirm('이 문항의 변경사항이 저장됩니다.')) return;
+    if (!confirm('저장 후 창이 닫힙니다.\n계속하시겠습니까?')) return;
+    toggleLoading(true); // 확인 직후 즉시 로딩 표시
     try {
         if (!originalId) throw new Error("수정할 문항 ID가 없습니다.");
 
@@ -8497,8 +8498,6 @@ async function updateBuilderQuestion(originalId) {
         const isGeneral = passageData.title === 'General';
         // [Fix] 07-1 setId 직접 참조 방식과 동일하게: origQ.setId(DB 원본 UUID) 우선 사용
         const targetBundleId = isGeneral ? "" : (origQ.setId || passageData.id || "");
-
-        toggleLoading(true);
 
         const category = globalConfig.categories.find(c => c.id === result.catId);
         if (!category) throw new Error("카테고리를 찾을 수 없습니다.");
