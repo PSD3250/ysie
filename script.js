@@ -3618,6 +3618,9 @@ function renderStudentSidebar() {
 // [Helper] 단독형 문항 1개 HTML 렌더링 (발문=q.title, 지문=q.text)
 function renderSingleQHtml(q) {
     const questionText = (q.title || '').replace(/\n/g, '<br>');
+    const _qIsMultiple = q.type === '객관형' && q.answer && String(q.answer).includes(',');
+    const _qMaxCount = _qIsMultiple ? String(q.answer).split(',').filter(function(s){return s.trim();}).length : 0;
+    const _multipleHint = _qIsMultiple ? ` <span class="text-indigo-600">(정답 ${_qMaxCount}개)</span>` : '';
     const passageText = q.text || '';
     const passageHtml = passageText.trim() !== ''
         ? `<div class="mb-3 p-3 bg-slate-100/50 border border-black rounded-lg text-[14px] leading-relaxed font-serif text-slate-700">${passageText}</div>`
@@ -3626,7 +3629,7 @@ function renderSingleQHtml(q) {
         <div>
             <div class="flex items-center gap-3 mb-2">
                 <div class="flex-shrink-0 min-w-[28px] h-7 px-1.5 rounded bg-indigo-600 text-white flex items-center justify-center font-bold text-[13px] shadow-sm">${q.displayIndex}</div>
-                <h4 class="text-[15px] font-normal text-slate-800 leading-snug break-keep select-text">${questionText}</h4>
+                <h4 class="text-[15px] font-normal text-slate-800 leading-snug break-keep select-text">${questionText}${_multipleHint}</h4>
             </div>
             ${passageHtml}
             ${getMediaHtml(q)}
@@ -3702,7 +3705,8 @@ function updateProgressUI() {
     allQs.forEach(function(q) {
         const ans = answersMap[q.id] || '';
         if (!ans) return; // 미선택
-        const isMultiple = q.answer && String(q.answer).includes(',');
+        const isSubjective = q.type === '주관형';
+        const isMultiple = !isSubjective && q.answer && String(q.answer).includes(',');
         if (isMultiple) {
             // 복수정답: 정답 개수만큼 다 선택해야 카운팅
             const maxCount = String(q.answer).split(',').filter(function(s){ return s.trim(); }).length;
@@ -10288,6 +10292,9 @@ function renderSplitBundle(data) {
 // 발문=q.title, 개별지문=q.text (GAS 필드 매핑 기준)
 function renderSubQuestion(q) {
     const questionText = (q.title || '').replace(/\n/g, '<br>');
+    const _qIsMultiple = q.type === '객관형' && q.answer && String(q.answer).includes(',');
+    const _qMaxCount = _qIsMultiple ? String(q.answer).split(',').filter(function(s){return s.trim();}).length : 0;
+    const _multipleHint = _qIsMultiple ? ` <span class="text-indigo-600">(정답 ${_qMaxCount}개)</span>` : '';
     const passageText = q.text || '';
     const mediaHtml = getMediaHtml(q);
     const inputHtml = getInputHtml(q);
@@ -10302,7 +10309,7 @@ function renderSubQuestion(q) {
                  <div class="flex-shrink-0 min-w-[28px] h-7 px-1.5 rounded bg-indigo-600 text-white flex items-center justify-center font-bold text-[13px] shadow-sm">
                     ${q.displayIndex}
                  </div>
-                 <h4 class="text-[15px] font-normal text-slate-800 leading-snug break-keep select-text">${questionText}</h4>
+                 <h4 class="text-[15px] font-normal text-slate-800 leading-snug break-keep select-text">${questionText}${_multipleHint}</h4>
             </div>
             <div class="space-y-3 pl-0">
                 ${subPassageHtml}
@@ -10356,7 +10363,6 @@ function renderChoices(q, choices) {
     const isMultipleAns = String(q.answer || '').includes(',');
     const maxCount = isMultipleAns ? String(q.answer || '').split(',').filter(function(a){return a.trim();}).length : 1;
     return `
-        ${isMultipleAns ? `<p class="text-[13px] text-indigo-600 font-medium mb-2">✓ ${maxCount}개를 선택하세요</p>` : ''}
         <div class="grid ${gridClass} gap-x-6 gap-y-2">
             ${choices.map((choice, idx) => {
         const val = getVal(idx);
