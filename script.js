@@ -6348,13 +6348,13 @@ function renderBank(c) {
 
             <div class="flex-grow overflow-hidden bg-white rounded-2xl border border-slate-200 flex flex-col shadow-sm">
                 <!-- 헤더 (Grid Layout) -->
-                <div class="grid grid-cols-[60px_100px_120px_1fr_80px_80px] bg-slate-100 border-b border-slate-200 p-4 font-bold text-[#013976] text-center fs-16 uppercase tracking-wider sticky top-0 z-10">
-                    <div>GRP</div>
-                    <div>SEC</div>
-                    <div>TYPE</div>
-                    <div>QUESTION TITLE (발문)</div>
-                    <div>PTS</div>
-                    <div>EDIT</div>
+                <div class="grid grid-cols-[70px_110px_100px_1fr_100px_70px] bg-slate-100 border-b border-slate-200 p-4 font-bold text-[#013976] text-center fs-16 tracking-wider sticky top-0 z-10">
+                    <div>번호 <span id="bank-hdr-total" class="text-[12px] font-normal text-slate-500"></span></div>
+                    <div>영역</div>
+                    <div>유형</div>
+                    <div>발문</div>
+                    <div>배점 <span id="bank-hdr-pts" class="text-[12px] font-normal text-slate-500"></span></div>
+                    <div>수정</div>
                 </div>
                 
                 <!-- 리스트 영역 -->
@@ -6405,7 +6405,16 @@ function renderBankRows() {
         }
     });
 
+    // 총 문항 수 + 총 배점 계산 → 헤더 업데이트
+    const totalQ = list.length;
+    const totalPts = list.reduce((sum, q) => sum + (Number(q.score) || 0), 0);
+    const hdrTotal = document.getElementById('bank-hdr-total');
+    const hdrPts = document.getElementById('bank-hdr-pts');
+    if (hdrTotal) hdrTotal.textContent = `(총 ${totalQ}문항)`;
+    if (hdrPts) hdrPts.textContent = `(총 ${totalPts}점)`;
+
     let html = '';
+
 
     list.forEach((q, idx) => {
         let groupColorClass = 'bg-slate-200'; // Default: Single
@@ -6421,7 +6430,7 @@ function renderBankRows() {
         const groupKeyEncoded = key ? encodeURIComponent(key) : '';
 
         html += `
-            <div class="bank-row grid grid-cols-[60px_100px_120px_1fr_80px_80px] items-center p-3 bg-white border border-slate-100 rounded-xl hover:shadow-md transition-all group select-none hover:bg-blue-50"
+            <div class="bank-row grid grid-cols-[70px_110px_100px_1fr_100px_70px] items-center p-3 bg-white border border-slate-100 rounded-xl hover:shadow-md transition-all group select-none hover:bg-blue-50"
                  data-id="${q.id}"
             >
                 <!-- Group Indicator -->
