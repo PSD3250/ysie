@@ -7556,7 +7556,7 @@ function getComponentHtml(type, id, data) {
                          <!-- Section -->
                          <select id="${id}-sec" data-field="section" 
                                  onchange="updateSubTypes('${id}', this.value); updateQuestionNumbers(); this.classList.toggle('bg-amber-50', !this.value); this.classList.toggle('bg-white', !!this.value);" 
-                                 class="h-[34px] px-1 text-[14px] font-bold border border-slate-300 rounded-lg outline-none focus:border-blue-500 text-rose-700 ${!d.sec ? 'bg-amber-50' : 'bg-white'}">
+                                 class="w-[120px] h-[34px] px-1 text-[14px] font-bold border border-slate-300 rounded-lg outline-none focus:border-blue-500 text-rose-700 ${!d.sec ? 'bg-amber-50' : 'bg-white'}">
                             <option value="" disabled ${!d.sec ? 'selected' : ''}>영역</option>
                             <option value="Reading" ${d.sec === 'Reading' ? 'selected' : ''}>Reading</option>
                             <option value="Grammar" ${d.sec === 'Grammar' ? 'selected' : ''}>Grammar</option>
@@ -7568,7 +7568,7 @@ function getComponentHtml(type, id, data) {
                          <!-- SubType -->
                          <select id="${id}-subtype" data-field="subtype" 
                                  onchange="this.classList.toggle('bg-amber-50', !this.value); this.classList.toggle('bg-white', !!this.value);"
-                                 class="h-[34px] px-1 text-[14px] font-bold border border-slate-300 rounded-lg outline-none focus:border-blue-500 ${!d.sub ? 'bg-amber-50' : 'bg-white'}">
+                                 class="w-[145px] h-[34px] px-1 text-[14px] font-bold border border-slate-300 rounded-lg outline-none focus:border-blue-500 ${!d.sub ? 'bg-amber-50' : 'bg-white'}">
                              ${renderSubTypeOptions(d.sec, d.sub)}
                          </select>
 
