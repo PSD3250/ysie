@@ -8284,15 +8284,15 @@ function renderEditForm(qId) {
     // [Fix] 직전 카테고리 ID 보존 (Cancel 복귀용)
 
     setCanvasId('08-2');
-    const c = document.getElementById('dynamic-content');
 
-    // app-canvas 패딩 제거
-    const ac = document.getElementById('app-canvas');
-    if (ac) ac.style.padding = '0';
-    document.getElementById('app-canvas').classList.add('!overflow-hidden');
-
-    // Make layout structurally identical to 07-1 (Split View 3:6:1) for builder compatibility
-    c.classList.add('h-full');
+    // [Modal] 기존 모달 제거 후 body에 full-screen 오버레이 생성 (08 화면 유지)
+    const existingModal = document.getElementById('edit-modal-overlay');
+    if (existingModal) existingModal.remove();
+    const modal = document.createElement('div');
+    modal.id = 'edit-modal-overlay';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;background-color:#f8fafc;overflow:hidden;';
+    document.body.appendChild(modal);
+    const c = modal;
     c.innerHTML = `
         <!-- [Edit Mode Layout] 100% height to fit within header/footer -->
         <div style="width: 100%; height: 100%; background-color: #f8fafc; position: relative; overflow: hidden;">
@@ -8467,15 +8467,10 @@ function exitEditMode(skipConfirm = false) {
         }
     }
 
-    // Restore app-canvas padding
-    const ac = document.getElementById('app-canvas');
-    if (ac) ac.style.padding = '';
-
-    // Restore layout
-    document.getElementById('app-canvas').classList.remove('!overflow-hidden');
-    document.body.classList.add('has-sidebar');
-
-    renderBank();
+    // [Modal] 모달만 제거 — 08 화면은 그대로 유지
+    const modal = document.getElementById('edit-modal-overlay');
+    if (modal) modal.remove();
+    setCanvasId('08');
 }
 
 // [SAFE] Partial Update Logic — Only modifies the specific row in the sheet
