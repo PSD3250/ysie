@@ -891,16 +891,16 @@
         }
 
 /* ========================================
-   �μ� ���� ��Ÿ�� (@media print)
-   ����ǥ(#report-display)�� ���
+   인쇄 레포트 스타일 (@media print)
+   레포트(#report-display)용 전용
 ======================================== */
 @media print {
-    /* ���/���̵��/Ǫ��/��ư ���� */
+    /* 헤더/사이드바/푸터/버튼 숨김 */
     #app-header, #app-sidebar, #app-footer,
     #loading-overlay, #toast,
     .no-print { display: none !important; }
 
-    /* ���̾ƿ� �ʱ�ȭ */
+    /* 레이아웃 초기화 */
     body { background: white !important; }
     #main-container {
         display: block !important;
@@ -918,20 +918,20 @@
         padding: 0 !important;
     }
 
-    /* ����ǥ ���� �μ� */
+    /* 레포트 전용 인쇄 */
     #report-display {
         display: block !important;
         width: 100% !important;
         page-break-inside: auto;
     }
 
-    /* ��Ʈ �μ� ���� */
+    /* 차트 인쇄 대응 */
     canvas {
         max-width: 100% !important;
         height: auto !important;
     }
 
-    /* Card �μ� ��Ÿ�� */
+    /* Card 인쇄 스타일 */
     .card {
         box-shadow: none !important;
         border: 1px solid #e2e8f0 !important;

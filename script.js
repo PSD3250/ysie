@@ -6352,7 +6352,7 @@ function renderBank(c) {
                     <div>번호</div>
                     <div>영역</div>
                     <div>유형</div>
-                    <div class="flex items-center justify-between px-2">
+                    <div class="flex items-center justify-between px-4">
                         <span>발문</span>
                         <span id="bank-hdr-stats" class="text-[12px] font-normal bg-blue-50 text-blue-400 rounded-full px-3 py-0.5 border border-blue-100"></span>
                     </div>
@@ -6411,10 +6411,8 @@ function renderBankRows() {
     // 총 문항 수 + 총 배점 계산 → 헤더 업데이트
     const totalQ = list.length;
     const totalPts = list.reduce((sum, q) => sum + (Number(q.score) || 0), 0);
-    const hdrTotal = document.getElementById('bank-hdr-total');
-    const hdrPts = document.getElementById('bank-hdr-pts');
-    if (hdrTotal) hdrTotal.textContent = `(총 ${totalQ}문항)`;
-    if (hdrPts) hdrPts.textContent = `(총 ${totalPts}점)`;
+    const hdrStats = document.getElementById('bank-hdr-stats');
+    if (hdrStats) hdrStats.textContent = `총 ${totalQ}문항 · 총 ${totalPts}점`;
 
     let html = '';
 
