@@ -4731,20 +4731,17 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
             <div class="flex items-stretch gap-6">
 
                 <!-- 평균 표시 토글 no-print -->
-                <div class="no-print" style="display:flex;flex-direction:row;align-items:center;gap:8px;margin-right:4px;">
-                    <!-- 좌측: 최저학급 체크박스 -->
-                    <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;white-space:nowrap;border:1.5px solid #e2e8f0;border-radius:8px;padding:4px 8px;background:#f8fafc;">
-                        <input type="checkbox" id="avg-lowest-class-chk" onchange="rerenderReportCharts()" style="width:14px;height:14px;cursor:pointer;accent-color:#013976;">
-                        최저학급
-                    </label>
-                    <!-- 우측: 평균 표시 버튼들 -->
-                    <div style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;">
-                        <span style="font-size:14px;font-weight:700;color:#64748b;">평균 표시</span>
-                        <div style="display:flex;gap:5px;">
-                            <button id="avg-btn-all" onclick="setReportAvgMode('all')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#013976;color:white;border:none;border-radius:7px;cursor:pointer;">모두</button>
-                            <button id="avg-btn-overall" onclick="setReportAvgMode('overall')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">전체만</button>
-                            <button id="avg-btn-class" onclick="setReportAvgMode('class')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">학급만</button>
-                        </div>
+                <div class="no-print" style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;margin-right:4px;">
+                    <span style="font-size:14px;font-weight:700;color:#64748b;">평균 표시</span>
+                    <div style="display:flex;gap:5px;align-items:center;">
+                        <!-- 최저학급 체크박스 (버튼과 동일 높이/스타일) -->
+                        <label style="display:flex;flex-direction:row;align-items:center;gap:5px;cursor:pointer;font-size:16px;font-weight:700;color:#64748b;white-space:nowrap;border:1.5px solid #e2e8f0;border-radius:7px;padding:3px 10px;background:#f8fafc;">
+                            <input type="checkbox" id="avg-lowest-class-chk" onchange="rerenderReportCharts()" style="width:14px;height:14px;cursor:pointer;accent-color:#013976;">
+                            최저학급
+                        </label>
+                        <button id="avg-btn-all" onclick="setReportAvgMode('all')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#013976;color:white;border:none;border-radius:7px;cursor:pointer;">모두</button>
+                        <button id="avg-btn-overall" onclick="setReportAvgMode('overall')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">전체만</button>
+                        <button id="avg-btn-class" onclick="setReportAvgMode('class')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">학급만</button>
                     </div>
                 </div>
 
