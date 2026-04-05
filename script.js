@@ -4848,6 +4848,7 @@ async function callGeminiAPI(prompt, silent = false, imageUrls = []) {
 
         if (result.status === "Success" && result.data) {
             const data = result.data;
+            if (result.modelUsed) console.log(`[Gemini] 사용 모델: ${result.modelUsed}`);
             if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
                 return data.candidates[0].content.parts[0].text;
             } else {
