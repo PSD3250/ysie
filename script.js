@@ -7848,7 +7848,14 @@ function renderBuilderChoices(itemId, n) {
                 ansInput.removeAttribute('maxlength');
                 ansInput.placeholder = '1~' + n;
                 ansInput.setAttribute('data-max', n);
-                ansInput.oninput = null;
+                ansInput.oninput = function () {
+                    const v = Number(this.value);
+                    if (this.value && (isNaN(v) || v < 1 || v > Number(n) || !Number.isInteger(v))) {
+                        this.value = '';
+                        this.classList.add('border-red-400', 'bg-red-50');
+                        setTimeout(function (el) { return function () { el.classList.remove('border-red-400', 'bg-red-50'); }; }(ansInput), 800);
+                    }
+                };
                 // 기존 값 범위 초기화
                 const cur = Number(ansInput.value);
                 if (ansInput.value && (isNaN(cur) || cur < 1 || cur > Number(n))) ansInput.value = '';
@@ -7895,7 +7902,8 @@ function addBuilderAnswer(itemId) {
         inp.setAttribute('data-max', n);
         inp.oninput = function () {
             const v = Number(this.value);
-            if (this.value && (isNaN(v) || v < 1 || v > n)) {
+            if (this.value && (isNaN(v) || v < 1 || v > n || !Number.isInteger(v))) {
+                this.value = '';
                 this.classList.add('border-red-400', 'bg-red-50');
                 setTimeout(function () { inp.classList.remove('border-red-400', 'bg-red-50'); }, 800);
             }
