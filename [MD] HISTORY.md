@@ -76,7 +76,14 @@
 - Git 커밋 완료 ✅
 - **⚠️ GAS(script.js) 복붙 필요** (사용자가 직접 수행)
 
+### [긴급] 영역별 입력 시 문항별 데이터 빈 배열 저장 버그 수정 (커밋: 8100793)
+- **현상**: Canvas 06에서 영역별 입력(`chk-no-qscore` 체크) 모드로 저장해도 `문항별상세(JSON)`에 시험지 전체 문항이 `score: 0, correct: null`로 채워져 저장됨
+- **원인**: `noQScoreMode` 체크를 문항 데이터 수집 **이후**에 하던 버그. 체크박스 확인 전에 `q-score-` input 132개를 이미 다 긁어서 `questionScores`에 push
+- **수정**: `noQScoreMode` 선언을 수집 루프보다 **먼저** 실행, `!noQScoreMode`일 때만 수집 → 영역별 입력 시 `questionScores = []` 빈 배열 보장
+- **영향**: Canvas 05-1 성적표에서 문항별 상세보기 체크박스 체크 시 "문항 정보 없음" 정상 표시
+- **⚠️ GAS 복붙 불필요** (script.js만 수정)
 
+### DB IMPORT.gs 파일 생성 (학생 과거 데이터 임포트 스크립트 v3)
 - **경위**: 기존 v2 스크립트에서 소스 시트 컬럼 순서 변경 + 응시월 컬럼 추가에 따른 업데이트 요청
 - **변경 1**: `_makeDate_(year, month)` 헬퍼 함수 추가 → `"YYYY-MM-01"` 형식으로 날짜 생성 (응시일은 1일 고정, 응시월은 입력값 반영)
 - **변경 2**: `importBySection`, `importByQuestion` 두 함수 모두 `응시월` 컬럼 읽기 추가 (`monthIdx`)
