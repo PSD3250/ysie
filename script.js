@@ -4491,16 +4491,16 @@ async function generateOverallComment(record, averages, activeSections, sectionC
 ${sectionSummary}
 
 [총점 현황]
-개인 총점: ${totalScore}점 / 시험지 만점: ${totalMax}점 / 전체 평균: ${totalAvg.toFixed(1)}점(전체 대비 ${_oaDiff >= 0 ? '+' : ''}${_oaDiff.toFixed(1)}점) / 정답률: ${totalRate}% / 성취레벨: ${totalLevel} / 전체 상위 백분위: 약 ${oaUpperPercentile}%(즉, ${_pctLabel(oaUpperPercentile)})${clsTotalAvg !== null ? ' / 권장학급(' + _oaCls + ') 총점 평균: ' + clsTotalAvg.toFixed(1) + '점(학급 평균 대비 ' + (totalScore - clsTotalAvg >= 0 ? '+' : '') + (totalScore - clsTotalAvg).toFixed(1) + '점)' + (clsTotalPercentile !== null ? ' / 권장학급 내 상위 백분위: 약 ' + clsTotalPercentile + '%(권장학급에서는 ' + _pctLabel(clsTotalPercentile, '권장학급 내') + ')' : '') : ''}
+개인 총점: ${totalScore}점 / 시험지 만점: ${totalMax}점 / 전체 평균: ${totalAvg.toFixed(1)}점(전체 대비 ${_oaDiff >= 0 ? '+' : ''}${_oaDiff.toFixed(1)}점) / 정답률: ${totalRate}% / 성취레벨: ${totalLevel} / 전체 백분위: 약 ${oaUpperPercentile}%(즉, ${_pctLabel(oaUpperPercentile)})${clsTotalAvg !== null ? ' / 권장학급(' + _oaCls + ') 총점 평균: ' + clsTotalAvg.toFixed(1) + '점(학급 평균 대비 ' + (totalScore - clsTotalAvg >= 0 ? '+' : '') + (totalScore - clsTotalAvg).toFixed(1) + '점)' + (clsTotalPercentile !== null ? ' / 권장학급 내 백분위: 약 ' + clsTotalPercentile + '%(권장학급에서는 ' + _pctLabel(clsTotalPercentile, '권장학급 내') + ')' : '') : ''}
 
 [전체 성취 수준 — 코멘트에 이 수준을 반드시 리터런리 반영할 것]
 전체 수준: ${_pctLabel(oaUpperPercentile)} / 성취레벨: ${totalLevel} / 전체 평균 대비: ${_oaDiff >= 0 ? '+' : ''}${_oaDiff.toFixed(1)}점(${_oaDiff >= 0 ? '평균 이상' : '평균 미달'})${clsTotalPercentile !== null ? ' / 권장학급 수준: ' + _pctLabel(clsTotalPercentile, '권장학급 내') : ''}
 
-⚠️ 백분위 해석 주의 (절대 엄수): 상위 백분위(%) 숫자는 작을수록 우수합니다. 상위 1%=최상위 / 상위 100%=최하위. 예시: 상위 75%는 하위권이므로 "높은 백분위", "우수한 실력" 절대 사용 금지.
+⚠️ 백분위 해석 주의 (절대 엄수): 백분위(%) 숫자는 작을수록 우수합니다. 상위 1%=최상위 / 상위 100%=최하위. 예시: 상위 75%는 하위권이므로 "높은 백분위", "우수한 실력" 절대 사용 금지.
 
 [작성 규칙]
 1) 각 영역 코멘트에서 이미 언급된 세부 내용(특정 표현, 문법 항목, 단어 유형 등)은 그대로 반복하지 마세요.
-2) 전체 상위 백분위(약 ${oaUpperPercentile}%)${clsTotalPercentile !== null ? '·권장학급 내 상위 백분위(약 ' + clsTotalPercentile + '%)' : ''}를 활용하여 영역들을 가로질러 보이는 전체적 패턴이나 공통 특징을 종합적으로 언급하세요 (1~2문장)
+2) 전체 백분위(약 ${oaUpperPercentile}%)${clsTotalPercentile !== null ? '·권장학급 내 백분위(약 ' + clsTotalPercentile + '%)' : ''}를 활용하여 영역들을 가로질러 보이는 전체적 패턴이나 공통 특징을 종합적으로 언급하세요 (1~2문장)
 3) 부족한 영역의 핵심 학습 방향을 종합 관점에서 간결하게 제안하세요 (1~2문장)
 4) 전체적 격려 메시지로 마무리하세요 (1문장)${_gapRule}
 
@@ -4511,7 +4511,7 @@ ${sectionSummary}
 - 영역명을 영어(Grammar, Reading 등)로 쓰지 마세요. 한국어(문법, 독해 등)로만 쓰세요.
 - 학생을 묘사할 때 경어(-시- 존칭: 받으신, 획득하신, 기록하셨으므로 등) 절대 사용 금지. "획득하여", "기록했으므로" 형식으로 쓰세요.
 - 실제 총점과 만점을 반드시 언급하세요. 호칭이 필요하면 "${sName} 학생은" 형식만 사용하세요.
-- 전체 상위 백분위(약 ${oaUpperPercentile}%)${clsTotalPercentile !== null ? '와 권장학급 내 상위 백분위(약 ' + clsTotalPercentile + '%)' : ''}를 코멘트에 반드시 활용하여 서술하세요.
+- 전체 백분위(약 ${oaUpperPercentile}%)${clsTotalPercentile !== null ? '와 권장학급 내 백분위(약 ' + clsTotalPercentile + '%)' : ''}를 코멘트에 반드시 활용하여 서술하세요.
 - 학원명, 교재명, 브랜드명 절대 금지. 모든 답변은 순수 한국어로 작성하세요.`;
 
     return await callGeminiAPI(prompt);
@@ -4692,7 +4692,7 @@ async function generateSectionComments(record, averages, activeSections) {
         const overallAvgScore = parseFloat(averages[section + '_점수'] || averages[secMap[section]] || 0);
         const maxScore = parseFloat(record[section + '_만점'] || record[maxMap[section]] || averages[maxMap[section]] || 0);
 
-        // 전체 학생 상위 백분위 계산 (해당 영역 기준)
+        // 전체 학생 백분위 계산 (해당 영역 기준)
         const _allRecords = window.cachedStudentRecords || [];
         const _allSectionScores = _allRecords
             .map(r => parseFloat(r[section + '_점수'] || r[secMap[section]] || 0))
@@ -4772,11 +4772,21 @@ async function generateSectionComments(record, averages, activeSections) {
         const _shortfall = maxScore > 0 ? (maxScore - studentScore) : null;
         let _weaknessRule;
         if (_isPerfect) {
-            _weaknessRule = '2) 현재 수준 유지 (1문장) — 만점이므로 미흡한 점, 부족한 점을 절대 쓰지 마세요. 전체 상위 백분위(약 ' + upperPercentile + '%)'  + (clsUpperPercentile !== null ? '·학급 내 상위 백분위(약 ' + clsUpperPercentile + '%)' : '') + '를 활용하여 현재 실력을 유지하는 것의 중요성을 서술하세요.';
+            _weaknessRule = '2) 현재 수준 유지 (1문장) — 만점이므로 미흡한 점, 부족한 점을 절대 쓰지 마세요. 전체 백분위(약 ' + upperPercentile + '%)'  + (clsUpperPercentile !== null ? '·학급 내 백분위(약 ' + clsUpperPercentile + '%)' : '') + '를 활용하여 현재 실력을 유지하는 것의 중요성을 서술하세요.';
         } else if (_aboveCls) {
-            _weaknessRule = '2) 보완 포인트 (1문장) — 학급 평균보다 높으므로 "미흡하다", "부족하다", "발전할 여지가 있다" 같은 부정 표현 절대 금지. 전체 상위 백분위(약 ' + upperPercentile + '%)' + (clsUpperPercentile !== null ? '·학급 내 상위 백분위(약 ' + clsUpperPercentile + '%)' : '') + '를 활용하여 만점(' + maxScore + '점) 대비 ' + _shortfall + '점 부족한 부분을 서술하세요.' + (subTypeInfo ? ' 세부 영역별 데이터를 활용해 가장 취약한 세부 영역도 명시하세요.' : '');
+            _weaknessRule = '2) 보완 포인트 (1문장) — 학급 평균보다 높으므로 "미흡하다", "부족하다", "발전할 여지가 있다" 같은 부정 표현 절대 금지. 전체 백분위(약 ' + upperPercentile + '%)' + (clsUpperPercentile !== null ? '·학급 내 백분위(약 ' + clsUpperPercentile + '%)' : '') + '를 활용하여 만점(' + maxScore + '점) 대비 ' + _shortfall + '점 부족한 부분을 서술하세요.' + (subTypeInfo ? ' 세부 영역별 데이터를 활용해 가장 취약한 세부 영역도 명시하세요.' : '');
         } else {
-            _weaknessRule = '2) 미흡한 점 또는 약점 (1문장) — ' + (subTypeInfo ? '✅ 세부 영역별 점수 데이터 제공됨. 가장 취약한 세부 영역을 명시하고 전체 상위 백분위(약 ' + upperPercentile + '%)와 학급 내 백분위(약 ' + clsUpperPercentile + '%)를 활용하세요.' : '⚠️ 세부 영역 데이터 없음. 전체 상위 백분위(약 ' + upperPercentile + '%)와 학급 평균보다 낮은 점에 근거해 서술하세요. 세부 유형·문법 항목을 절대 추측하지 마세요.');
+            _weaknessRule = '2) 미흡한 점 또는 약점 (1문장) — ' + (subTypeInfo ? '✅ 세부 영역별 점수 데이터 제공됨. 가장 취약한 세부 영역을 명시하고 전체 백분위(약 ' + upperPercentile + '%)와 학급 내 백분위(약 ' + clsUpperPercentile + '%)를 활용하세요.' : '⚠️ 세부 영역 데이터 없음. 전체 백분위(약 ' + upperPercentile + '%)와 학급 평균보다 낮은 점에 근거해 서술하세요. 세부 유형·문법 항목을 절대 추측하지 마세요.');
+        }
+
+        // 잘한 점 지시 — 성취레벨에 따라 분기 (핵심: 부진권에서 억지 긍정 표현 방지)
+        let _goodPointRule;
+        if (upperPercentile <= 55) {
+            // 중위권 이상: 잘한 점 서술
+            _goodPointRule = '1) 잘한 점 (2문장) — 전체 백분위(약 ' + upperPercentile + '% = ' + _pctLabel(upperPercentile) + ')' + (clsUpperPercentile !== null ? '와 권장학급 내 백분위(약 ' + clsUpperPercentile + '%)' : '') + '를 활용하여 구체적으로 서술하세요. 성취레벨 ' + level + '에 맞는 적절한 수준의 표현을 사용하세요.';
+        } else {
+            // 중하위권 이하: 현재 수준 정직하게 기술 (잘했다/높다/우수하다 절대 금지)
+            _goodPointRule = '1) 현재 성취 수준 기술 (2문장) — 성취레벨 ' + level + ' / 전체 백분위 약 ' + upperPercentile + '%(= 전체 학생 중 ' + upperPercentile + '%가 이 학생보다 높은 점수 → ' + _pctLabel(upperPercentile) + ')' + (clsUpperPercentile !== null ? ' / 권장학급 내 백분위 약 ' + clsUpperPercentile + '%(' + _pctLabel(clsUpperPercentile, '권장학급 내') + ')' : '') + ' — ⛔ "잘했다", "높다", "우수하다", "높은 백분위" 같은 표현 절대 금지. 현재 수준을 정직하게 기술하되, 노력과 가능성에 초점을 맞추세요.';
         }
 
         const prompt = `${gradeTone}
@@ -4787,25 +4797,25 @@ async function generateSectionComments(record, averages, activeSections) {
 이름: ${sName}
 
 [성적 데이터]
-개인 점수: ${studentScore}점 / 영역 만점: ${maxScore > 0 ? maxScore + '점' : '정보 없음'} / 전체 평균: ${overallAvgScore.toFixed(1)}점(전체 대비 ${diff >= 0 ? '+' : ''}${diff.toFixed(1)}점) / 성취레벨: ${level} / 전체 상위 백분위: 약 ${upperPercentile}%(즉, ${_pctLabel(upperPercentile)})${clsAvgScore !== null ? ' / 권장학급(' + _recCls + ') 평균: ' + clsAvgScore.toFixed(1) + '점(학급 평균 대비 ' + (studentScore - clsAvgScore >= 0 ? '+' : '') + (studentScore - clsAvgScore).toFixed(1) + '점)' : ''}${clsUpperPercentile !== null ? ' / 권장학급 내 상위 백분위: 약 ' + clsUpperPercentile + '%(권장학급에서는 ' + _pctLabel(clsUpperPercentile, '권장학급 내') + ')' : ''}${subTypeInfo}${wrongInfo}
+개인 점수: ${studentScore}점 / 영역 만점: ${maxScore > 0 ? maxScore + '점' : '정보 없음'} / 전체 평균: ${overallAvgScore.toFixed(1)}점(전체 대비 ${diff >= 0 ? '+' : ''}${diff.toFixed(1)}점) / 성취레벨: ${level} / 전체 백분위: 약 ${upperPercentile}%(= 전체 학생 중 ${upperPercentile}%가 이 학생보다 높은 점수 → ${_pctLabel(upperPercentile)})${clsAvgScore !== null ? ' / 권장학급(' + _recCls + ') 평균: ' + clsAvgScore.toFixed(1) + '점(학급 평균 대비 ' + (studentScore - clsAvgScore >= 0 ? '+' : '') + (studentScore - clsAvgScore).toFixed(1) + '점)' : ''}${clsUpperPercentile !== null ? ' / 권장학급 내 백분위: 약 ' + clsUpperPercentile + '%(= 권장학급에서도 ' + clsUpperPercentile + '%가 이 학생보다 높음 → ' + _pctLabel(clsUpperPercentile, '권장학급 내') + ')' : ''}${subTypeInfo}${wrongInfo}
 
 [이 영역 성취 수준 — 코멘트에 이 수준을 반드시 리터런리 반영할 것]
 전체 수준: ${_pctLabel(upperPercentile)} / 성취레벨: ${level} / 전체 평균 대비: ${diff >= 0 ? '+' : ''}${diff.toFixed(1)}점(${diff >= 0 ? '평균 이상' : '평균 미달'})${clsUpperPercentile !== null ? ' / 권장학급 수준: ' + _pctLabel(clsUpperPercentile, '권장학급 내') : ''}
-⚠️ 백분위 해석 주의 (절대 엄수): 상위 백분위(%) 숫자는 작을수록 우수합니다. 상위 1%=최상위 / 상위 100%=최하위. 예시: 상위 75%는 하위권이므로 "높은 백분위", "우수한 실력"  절대 사용 금지. 상위 5%이면 영역에서 실력이 뛰어남을 시사합니다.
+⚠️ 백분위 해석 주의 (절대 엄수): 백분위(%) 숫자는 작을수록 우수합니다. 상위 1%=최상위 / 상위 100%=최하위. 예시: 상위 75%는 하위권이므로 "높은 백분위", "우수한 실력"  절대 사용 금지. 상위 5%이면 영역에서 실력이 뛰어남을 시사합니다.
 
 [작성 규칙]
-1) 잘한 점 (2문장) — 전체 상위 백분위(약 ${upperPercentile}%)${clsUpperPercentile !== null ? '와 권장학급 내 상위 백분위(약 ' + clsUpperPercentile + '%)' : ''}를 활용하여 구체적으로 서술하세요.
+1) ${_goodPointRule}
 ${_weaknessRule}
 3) 구체적 학습 방향 제시 (1문장) — ${subTypeInfo ? '취약 세부 영역 중심으로 제시하세요.' : '해당 영역 전반적 학습 방향만 제시하세요. 세부 유형 절대 지어내지 마세요.'}
 
 ⚠️ 출력 형식 절대 규칙 (위반 시 응답 전체가 무효):
-- 첫 번째 문장은 반드시 잘한 점에 대한 구체적인 내용으로 시작하세요.
+- 첫 번째 문장은 성취레벨 ${level}에 맞는 내용으로 시작하세요. ${upperPercentile > 55 ? '⛔ 성취레벨이 ' + level + '이므로 첫 문장에 "잘했다", "우수하다", "높다", "높은 백분위" 등 긍정 과장 표현 절대 금지.' : ''}
 - "${sName} 학생의 ~에 대한 피드백입니다", "${sName} 학생의 ~ 영역 평가 결과입니다" 같은 소개·제목 문장은 절대 쓰지 마세요.
 - 인사말(안녕하세요 등) 금지. "축하드립니다", "훌륭합니다", "대단합니다" 같은 과도한 칭찬·축하 표현 절대 금지.
 - 영역명을 영어(Grammar, Reading 등)로 쓰지 마세요. 한국어(문법, 독해 등)로만 쓰세요.
 - 학생을 묘사할 때 경어(-시- 존칭: 받으신, 획득하신, 기록하셨으므로 등) 절대 사용 금지. "획득하여", "기록했으므로" 형식으로 쓰세요.
 - 실제 점수와 만점을 반드시 언급하세요. 호칭이 필요하면 "${sName} 학생은" 형식만 사용하세요.
-- 전체 상위 백분위(약 ${upperPercentile}%)${clsUpperPercentile !== null ? '와 권장학급 내 상위 백분위(약 ' + clsUpperPercentile + '%)' : ''}를 코멘트 어딘가에 반드시 언급하세요.
+- 전체 백분위(약 ${upperPercentile}%)${clsUpperPercentile !== null ? '와 권장학급 내 백분위(약 ' + clsUpperPercentile + '%)' : ''}를 코멘트 어딘가에 반드시 언급하세요.
 - 학원명, 교재명, 브랜드명 절대 금지. 모든 답변은 순수 한국어로 작성하세요.`;
 
         comments[section] = await callGeminiAPI(prompt);
