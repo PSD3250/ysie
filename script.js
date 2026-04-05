@@ -654,17 +654,18 @@ async function verifyAuth(mode) {
 
     // 2. GAS 서버에서 코드 검증 (비밀번호를 프론트엔드에서 비교하지 않음)
     try {
+        const folderId = extractFolderId(globalConfig.mainServerLink);
         const verifyRes = await fetch(globalConfig.masterUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 type: 'VERIFY_CODE',
-                parentFolderId: globalConfig.mainServerLink ? globalConfig.mainServerLink.match(/folders\/([^/?]+)/)?.[1] : null,
+                parentFolderId: folderId,
                 code: pw,
                 mode: mode
             })
         });
-        const verifyData = await verifyRes.json();
+        const verifyText = await verifyRes.text();
+        const verifyData = JSON.parse(verifyText);
 
         if (verifyData.status === 'Success' && verifyData.verified) {
             if (mode === 'admin') {
