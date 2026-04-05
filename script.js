@@ -4721,9 +4721,9 @@ async function generateSectionComments(record, averages, activeSections) {
         const _shortfall = maxScore > 0 ? (maxScore - studentScore) : null;
         let _weaknessRule;
         if (_isPerfect) {
-            _weaknessRule = '2) 현재 수준 유지 (1문장) — 만점이므로 미흡한 점, 부족한 점을 절대 쓰지 마세요. 현재의 실력을 앞으로도 유지하는 것의 중요성에 대해 서술하세요.';
+            _weaknessRule = '2) 현재 수준 유지 (1문장) — 만점이므로 미흡한 점, 부족한 점을 절대 쓰지 마세요. 전체 상위 백분위(약 ' + upperPercentile + '%)'  + (clsUpperPercentile !== null ? '·학급 내 상위 백분위(약 ' + clsUpperPercentile + '%)' : '') + '를 활용하여 현재 실력을 유지하는 것의 중요성을 서술하세요.';
         } else if (_aboveCls) {
-            _weaknessRule = '2) 보완 포인트 (1문장) — 학급 평균보다 높으므로 "미흡하다", "부족하다", "발전할 여지가 있다" 같은 부정 표현 절대 금지. 만점(' + maxScore + '점) 대비 ' + _shortfall + '점 부족한 부분을 서술하세요.' + (subTypeInfo ? ' 세부 영역별 데이터를 활용해 가장 취약한 세부 영역도 명시하세요.' : '');
+            _weaknessRule = '2) 보완 포인트 (1문장) — 학급 평균보다 높으므로 "미흡하다", "부족하다", "발전할 여지가 있다" 같은 부정 표현 절대 금지. 전체 상위 백분위(약 ' + upperPercentile + '%)' + (clsUpperPercentile !== null ? '·학급 내 상위 백분위(약 ' + clsUpperPercentile + '%)' : '') + '를 활용하여 만점(' + maxScore + '점) 대비 ' + _shortfall + '점 부족한 부분을 서술하세요.' + (subTypeInfo ? ' 세부 영역별 데이터를 활용해 가장 취약한 세부 영역도 명시하세요.' : '');
         } else {
             _weaknessRule = '2) 미흡한 점 또는 약점 (1문장) — ' + (subTypeInfo ? '✅ 세부 영역별 점수 데이터 제공됨. 가장 취약한 세부 영역을 명시하고 전체 상위 백분위(약 ' + upperPercentile + '%)와 학급 내 백분위(약 ' + clsUpperPercentile + '%)를 활용하세요.' : '⚠️ 세부 영역 데이터 없음. 전체 상위 백분위(약 ' + upperPercentile + '%)와 학급 평균보다 낮은 점에 근거해 서술하세요. 세부 유형·문법 항목을 절대 추측하지 마세요.');
         }
