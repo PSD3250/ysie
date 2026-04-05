@@ -19,7 +19,26 @@
 
 ---
 
+## 🛠️ 2026-04-05 작업 내역
+
+### 객관식 정답 수동입력 number 모드 범위 검증 추가 (커밋: ddaa945)
+- **원인**: `renderBuilderChoices`에서 number 모드 `ansInput.oninput = null` → 실시간 검증 없음 → "23" 등 범위 초과 값 자유 입력 가능
+- **수정 1**: `renderBuilderChoices` number 모드에 `oninput` 추가 → 1~n 범위 초과/비정수 시 자동 클리어 + 빨간 테두리
+- **수정 2**: `addBuilderAnswer` number 모드에도 동일하게 값 클리어 추가 (기존엔 빨간 테두리만, 값 유지됨)
+- **적용 범위**: Canvas 08-1 / 08-2 공통 (`getComponentHtml` 단일 정의이므로 자동 적용)
+
+### 달성미달 → 학년별 미달반 자동 선택 + ⛔ 이모지 표시 (커밋: 240fd50)
+- **배경**: 사용자가 학년별 미달반(5미달, 6미달, 7미달, 8미달, 9미달, 미달)을 Class Registration에 등록해 탈락자 DB 관리용으로 사용
+- **수정 1**: `calcAndRecommendClass06` (Canvas 06) — 달성미달 판정 시 드롭박스 options에서 "미달" 포함 항목 자동 탐색 후 선택
+- **수정 2**: Canvas 05-1 `recCls05` 처리 — 달성미달 판정 시 `getClassesForGrade()`에서 미달반 찾아 대체
+- **수정 3**: `updateClassDropdown06` (Canvas 06) — `⛔ 달성미달` 하드코딩 option 제거 (미달반이 학급 목록에 이미 존재하므로 불필요)
+- **수정 4**: Canvas 06 / 05-1 드롭박스 — 이름에 "미달" 포함된 학급 option 텍스트 앞에 `⛔` 이모지 표시 (value는 원래 학급명 그대로 유지, DB 저장값 보존)
+- **참고**: 05-1은 `getClassesForGrade()`로만 학급 렌더링하므로 처음부터 `달성미달` option 없었음 (별도 제거 불필요)
+
+---
+
 ## 🛠️ 2026-04-02 저녁 세션 작업 내역
+
 
 ### 주관형 진척도 버그 수정 + 복수정답 안내 문구 변경 (커밋: 255b723)
 - **원인**: `updateProgressUI`에서 `q.type` 체크 없이 정답(`q.answer`)에 쉼표가 있으면 무조건 복수 객관형으로 처리 → 주관형 정답("공간, 우주, 장소" 등)이 먹통
