@@ -19,7 +19,26 @@
 
 ---
 
+## 🛠️ 2026-04-06 작업 내역
+
+### DB IMPORT.gs 파일 생성 (학생 과거 데이터 임포트 스크립트 v3)
+- **경위**: 기존 v2 스크립트에서 소스 시트 컬럼 순서 변경 + 응시월 컬럼 추가에 따른 업데이트 요청
+- **변경 1**: `_makeDate_(year, month)` 헬퍼 함수 추가 → `"YYYY-MM-01"` 형식으로 날짜 생성 (응시일은 1일 고정, 응시월은 입력값 반영)
+- **변경 2**: `importBySection`, `importByQuestion` 두 함수 모두 `응시월` 컬럼 읽기 추가 (`monthIdx`)
+- **참고**: 컬럼 순서 변경은 헤더명 기반 탐색(`h.indexOf()`) 방식이므로 영향 없음
+- **파일**: `자동화 테스트\DB IMPORT.gs` (로컬 보관용, Google Apps Script에 복붙하여 사용)
+
+### BULK_DELETE_STUDENTS 성능 최적화 (커밋: 0e654c4)
+- **원인**: `deleteRow(bi)` 를 루프에서 N회 반복 호출 → 100명 삭제 시 GAS 서버와 100번 통신하여 극도로 느림
+- **수정**: `getValues()` 1회 → JS `filter()` → `clearContent()` 1회 → `setValues()` 1회로 변경 (API 호출 3회 고정)
+- **엣지케이스 처리**:
+  - 헤더만 있거나 빈 시트 (`bLast < 2`): 즉시 성공 반환
+  - 전체 삭제 후 잔여 데이터 0건: `setValues` 호출 생략 (GAS 에러 방지)
+- **영향 범위**: `API script.gs` `BULK_DELETE_STUDENTS` 블록만 수정. 다른 블록 및 `script.js` 응답 처리 로직 영향 없음
+- **⚠️ GAS 재배포 필요** (기존 배포 "수정"으로만 배포할 것 — 새 배포 금지)
+
 ## 🛠️ 2026-04-05 작업 내역
+
 
 ### 객관식 정답 수동입력 number 모드 범위 검증 추가 (커밋: ddaa945)
 - **원인**: `renderBuilderChoices`에서 number 모드 `ansInput.oninput = null` → 실시간 검증 없음 → "23" 등 범위 초과 값 자유 입력 가능
@@ -42,6 +61,14 @@
 - **수정 3**: `calcAndRecommendClass06` — 달성미달 중간 처리 코드 완전 제거 (함수가 미달반 이름 직접 반환하므로 sel.value = rec 단순화)
 - **수정 4**: Canvas 05-1 — 달성미달 중간 처리 코드 완전 제거
 - **결과**: '달성미달' 문자열이 코드 어디에도 존재하지 않음 (GAS 포함)
+
+### 미달 판정 기준 60% → 70%로 상향 (커밋: 9c31db4)
+- **지시**: `recommendClassByScore`에서 미달 판정 임계값을 최저 실제반 평균의 60% → 70%로 상향
+- **수정**: `script.js` `recommendClassByScore` 함수 내 `* 0.6` → `* 0.7` 변경
+
+### 복붙 밑줄 빈칸 공백 압축 버그 수정 (커밋: 9062e41)
+- **원인**: `sanitizePastedHtml`에서 `<u>` 태그 내 연속 공백이 단일 문자로 압축되어 빈칸 문제 공백이 사라지는 버그
+- **수정**: `<u>` 내부 공백 시퀀스를 `&nbsp;`로 보존한 뒤 sanitize 처리
 
 ---
 
