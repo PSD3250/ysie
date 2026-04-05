@@ -1,0 +1,9 @@
+# GAS 파일 (Google Apps Script - 소스는 GAS 프로젝트에서 관리)
+*.gs
+
+# 내부 MD 문서 파일
+[MD] *.md
+
+# 에이전트/IDE 설정
+.agents/
+.vscode/
