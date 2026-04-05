@@ -1298,7 +1298,6 @@ async function callGeminiAPI(prompt, silent = false) {
         if (!silent) toggleLoading(true);
         const res = await fetch(globalConfig.masterUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 type: 'CALL_GEMINI',
                 parentFolderId: folderId,
@@ -1692,7 +1691,7 @@ function renderMainConfig(c) {
                             <p class="fs-14 text-slate-400">관리자 모드 접속 비밀번호</p>
                             <div class="flex gap-3 items-center">
                                 <input type="password" id="admin-code-input" class="ys-field flex-grow fs-20 font-black text-[#013976] tracking-widest text-center" value="" placeholder="새 코드 입력">
-                                <button onclick="(async()=>{if(!confirm('관리자 코드를 변경하시겠습니까?')) return; const v=document.getElementById('admin-code-input').value; if(!v){showToast('⚠️ 유효한 코드를 입력하세요');return;} const fId=globalConfig.mainServerLink?globalConfig.mainServerLink.match(/folders\/([^/?]+)/)?.[1]:null; const r=await fetch(globalConfig.masterUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{adminCode:v}})}); const d=await r.json(); if(d.status==='Success'){showToast('✅ 관리자 코드가 변경되었습니다.');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()"
+                                <button onclick="(async()=>{if(!confirm('관리자 코드를 변경하시겠습니까?')) return; const v=document.getElementById('admin-code-input').value; if(!v){showToast('⚠️ 유효한 코드를 입력하세요');return;} const fId=extractFolderId(globalConfig.mainServerLink); const r=await fetch(globalConfig.masterUrl,{method:'POST',body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{adminCode:v}})}); const t=await r.text(); const d=JSON.parse(t); if(d.status==='Success'){showToast('✅ 관리자 코드가 변경되었습니다.');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()"
                                         class="bg-[#013976] text-white px-6 py-3 rounded-xl fs-14 font-bold hover:bg-blue-800 transition-all active:scale-95 whitespace-nowrap shadow-md flex-none">SAVE</button>
                             </div>
                         </div>
@@ -1704,7 +1703,7 @@ function renderMainConfig(c) {
                             <p class="fs-14 text-slate-400">최고 관리자 접속 비밀번호</p>
                             <div class="flex gap-3 items-center">
                                 <input type="password" id="master-code-input" class="ys-field flex-grow fs-20 font-black text-indigo-700 tracking-widest text-center" value="" placeholder="새 코드 입력">
-                                <button onclick="(async()=>{if(!confirm('마스터 코드를 변경하시겠습니까?')) return; const v=document.getElementById('master-code-input').value; if(!v){showToast('⚠️ 유효한 코드를 입력하세요');return;} const fId=globalConfig.mainServerLink?globalConfig.mainServerLink.match(/folders\/([^/?]+)/)?.[1]:null; const r=await fetch(globalConfig.masterUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{masterCode:v}})}); const d=await r.json(); if(d.status==='Success'){showToast('✅ 마스터 코드가 변경되었습니다.');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()"                                        class="bg-indigo-600 text-white px-6 py-3 rounded-xl fs-14 font-bold hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap shadow-md flex-none">SAVE</button>
+                                <button onclick="(async()=>{if(!confirm('마스터 코드를 변경하시겠습니까?')) return; const v=document.getElementById('master-code-input').value; if(!v){showToast('⚠️ 유효한 코드를 입력하세요');return;} const fId=extractFolderId(globalConfig.mainServerLink); const r=await fetch(globalConfig.masterUrl,{method:'POST',body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{masterCode:v}})}); const t=await r.text(); const d=JSON.parse(t); if(d.status==='Success'){showToast('✅ 마스터 코드가 변경되었습니다.');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()"                                        class="bg-indigo-600 text-white px-6 py-3 rounded-xl fs-14 font-bold hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap shadow-md flex-none">SAVE</button>
                             </div>
                         </div>
                     </div>
@@ -1798,7 +1797,7 @@ function renderMainConfig(c) {
                                    class="py-3 px-5 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center gap-2 hover:bg-purple-100 transition-all no-underline whitespace-nowrap flex-none">
                                     <span class="fs-14 font-bold text-purple-700">🔑 GET KEY</span>
                                 </a>
-                                <button onclick="(async()=>{if(!confirm('서버에 API Key를 저장하시겠습니까?')) return; const gVal=document.getElementById('g-key').value; if(!gVal){showToast('⚠️ 유효한 키를 입력하세요');return;} const fId=globalConfig.mainServerLink?globalConfig.mainServerLink.match(/folders\/([^/?]+)/)?.[1]:null; const r=await fetch(globalConfig.masterUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{geminiKey:gVal}})}); const d=await r.json(); if(d.status==='Success'){showToast('✅ Gemini Key가 저장되었습니다.');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()"
+                                <button onclick="(async()=>{if(!confirm('서버에 API Key를 저장하시겠습니까?')) return; const gVal=document.getElementById('g-key').value; if(!gVal){showToast('⚠️ 유효한 키를 입력하세요');return;} const fId=extractFolderId(globalConfig.mainServerLink); const r=await fetch(globalConfig.masterUrl,{method:'POST',body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{geminiKey:gVal}})}); const t=await r.text(); const d=JSON.parse(t); if(d.status==='Success'){showToast('✅ Gemini Key가 저장되었습니다.');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()"
                                         class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl fs-14 font-bold shadow-md transition-all active:scale-95 whitespace-nowrap flex-none">SAVE</button>
                             </div>
                         </div>
@@ -2732,7 +2731,7 @@ function renderAdminCode(c) {
                         <h3 class="fs-32 text-white font-black uppercase tracking-tighter underline decoration-blue-400/30 decoration-8 underline-offset-8 mb-6 leading-none">Change Management Code</h3>
                         <p class="fs-18 text-blue-200 mb-8">관리자 모드(Admin) 접속에 사용할 새로운 액세스 코드를 설정하세요.</p>
                         <input type="text" id="new-admin-code" autocomplete="off" class="ys-field !bg-white/10 !text-white border-white/20" value="" placeholder="새 코드 입력">
-                        <button onclick="(async()=>{const val=document.getElementById('new-admin-code').value; if(!val) return showToast('코드를 입력하세요'); const fId=globalConfig.mainServerLink?globalConfig.mainServerLink.match(/folders\/([^/?]+)/)?.[1]:null; const r=await fetch(globalConfig.masterUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{adminCode:val}})}); const d=await r.json(); if(d.status==='Success'){showToast('관리자 코드가 성공적으로 변경 및 동기화되었습니다.'); changeTab('main_config');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()" 
+                        <button onclick="(async()=>{const val=document.getElementById('new-admin-code').value; if(!val) return showToast('코드를 입력하세요'); const fId=extractFolderId(globalConfig.mainServerLink); const r=await fetch(globalConfig.masterUrl,{method:'POST',body:JSON.stringify({type:'UPDATE_CONFIG_KEYS',parentFolderId:fId,updates:{adminCode:val}})}); const t=await r.text(); const d=JSON.parse(t); if(d.status==='Success'){showToast('관리자 코드가 성공적으로 변경 및 동기화되었습니다.'); changeTab('main_config');}else{showToast('❌ 저장 실패: '+(d.message||''));}})()" 
                         class="bg-white text-[#013976] w-full py-6 rounded-2xl fs-18 mt-4 hover:bg-slate-100 transition-all uppercase">💾 Update & Sync Code</button>
                     </div>
                 </div>`;
