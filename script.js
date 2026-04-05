@@ -3103,6 +3103,30 @@ function warnClassChange05(sel) {
     window._dirtyClass = true;
 }
 
+// 미달 제외 최저학급 평균 계산
+function getLowestClassAvg(grade, secMap) {
+    const records = (window.cachedStudentRecords || []).filter(function(r) {
+        const rGrade = r['학년'] || r.grade || '';
+        const rClass = r['등록학급'] || r.studentClass || '';
+        return rGrade === grade && rClass && !rClass.includes('미달');
+    });
+    if (!records.length) return null;
+    const classMap = {};
+    records.forEach(function(r) {
+        const cls = r['등록학급'] || r.studentClass || '';
+        const total = parseFloat(r['총점'] || r.totalScore || 0) || 0;
+        if (!classMap[cls]) classMap[cls] = { sum: 0, cnt: 0 };
+        classMap[cls].sum += total;
+        classMap[cls].cnt++;
+    });
+    let lowestCls = null, lowestAvg = Infinity;
+    Object.entries(classMap).forEach(function([cls, data]) {
+        const avg = data.sum / data.cnt;
+        if (avg < lowestAvg) { lowestAvg = avg; lowestCls = cls; }
+    });
+    return lowestCls ? computeClassAvg(lowestCls, grade, secMap) : null;
+}
+
 // 성적표 평균 표시 모드 변경
 function setReportAvgMode(mode) {
     window._reportAvgMode = mode;
@@ -3118,8 +3142,16 @@ function setReportAvgMode(mode) {
 function rerenderReportCharts() {
     const d = window.currentReportData;
     if (!d || !d.secMap) return;
-    const selCls = document.getElementById('report-student-class')?.value || '';
-    const clsAvg = (selCls && selCls !== '__RECOMMEND__') ? computeClassAvg(selCls, d.sGrade, d.secMap) : null;
+    const lowestChk = document.getElementById('avg-lowest-class-chk');
+    let clsAvg = null;
+    if (lowestChk && lowestChk.checked) {
+        // 체크 ON: 미달 제외 최저학급 평균 사용
+        clsAvg = getLowestClassAvg(d.sGrade, d.secMap);
+    } else {
+        // 체크 OFF: 기존 권장학급 평균 사용
+        const selCls = document.getElementById('report-student-class')?.value || '';
+        clsAvg = (selCls && selCls !== '__RECOMMEND__') ? computeClassAvg(selCls, d.sGrade, d.secMap) : null;
+    }
     const mode = window._reportAvgMode || 'all';
     renderTotalChart(d.record, d.averages, d.sTotal, d.sMax, clsAvg, mode);
     renderSectionsBarChart(d.record, d.averages, d.activeSections, d.secMap, d.maxMap, clsAvg, mode);
@@ -4696,12 +4728,20 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
             <div class="flex items-stretch gap-6">
 
                 <!-- 평균 표시 토글 no-print -->
-                <div class="no-print" style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;margin-right:4px;">
-                    <span style="font-size:14px;font-weight:700;color:#64748b;">평균 표시</span>
-                    <div style="display:flex;gap:5px;">
-                        <button id="avg-btn-all" onclick="setReportAvgMode('all')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#013976;color:white;border:none;border-radius:7px;cursor:pointer;">모두</button>
-                        <button id="avg-btn-overall" onclick="setReportAvgMode('overall')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">전체</button>
-                        <button id="avg-btn-class" onclick="setReportAvgMode('class')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">학급</button>
+                <div class="no-print" style="display:flex;flex-direction:row;align-items:center;gap:8px;margin-right:4px;">
+                    <!-- 좌측: 최저학급 체크박스 -->
+                    <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;white-space:nowrap;border:1.5px solid #e2e8f0;border-radius:8px;padding:4px 8px;background:#f8fafc;">
+                        <input type="checkbox" id="avg-lowest-class-chk" onchange="rerenderReportCharts()" style="width:14px;height:14px;cursor:pointer;accent-color:#013976;">
+                        최저학급
+                    </label>
+                    <!-- 우측: 평균 표시 버튼들 -->
+                    <div style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;">
+                        <span style="font-size:14px;font-weight:700;color:#64748b;">평균 표시</span>
+                        <div style="display:flex;gap:5px;">
+                            <button id="avg-btn-all" onclick="setReportAvgMode('all')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#013976;color:white;border:none;border-radius:7px;cursor:pointer;">모두</button>
+                            <button id="avg-btn-overall" onclick="setReportAvgMode('overall')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">전체만</button>
+                            <button id="avg-btn-class" onclick="setReportAvgMode('class')" style="padding:3px 10px;font-size:16px;font-weight:700;background:#e2e8f0;color:#64748b;border:none;border-radius:7px;cursor:pointer;">학급만</button>
+                        </div>
                     </div>
                 </div>
 
@@ -4813,7 +4853,7 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
                    </div>`
             : `<div class="text-center py-4">
                     <p class="text-slate-500 mb-4 fs-15">AI 심층 분석을 통해 학생의 강점과 약점을 파악해보세요.</p>
-                    <button onclick="triggerAIAnalysis()" class="btn-ys !bg-[#013976] !text-white !py-3 !px-8 shadow-lg hover:scale-105 transition-all fs-16 font-bold flex items-center gap-2 mx-auto">✨ AI 분석 생성하기</button>
+                    <button onclick="triggerAIAnalysis()" class="btn-ys !bg-[#013976] !text-white !py-3 !px-8 shadow-lg hover:scale-105 transition-all fs-16 font-bold flex items-center gap-2 mx-auto">✨ AI 분석 전체(영역별, 종합) 생성하기</button>
                   </div>`
         }
         </div>
