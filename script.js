@@ -4390,7 +4390,33 @@ async function generateOverallComment(record, averages, activeSections, sectionC
     const totalMax = parseFloat(record['만점'] || record.maxScore || 100);
     const totalAvg = parseFloat(averages['총점'] || 0);
     const totalRate = totalMax > 0 ? (totalScore / totalMax * 100).toFixed(1) : '?';
-    const totalLevel = (totalScore / totalMax * 100) >= 90 ? '우수' : (totalScore / totalMax * 100) >= 70 ? '보통' : '부진';
+
+    // 총점 전체 백분위 + 7단계 성취레벨
+    const _allRecordsOA = window.cachedStudentRecords || [];
+    const _allTotalScores = _allRecordsOA.map(r => parseFloat(r['총점'] || r.totalScore || 0)).filter(v => !isNaN(v) && v > 0);
+    const _oaAbove = _allTotalScores.filter(s => s > totalScore).length;
+    const oaUpperPercentile = _allTotalScores.length > 0 ? Math.min(100, Math.round((_oaAbove / _allTotalScores.length) * 100) + 1) : 50;
+    const _oaDiff = totalAvg > 0 ? totalScore - totalAvg : 0;
+    let totalLevel;
+    if (oaUpperPercentile <= 10) totalLevel = '매우 우수';
+    else if (oaUpperPercentile <= 20) totalLevel = '우수';
+    else if (oaUpperPercentile <= 35) totalLevel = '다소 우수';
+    else if (oaUpperPercentile <= 55) totalLevel = '보통';
+    else if (oaUpperPercentile <= 70) totalLevel = '다소 부진';
+    else if (oaUpperPercentile <= 85) totalLevel = '부진';
+    else totalLevel = '매우 부진';
+
+    // 권장학급 총점 평균 + 학급 내 백분위
+    const _oaGrd = record.grade || record['학년'] || '';
+    const _oaCls = record.studentClass || record['등록학급'] || '';
+    const _oaClsData = (_oaCls && _oaGrd) ? computeClassAvg(_oaCls, _oaGrd, null) : null;
+    const clsTotalAvg = _oaClsData ? parseFloat(_oaClsData['총점'] || 0) : null;
+    const _clsTotalRecs = (_oaCls && _oaGrd) ? _allRecordsOA.filter(r =>
+        (r['학년'] || r.grade || '') === _oaGrd && (r.studentClass || r['등록학급'] || '') === _oaCls
+    ) : [];
+    const _clsTotalScores = _clsTotalRecs.map(r => parseFloat(r['총점'] || r.totalScore || 0)).filter(v => !isNaN(v) && v > 0);
+    const _clsTotalAbove = _clsTotalScores.filter(s => s > totalScore).length;
+    const clsTotalPercentile = _clsTotalScores.length > 0 ? Math.min(100, Math.round((_clsTotalAbove / _clsTotalScores.length) * 100) + 1) : null;
 
     const gradeTone = getGradeTone(record.grade || record['학년']);
 
@@ -4400,7 +4426,7 @@ async function generateOverallComment(record, averages, activeSections, sectionC
         const max = parseFloat(record[s + '_만점'] || record[maxMap[s]] || averages[maxMap[s]] || 0);
         const avg = parseFloat(averages[s + '_점수'] || averages[secMap[s]] || 0);
         const cmt = sectionComments[s] || '(코멘트 없음)';
-        return `[영역: ${_secKR[s] || s}] 개인 ${score}점 / 만점 ${max > 0 ? max + '점' : '?'} / 평균 ${avg.toFixed(1)}점\n영역 코멘트: ${cmt}`;
+        return `[영역: ${_secKR[s] || s}] 개인 ${score}점 / 만점 ${max > 0 ? max + '점' : '?'} / 전체 평균 ${avg.toFixed(1)}점\n영역 코멘트: ${cmt}`;
     }).join('\n\n');
 
     const sName = record['이름'] || record.name || record.studentName || '';
@@ -4416,7 +4442,7 @@ async function generateOverallComment(record, averages, activeSections, sectionC
 ${sectionSummary}
 
 [총점 현황]
-개인 총점: ${totalScore}점 / 시험지 만점: ${totalMax}점 / 반 평균: ${totalAvg.toFixed(1)}점 / 정답률: ${totalRate}% / 성취레벨: ${totalLevel}
+개인 총점: ${totalScore}점 / 시험지 만점: ${totalMax}점 / 전체 평균: ${totalAvg.toFixed(1)}점(전체 대비 ${_oaDiff >= 0 ? '+' : ''}${_oaDiff.toFixed(1)}점) / 정답률: ${totalRate}% / 성취레벨: ${totalLevel} / 전체 상위 백분위: 약 ${oaUpperPercentile}%${clsTotalAvg !== null ? ' / 권장학급(' + _oaCls + ') 총점 평균: ' + clsTotalAvg.toFixed(1) + '점' + (clsTotalPercentile !== null ? ' / 권장학급 내 상위 백분위: 약 ' + clsTotalPercentile + '%' : '') : ''}
 
 [작성 규칙]
 1) 각 영역 코멘트에서 이미 언급된 세부 내용(특정 표현, 문법 항목, 단어 유형 등)은 그대로 반복하지 마세요.
