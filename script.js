@@ -4481,6 +4481,9 @@ ${sectionSummary}
 [총점 현황]
 개인 총점: ${totalScore}점 / 시험지 만점: ${totalMax}점 / 전체 평균: ${totalAvg.toFixed(1)}점(전체 대비 ${_oaDiff >= 0 ? '+' : ''}${_oaDiff.toFixed(1)}점) / 정답률: ${totalRate}% / 성취레벨: ${totalLevel} / 전체 상위 백분위: 약 ${oaUpperPercentile}%(즉, ${_pctLabel(oaUpperPercentile)})${clsTotalAvg !== null ? ' / 권장학급(' + _oaCls + ') 총점 평균: ' + clsTotalAvg.toFixed(1) + '점(학급 평균 대비 ' + (totalScore - clsTotalAvg >= 0 ? '+' : '') + (totalScore - clsTotalAvg).toFixed(1) + '점)' + (clsTotalPercentile !== null ? ' / 권장학급 내 상위 백분위: 약 ' + clsTotalPercentile + '%(권장학급에서는 ' + _pctLabel(clsTotalPercentile, '권장학급 내') + ')' : '') : ''}
 
+[전체 성취 수준 — 코멘트에 이 수준을 반드시 리터런리 반영할 것]
+전체 수준: ${_pctLabel(oaUpperPercentile)} / 성취레벨: ${totalLevel} / 전체 평균 대비: ${_oaDiff >= 0 ? '+' : ''}${_oaDiff.toFixed(1)}점(${_oaDiff >= 0 ? '평균 이상' : '평균 미달'})${clsTotalPercentile !== null ? ' / 권장학급 수준: ' + _pctLabel(clsTotalPercentile, '권장학급 내') : ''}
+
 ⚠️ 백분위 해석 주의 (절대 엄수): 상위 백분위(%) 숫자는 작을수록 우수합니다. 상위 1%=최상위 / 상위 100%=최하위. 예시: 상위 75%는 하위권이므로 "높은 백분위", "우수한 실력" 절대 사용 금지.
 
 [작성 규칙]
@@ -4774,6 +4777,8 @@ async function generateSectionComments(record, averages, activeSections) {
 [성적 데이터]
 개인 점수: ${studentScore}점 / 영역 만점: ${maxScore > 0 ? maxScore + '점' : '정보 없음'} / 전체 평균: ${overallAvgScore.toFixed(1)}점(전체 대비 ${diff >= 0 ? '+' : ''}${diff.toFixed(1)}점) / 성취레벨: ${level} / 전체 상위 백분위: 약 ${upperPercentile}%(즉, ${_pctLabel(upperPercentile)})${clsAvgScore !== null ? ' / 권장학급(' + _recCls + ') 평균: ' + clsAvgScore.toFixed(1) + '점(학급 평균 대비 ' + (studentScore - clsAvgScore >= 0 ? '+' : '') + (studentScore - clsAvgScore).toFixed(1) + '점)' : ''}${clsUpperPercentile !== null ? ' / 권장학급 내 상위 백분위: 약 ' + clsUpperPercentile + '%(권장학급에서는 ' + _pctLabel(clsUpperPercentile, '권장학급 내') + ')' : ''}${subTypeInfo}${wrongInfo}
 
+[이 영역 성취 수준 — 코멘트에 이 수준을 반드시 리터런리 반영할 것]
+전체 수준: ${_pctLabel(upperPercentile)} / 성취레벨: ${level} / 전체 평균 대비: ${diff >= 0 ? '+' : ''}${diff.toFixed(1)}점(${diff >= 0 ? '평균 이상' : '평균 미달'})${clsUpperPercentile !== null ? ' / 권장학급 수준: ' + _pctLabel(clsUpperPercentile, '권장학급 내') : ''}
 ⚠️ 백분위 해석 주의 (절대 엄수): 상위 백분위(%) 숫자는 작을수록 우수합니다. 상위 1%=최상위 / 상위 100%=최하위. 예시: 상위 75%는 하위권이므로 "높은 백분위", "우수한 실력"  절대 사용 금지. 상위 5%이면 영역에서 실력이 뛰어남을 시사합니다.
 
 [작성 규칙]
