@@ -4916,9 +4916,12 @@ function toggleAllQuestionDetail(checked) {
         const catQs = globalConfig.questions || [];
         const mark = (q) => {
             if (q.correct === true || q.correct === 'O') return '<span class="text-green-600 font-black">O</span>';
+            // 부분점수: 0 < score < maxScore 이면 correct 값과 무관하게 △
+            const _s = parseFloat(q.score || 0), _m = parseFloat(q.maxScore || 0);
+            if (_s > 0 && _m > 0 && _s < _m) return '<span class="text-slate-400">△</span>';
             if (q.correct === false || q.correct === 'X') return '<span class="text-red-500 font-black">X</span>';
-            if (q.score > 0 && q.maxScore > 0 && q.score === q.maxScore) return '<span class="text-green-600 font-black">O</span>';
-            if (q.score === 0 && q.maxScore > 0) return '<span class="text-red-500 font-black">X</span>';
+            if (_s > 0 && _m > 0 && _s === _m) return '<span class="text-green-600 font-black">O</span>';
+            if (_s === 0 && _m > 0) return '<span class="text-red-500 font-black">X</span>';
             return '<span class="text-slate-400">△</span>';
         };
 
@@ -4941,9 +4944,6 @@ function toggleAllQuestionDetail(checked) {
                     <tr class="bg-[#013976] text-white">${chunk.map(q =>
                     `<th class="py-1 px-1 text-center font-bold border border-[#013976]" style="width:10%">${q.no || '-'}</th>`
                 ).join('')}${'<th class="py-1 border border-[#013976]" style="width:10%"></th>'.repeat(10 - cols)}</tr>
-                    <tr class="bg-slate-50">${chunk.map(q =>
-                    `<td class="py-1 px-1 text-center text-slate-500 border border-slate-200 text-[14px]">${q.maxScore || 0}점</td>`
-                ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-white">${chunk.map(q => {
                     const cq = catQs.find(cq => String(cq.no) === String(q.no));
                     const diff = q.difficulty || cq?.difficulty || '-';
@@ -4951,7 +4951,7 @@ function toggleAllQuestionDetail(checked) {
                     return `<td class="py-1 px-1 text-center border border-slate-200 text-[14px] ${diffColor}">${diff}</td>`;
                 }).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-slate-50">${chunk.map(q =>
-                    `<td class="py-1 px-1 text-center font-bold border border-slate-200 text-[14px]">${q.score || 0}점</td>`
+                    `<td class="py-1 px-1 text-center border border-slate-200 text-[14px]"><span class="font-bold">${q.score || 0}점</span><span class="text-slate-400 font-normal"> / ${q.maxScore || 0}점</span></td>`
                 ).join('')}${'<td class="py-1 border border-slate-200"></td>'.repeat(10 - cols)}</tr>
                     <tr class="bg-white">${chunk.map(q =>
                     `<td class="py-1 px-1 text-center font-black border border-slate-200 text-[14px]">${mark(q)}</td>`
