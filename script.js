@@ -4461,6 +4461,7 @@ ${sectionSummary}
 - 영역명을 영어(Grammar, Reading 등)로 쓰지 마세요. 한국어(문법, 독해 등)로만 쓰세요.
 - 학생을 묘사할 때 경어(-시- 존칭: 받으신, 획득하신, 기록하셨으므로 등) 절대 사용 금지. "획득하여", "기록했으므로" 형식으로 쓰세요.
 - 실제 총점과 만점을 반드시 언급하세요. 호칭이 필요하면 "${sName} 학생은" 형식만 사용하세요.
+- 전체 상위 백분위(약 ${oaUpperPercentile}%)${clsTotalPercentile !== null ? '와 권장학급 내 상위 백분위(약 ' + clsTotalPercentile + '%)' : ''}를 코멘트에 반드시 활용하여 서술하세요.
 - 학원명, 교재명, 브랜드명 절대 금지. 모든 답변은 순수 한국어로 작성하세요.`;
 
     return await callGeminiAPI(prompt);
@@ -4971,7 +4972,10 @@ function renderReportCard(record, averages, sectionComments, overallComment, act
         <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-3xl border-2 border-blue-200">
             <div class="flex items-center justify-between mb-3">
                 <h4 class="ys-label text-blue-700 !mb-0">🤖 종합분석 코멘트</h4>
-                <button onclick="regenerateOverallComment()" class="no-print text-xl px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-500 transition-all border border-slate-200" title="종합 코멘트 재생성">🔄</button>
+                <div class="flex items-center gap-2 no-print">
+                    <button onclick="regenerateAllComments()" class="text-sm px-3 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 transition-all border border-blue-200" title="영역별 + 종합 코멘트 전체 재생성">🔄 전체</button>
+                    <button onclick="regenerateOverallComment()" class="text-xl px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-500 transition-all border border-slate-200" title="종합 코멘트만 재생성">🔄</button>
+                </div>
             </div>
             ${overallComment
             ? `<div id="overall-comment-wrap">
@@ -5643,6 +5647,50 @@ async function regenerateOverallComment() {
         showToast('✅ 종합 코멘트가 재생성되었습니다.');
     } catch (e) { showToast('❌ 재생성 실패: ' + e.message); }
     finally { if (btn) { btn.disabled = false; btn.textContent = '🔄'; } }
+}
+
+// 영역별 + 종합 코멘트 전체 재생성
+async function regenerateAllComments() {
+    if (!window.currentReportData) { showToast('⚠️ 성적 데이터가 없습니다.'); return; }
+    const { record, averages, activeSections } = window.currentReportData;
+    const allBtn = document.querySelector('button[onclick="regenerateAllComments()"]');
+    const oaBtn = document.querySelector('button[onclick="regenerateOverallComment()"]');
+    if (allBtn) { allBtn.disabled = true; allBtn.textContent = '⏳ 생성중...'; }
+    if (oaBtn) { oaBtn.disabled = true; }
+    try {
+        // 1단계: 영역별 코멘트 순차 재생성
+        showToast('🤖 영역별 코멘트 재생성 중...');
+        const newSectionComments = {};
+        for (const section of activeSections) {
+            const secBtn = document.querySelector(`button[onclick="regenerateSectionComment('${section}')"]`);
+            if (secBtn) { secBtn.disabled = true; secBtn.textContent = '⏳'; }
+            try {
+                const sectionKR = { Grammar: '문법', Writing: '영작', Reading: '독해', Listening: '듣기', Vocabulary: '어휘' }[section] || section;
+                showToast(`🤖 ${sectionKR} 코멘트 재생성 중...`);
+                const result = await generateSectionComments(record, averages, [section]);
+                const newComment = result[section] || '';
+                newSectionComments[section] = newComment;
+                window.currentReportData.sectionComments = { ...(window.currentReportData.sectionComments || {}), ...newSectionComments };
+                const el = document.getElementById(`section-comment-text-${section}`);
+                if (el) el.innerHTML = (newComment).split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>');
+            } finally {
+                if (secBtn) { secBtn.disabled = false; secBtn.textContent = '🔄'; }
+            }
+        }
+        // 2단계: 종합 코멘트 재생성
+        showToast('🤖 종합 코멘트 재생성 중...');
+        const mergedComments = { ...(window.currentReportData.sectionComments || {}), ...newSectionComments };
+        const newOverall = await generateOverallComment(record, averages, activeSections, mergedComments);
+        window.currentReportData.overallComment = newOverall;
+        const wrap = document.getElementById('overall-comment-wrap');
+        if (wrap) wrap.innerHTML = `<p class="text-slate-700 leading-relaxed fs-15" id="overall-comment-text" style="cursor:pointer;" onclick="editComment('overall')" title="클릭하여 수정">${(newOverall || '').split(/\n+/).map(l => l.trim()).filter(l => l).join('<br>')}</p>`;
+        window._dirtyComment = true;
+        showToast('✅ 영역별 + 종합 코멘트 전체 재생성 완료!');
+    } catch (e) { showToast('❌ 재생성 실패: ' + e.message); }
+    finally {
+        if (allBtn) { allBtn.disabled = false; allBtn.textContent = '🔄 전체'; }
+        if (oaBtn) { oaBtn.disabled = false; }
+    }
 }
 
 // 기타사항 토글
